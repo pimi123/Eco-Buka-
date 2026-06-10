@@ -1,4 +1,5 @@
 import type { Category } from '../types/category';
+import type { HomepageBanner, HomepagePromoCard } from '../types/homepage';
 import type { Product } from '../types/product';
 import deltaSeriesUrl from '../assets/categories/delta-series.png';
 import ocean2Url from '../assets/categories/ocean-2.png';
@@ -10,6 +11,7 @@ import solarPanelsUrl from '../assets/categories/solar-panels.png';
 import streamSeriesUrl from '../assets/categories/stream-series.png';
 import streamSolarSystemUrl from '../assets/categories/stream-solar-system.png';
 import showcaseBannerUrl from '../assets/heroes/hero-delta-max.png';
+import solarHomeUrl from '../assets/heroes/hero-solar-home.png';
 
 export const demoCategories: Category[] = [
   { id: 'power-stations', name: 'Power Stations', slug: 'power-stations', description: 'Portable power stations for home backup, outdoor use, and business continuity.', image_url: deltaSeriesUrl, is_new: false, active: true },
@@ -211,3 +213,57 @@ export const demoHomepageShowcase = {
     },
   ],
 };
+
+export const demoPromotionalCategoryCards: HomepagePromoCard[] = [
+  {
+    id: 'promo-offers',
+    section_key: 'promotional_category_cards',
+    label: null,
+    title: 'Promotional Offers',
+    subtitle: 'Shop a great selection of deals, sale and clearance items.',
+    button_text: 'Buy Now',
+    button_link: '/products',
+    category_slug: null,
+    background_image_url: showcaseBannerUrl,
+    mobile_background_image_url: showcaseBannerUrl,
+    text_color: 'light',
+    active: true,
+    sort_order: 1,
+  },
+  {
+    id: 'promo-home-battery',
+    section_key: 'promotional_category_cards',
+    label: null,
+    title: 'Home Battery',
+    subtitle: 'One powers all.',
+    button_text: 'Contact Us',
+    button_link: '/contact',
+    category_slug: 'solutions',
+    background_image_url: solarHomeUrl,
+    mobile_background_image_url: solarHomeUrl,
+    text_color: 'light',
+    active: true,
+    sort_order: 2,
+  },
+];
+
+export const demoFeaturedVideoPromoBanners: HomepageBanner[] = [
+  {
+    id: 'featured-video-promo-default',
+    section_id: 'featured-video-promo',
+    section_heading: 'Eco Buka STREAM Series Plug & Play Solar Plant',
+    eyebrow: 'FLASH SALE & Up to 43% OFF!',
+    title: 'Eco Buka STREAM Series Plug & Play Solar Plant',
+    subtitle: 'Run high-wattage appliances with clean solar power.',
+    price_text: 'Starting at EUR 1199',
+    button_text: 'Buy Now',
+    button_link: '/category/solar-generators',
+    background_video_url: null,
+    background_image_url: solarHomeUrl,
+    mobile_background_image_url: showcaseBannerUrl,
+    text_color: 'light',
+    text_alignment: 'left',
+    active: true,
+    sort_order: 1,
+  },
+];

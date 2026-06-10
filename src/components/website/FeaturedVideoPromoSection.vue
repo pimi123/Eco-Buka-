@@ -2,6 +2,7 @@
 import { computed, onMounted, ref } from 'vue';
 import fallbackUrl from '../../assets/heroes/hero-solar-home.png';
 import { apiGet, hasLaravelApiConfig } from '../../lib/api';
+import { demoFeaturedVideoPromoBanners } from '../../lib/demoData';
 import type { HomepageBanner } from '../../types/homepage';
 
 const props = withDefaults(
@@ -35,16 +36,19 @@ const banner = ref<HomepageBanner | null>(null);
 const loading = ref(false);
 const videoFailed = ref(false);
 
+const fallbackBanner = computed(() => demoFeaturedVideoPromoBanners[0] || null);
+const activeBanner = computed(() => banner.value || fallbackBanner.value);
+
 const content = computed(() => ({
-  title: props.title || banner.value?.section_heading || '',
-  promoLabel: props.promoLabel || banner.value?.eyebrow || '',
-  heading: props.heading || banner.value?.title || '',
-  description: props.description || banner.value?.subtitle || '',
-  priceText: props.priceText || banner.value?.price_text || '',
-  buttonText: props.buttonText || banner.value?.button_text || 'Buy Now',
-  buttonUrl: props.buttonUrl || banner.value?.button_link || '/products',
-  backgroundVideoUrl: props.backgroundVideoUrl || banner.value?.background_video_url || '',
-  fallbackImageUrl: props.fallbackImageUrl || banner.value?.background_image_url || banner.value?.mobile_background_image_url || fallbackUrl,
+  title: props.title || activeBanner.value?.section_heading || '',
+  promoLabel: props.promoLabel || activeBanner.value?.eyebrow || '',
+  heading: props.heading || activeBanner.value?.title || '',
+  description: props.description || activeBanner.value?.subtitle || '',
+  priceText: props.priceText || activeBanner.value?.price_text || '',
+  buttonText: props.buttonText || activeBanner.value?.button_text || 'Buy Now',
+  buttonUrl: props.buttonUrl || activeBanner.value?.button_link || '/products',
+  backgroundVideoUrl: props.backgroundVideoUrl || activeBanner.value?.background_video_url || '',
+  fallbackImageUrl: props.fallbackImageUrl || activeBanner.value?.background_image_url || activeBanner.value?.mobile_background_image_url || fallbackUrl,
 }));
 
 const sectionVisible = computed(() => loading.value || Boolean(content.value.heading));

@@ -3,6 +3,7 @@ import { ArrowRight } from 'lucide-vue-next';
 import { computed, onMounted, ref } from 'vue';
 import fallbackUrl from '../../assets/heroes/hero-delta-max.png';
 import { apiGet, hasLaravelApiConfig } from '../../lib/api';
+import { demoPromotionalCategoryCards } from '../../lib/demoData';
 import type { HomepagePromoCard } from '../../types/homepage';
 
 const props = withDefaults(
@@ -20,10 +21,14 @@ const loadedCards = ref<HomepagePromoCard[]>([]);
 const loading = ref(false);
 const error = ref<string | null>(null);
 
-const cardsToRender = computed(() => (props.cards?.length ? props.cards : loadedCards.value).filter((card) => card.active !== false));
+const activeLoadedCards = computed(() => loadedCards.value.filter((card) => card.active !== false));
+const cardsToRender = computed(() =>
+  (props.cards?.length ? props.cards : activeLoadedCards.value.length ? activeLoadedCards.value : demoPromotionalCategoryCards).filter((card) => card.active !== false),
+);
 
 function cardLink(card: HomepagePromoCard) {
-  return card.button_link || (card.category_slug ? `/category/${card.category_slug}` : '/products');
+  const link = card.button_link || (card.category_slug ? `/category/${card.category_slug}` : '/products');
+  return link.replace(/^\/categories\//, '/category/');
 }
 
 function isExternal(link: string) {
@@ -43,6 +48,7 @@ onMounted(async () => {
     loadedCards.value = await apiGet<HomepagePromoCard[]>(`/home/promo-cards/${props.sectionKey}`);
   } catch (requestError) {
     error.value = requestError instanceof Error ? requestError.message : 'Promotional cards could not be loaded.';
+    loadedCards.value = demoPromotionalCategoryCards;
   } finally {
     loading.value = false;
   }
