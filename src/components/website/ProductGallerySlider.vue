@@ -37,7 +37,7 @@ watch(images, () => {
 <template>
   <div class="min-w-0">
     <div class="group relative overflow-hidden rounded-lg border border-line bg-mist">
-      <img :src="activeImage" :alt="title" class="aspect-[4/3] w-full object-contain p-4 sm:p-6" />
+      <img :src="activeImage" :alt="title" class="aspect-[4/3] w-full object-contain p-3 sm:p-6" />
 
       <div v-if="!images.length" class="absolute inset-0 grid place-items-center text-slate-400">
         <ImageIcon class="h-10 w-10" />
@@ -46,7 +46,7 @@ watch(images, () => {
       <button
         v-if="hasMultipleImages"
         type="button"
-        class="absolute left-3 top-1/2 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-full bg-white/90 text-ink shadow-sm transition hover:bg-white sm:h-11 sm:w-11"
+        class="absolute left-2 top-1/2 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-full bg-white/90 text-ink shadow-sm transition hover:bg-white sm:left-3 sm:h-11 sm:w-11"
         aria-label="Previous product image"
         @click="showPrevious"
       >
@@ -56,7 +56,7 @@ watch(images, () => {
       <button
         v-if="hasMultipleImages"
         type="button"
-        class="absolute right-3 top-1/2 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-full bg-white/90 text-ink shadow-sm transition hover:bg-white sm:h-11 sm:w-11"
+        class="absolute right-2 top-1/2 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-full bg-white/90 text-ink shadow-sm transition hover:bg-white sm:right-3 sm:h-11 sm:w-11"
         aria-label="Next product image"
         @click="showNext"
       >
@@ -79,7 +79,7 @@ watch(images, () => {
         v-for="(image, index) in images"
         :key="image"
         type="button"
-        class="h-20 w-24 shrink-0 overflow-hidden rounded-md border bg-mist transition sm:h-24 sm:w-28"
+        class="h-16 w-20 shrink-0 overflow-hidden rounded-md border bg-mist transition sm:h-24 sm:w-28"
         :class="index === activeIndex ? 'border-ink ring-2 ring-ink/10' : 'border-line hover:border-slate-400'"
         :aria-label="`Show product image ${index + 1}`"
         @click="activeIndex = index"

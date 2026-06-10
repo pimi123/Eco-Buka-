@@ -58,8 +58,8 @@ function clearImage() {
   <div class="grid gap-2">
     <span class="label">{{ label }}</span>
 
-    <div class="grid gap-3 rounded-lg border border-line bg-mist p-3 sm:grid-cols-[132px_minmax(0,1fr)]">
-      <div class="flex aspect-[4/3] items-center justify-center overflow-hidden rounded-md bg-white">
+    <div class="grid min-w-0 gap-3 rounded-lg border border-line bg-mist p-3 sm:grid-cols-[132px_minmax(0,1fr)]">
+      <div class="flex aspect-[4/3] w-full items-center justify-center overflow-hidden rounded-md bg-white sm:w-auto">
         <img v-if="modelValue" :src="modelValue" :alt="label" class="h-full w-full object-cover" />
         <ImagePlus v-else class="h-8 w-8 text-slate-300" />
       </div>

@@ -4,7 +4,7 @@ import DashboardTopbar from './DashboardTopbar.vue';
 </script>
 
 <template>
-  <div class="min-h-screen min-w-0 bg-mist lg:grid lg:grid-cols-[250px_minmax(0,1fr)]">
+  <div class="min-h-screen min-w-0 overflow-x-clip bg-mist lg:grid lg:grid-cols-[250px_minmax(0,1fr)]">
     <DashboardSidebar />
     <main class="min-w-0">
       <DashboardTopbar />

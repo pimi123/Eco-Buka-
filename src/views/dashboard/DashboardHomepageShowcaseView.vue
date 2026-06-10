@@ -127,8 +127,8 @@ async function saveBanner(banner: HomepageBanner) {
       </p>
     </div>
 
-    <div class="grid gap-5">
-      <section class="rounded-lg border border-line bg-white p-4 shadow-sm sm:p-5">
+    <div class="grid min-w-0 gap-5">
+      <section class="min-w-0 rounded-lg border border-line bg-white p-4 shadow-sm sm:p-5">
         <h2 class="text-lg font-black">Section Settings</h2>
         <div class="mt-4 grid gap-4 lg:grid-cols-2">
           <label class="grid gap-2"><span class="label">Title</span><input v-model="sectionForm.title" class="input-field" /></label>
@@ -141,7 +141,7 @@ async function saveBanner(banner: HomepageBanner) {
         </div>
       </section>
 
-      <section class="rounded-lg border border-line bg-white p-4 shadow-sm sm:p-5">
+      <section class="min-w-0 rounded-lg border border-line bg-white p-4 shadow-sm sm:p-5">
         <h2 class="text-lg font-black">Showcase Products</h2>
         <div class="mt-4 grid gap-3 lg:grid-cols-[minmax(0,1fr)_140px_120px_140px]">
           <select v-model="productForm.product_id" class="input-field">
@@ -175,11 +175,11 @@ async function saveBanner(banner: HomepageBanner) {
         </div>
       </section>
 
-      <section class="rounded-lg border border-line bg-white p-4 shadow-sm sm:p-5">
+      <section class="min-w-0 rounded-lg border border-line bg-white p-4 shadow-sm sm:p-5">
         <h2 class="text-lg font-black">Navigation Cards</h2>
-        <div class="mt-4 grid gap-3 lg:grid-cols-[1fr_1fr_110px_120px_130px]">
+        <div class="mt-4 grid min-w-0 gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_110px_120px_130px]">
           <input v-model="cardForm.title" class="input-field" placeholder="Title" />
-          <input v-model="cardForm.link" class="input-field" placeholder="/categories/solar-panels" />
+          <input v-model="cardForm.link" class="input-field" placeholder="/category/solar-panels" />
           <input v-model.number="cardForm.sort_order" type="number" class="input-field" placeholder="Sort" />
           <label class="flex items-center gap-2 text-sm font-semibold"><input v-model="cardForm.active" type="checkbox" /> Active</label>
           <button class="btn-primary w-full" @click="addCard">Add Card</button>
@@ -189,7 +189,7 @@ async function saveBanner(banner: HomepageBanner) {
         </div>
 
         <div class="mt-5 grid gap-4">
-          <div v-for="card in homepageStore.navigationCards" :key="card.id" class="grid gap-3 rounded-lg border border-line p-4 lg:grid-cols-[1fr_1fr_1fr_90px_90px_160px]">
+          <div v-for="card in homepageStore.navigationCards" :key="card.id" class="grid min-w-0 gap-3 rounded-lg border border-line p-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_120px_90px_160px]">
             <input v-model="card.title" class="input-field" />
             <input v-model="card.link" class="input-field" />
             <input v-model.number="card.sort_order" type="number" class="input-field" />
@@ -198,14 +198,14 @@ async function saveBanner(banner: HomepageBanner) {
               <button class="btn-secondary min-h-9 px-3 py-1.5" @click="saveCard(card)">Save</button>
               <button class="btn-secondary min-h-9 px-3 py-1.5" @click="homepageStore.deleteNavigationCard(card.id)">Delete</button>
             </div>
-            <div class="lg:col-span-6">
+            <div class="lg:col-span-5">
               <ImageUploadField v-model="card.image_url" label="Navigation card image" folder="homepage/navigation-cards" />
             </div>
           </div>
         </div>
       </section>
 
-      <section class="rounded-lg border border-line bg-white p-4 shadow-sm sm:p-5">
+      <section class="min-w-0 rounded-lg border border-line bg-white p-4 shadow-sm sm:p-5">
         <h2 class="text-lg font-black">Promotional Banners</h2>
         <div class="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
           <input v-model="bannerForm.section_heading" class="input-field" placeholder="Section heading" />

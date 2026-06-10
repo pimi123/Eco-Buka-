@@ -9,8 +9,14 @@ use Illuminate\Http\Request;
 
 class ProductController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
+        $categorySlug = trim((string) $request->query('category', ''));
+
+        if ($categorySlug !== '') {
+            return $this->productsForCategorySlug($categorySlug)->get();
+        }
+
         return $this->activeProducts()->get();
     }
 
@@ -36,9 +42,7 @@ class ProductController extends Controller
 
     public function byCategory(string $slug)
     {
-        $category = Category::query()->where('active', true)->where('slug', $slug)->firstOrFail();
-
-        return $this->activeProducts()->where('category_id', $category->id)->get();
+        return $this->productsForCategorySlug($slug)->get();
     }
 
     public function show(string $slug)
@@ -53,5 +57,12 @@ class ProductController extends Controller
             ->with('category:id,name,slug')
             ->orderBy('sort_order')
             ->orderByDesc('created_at');
+    }
+
+    private function productsForCategorySlug(string $slug)
+    {
+        $category = Category::query()->where('active', true)->where('slug', $slug)->firstOrFail();
+
+        return $this->activeProducts()->where('category_id', $category->id);
     }
 }

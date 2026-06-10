@@ -9,18 +9,21 @@
       </div>
       <div>
         <p class="font-semibold">Shop</p>
-        <div class="mt-3 grid gap-2 text-sm text-slate-300">
-          <RouterLink to="/products">Products</RouterLink>
-          <RouterLink to="/categories/solar-generators">Solar generators</RouterLink>
-          <RouterLink to="/contact">Request offer</RouterLink>
+        <div class="mt-3 grid gap-1 text-sm text-slate-300">
+          <RouterLink to="/products" class="py-1.5">Products</RouterLink>
+          <RouterLink to="/category/power-stations" class="py-1.5">Power stations</RouterLink>
+          <RouterLink to="/category/solar-panels" class="py-1.5">Solar panels</RouterLink>
+          <RouterLink to="/category/solar-generators" class="py-1.5">Solar generators</RouterLink>
+          <RouterLink to="/category/accessories" class="py-1.5">Accessories</RouterLink>
+          <RouterLink to="/contact" class="py-1.5">Request offer</RouterLink>
         </div>
       </div>
       <div>
         <p class="font-semibold">Support</p>
-        <div class="mt-3 grid gap-2 text-sm text-slate-300">
-          <RouterLink to="/about">About Eco Buka</RouterLink>
-          <RouterLink to="/dashboard">Dashboard</RouterLink>
-          <RouterLink to="/contact">Contact</RouterLink>
+        <div class="mt-3 grid gap-1 text-sm text-slate-300">
+          <RouterLink to="/about" class="py-1.5">About Eco Buka</RouterLink>
+          <RouterLink to="/dashboard" class="py-1.5">Dashboard</RouterLink>
+          <RouterLink to="/contact" class="py-1.5">Contact</RouterLink>
         </div>
       </div>
     </div>

@@ -46,11 +46,11 @@ onMounted(() => {
 <template>
   <section
     v-if="homepageStore.promoCardsLoading || homepageStore.activePromoCards.length"
-    class="bg-mist py-9 sm:py-11 lg:py-12"
+    class="bg-mist py-8 sm:py-11 lg:py-12"
     aria-label="New product promotions"
   >
     <div class="container-shell">
-      <div class="mb-6 flex items-end justify-between gap-4">
+      <div class="mb-5 flex items-end justify-between gap-4 sm:mb-6">
         <div class="min-w-0">
           <h2 class="text-2xl font-black leading-tight text-ink sm:text-3xl">{{ title }}</h2>
           <p v-if="subtitle" class="mt-3 max-w-3xl text-sm leading-6 text-slate-600 sm:text-base">{{ subtitle }}</p>
@@ -83,7 +83,7 @@ onMounted(() => {
         <div
           v-for="index in 4"
           :key="index"
-          class="h-[300px] w-[82vw] max-w-[390px] shrink-0 animate-pulse rounded-2xl bg-white sm:h-[330px] sm:w-[360px] lg:h-[356px] lg:w-[390px]"
+          class="h-[280px] w-[84vw] max-w-[360px] shrink-0 animate-pulse rounded-lg bg-white sm:h-[330px] sm:w-[360px] lg:h-[356px] lg:w-[390px]"
         />
       </div>
 
@@ -95,7 +95,7 @@ onMounted(() => {
         <article
           v-for="(card, index) in homepageStore.activePromoCards"
           :key="card.id"
-          class="group relative h-[300px] w-[84vw] max-w-[400px] shrink-0 snap-start overflow-hidden rounded-2xl bg-slate-200 shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-panel sm:h-[330px] sm:w-[360px] lg:h-[356px] lg:w-[390px] xl:w-[410px]"
+          class="group relative h-[280px] w-[84vw] max-w-[360px] shrink-0 snap-start overflow-hidden rounded-lg bg-slate-200 shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-panel sm:h-[330px] sm:w-[360px] lg:h-[356px] lg:w-[390px] xl:w-[410px]"
           :class="[
             card.text_color === 'dark'
               ? 'text-ink'
@@ -111,6 +111,7 @@ onMounted(() => {
               :src="card.background_image_url || card.mobile_background_image_url || ''"
               :alt="card.title"
               class="h-full w-full object-cover transition duration-700 group-hover:scale-105"
+              loading="lazy"
             />
           </picture>
 
@@ -121,18 +122,18 @@ onMounted(() => {
               : 'bg-gradient-to-br from-black/70 via-black/35 to-black/5'"
           />
 
-          <div class="relative z-10 flex h-full max-w-[21rem] flex-col p-5 sm:p-6">
+          <div class="relative z-10 flex h-full max-w-[20rem] flex-col p-5 sm:max-w-[21rem] sm:p-6">
             <p v-if="card.label" class="text-sm font-semibold leading-5 text-orange-500">{{ card.label }}</p>
-            <h3 class="mt-2 text-2xl font-black leading-tight sm:text-[1.65rem]">{{ card.title }}</h3>
+            <h3 class="mt-2 text-xl font-black leading-tight min-[390px]:text-2xl sm:text-[1.65rem]">{{ card.title }}</h3>
             <p v-if="card.subtitle" class="mt-3 line-clamp-3 text-sm font-semibold leading-6 opacity-95 sm:text-[0.95rem]">
               {{ card.subtitle }}
             </p>
 
-            <div class="mt-7">
+            <div class="mt-6 sm:mt-7">
               <a
                 v-if="isExternal(card.button_link)"
                 :href="cardLink(card)"
-                class="inline-flex min-h-11 items-center justify-center rounded-full bg-white px-7 py-3 text-sm font-bold text-ink shadow-sm transition hover:bg-mist"
+                class="inline-flex min-h-11 items-center justify-center rounded-full bg-white px-6 py-3 text-sm font-bold text-ink shadow-sm transition hover:bg-mist sm:px-7"
                 target="_blank"
                 rel="noreferrer"
               >
@@ -141,7 +142,7 @@ onMounted(() => {
               <RouterLink
                 v-else
                 :to="cardLink(card)"
-                class="inline-flex min-h-11 items-center justify-center rounded-full bg-white px-7 py-3 text-sm font-bold text-ink shadow-sm transition hover:bg-mist"
+                class="inline-flex min-h-11 items-center justify-center rounded-full bg-white px-6 py-3 text-sm font-bold text-ink shadow-sm transition hover:bg-mist sm:px-7"
               >
                 {{ card.button_text || 'Learn More' }}
               </RouterLink>

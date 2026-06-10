@@ -93,6 +93,37 @@ export const useProductStore = defineStore('products', () => {
     loading.value = false;
   }
 
+  async function fetchProductsByCategory(slug: string) {
+    loading.value = true;
+
+    if (hasLaravelApiConfig) {
+      try {
+        const data = await apiGet<LaravelProduct[]>(`/products/category/${slug}`);
+        loading.value = false;
+        return data.map(mapLaravelProduct);
+      } catch {
+        // Fall through to the configured local/Supabase strategy.
+      }
+    }
+
+    if (!products.value.length) await fetchProducts();
+
+    const normalizedSlug = slug.toLowerCase();
+    const filteredProducts = activeProducts.value.filter((product) => {
+      const categoryId = String(product.category_id || '').toLowerCase();
+      const categoryNameSlug = String(product.category || '')
+        .toLowerCase()
+        .replace(/&/g, 'and')
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/(^-|-$)/g, '');
+
+      return categoryId === normalizedSlug || categoryNameSlug === normalizedSlug;
+    });
+
+    loading.value = false;
+    return filteredProducts;
+  }
+
   async function saveProduct(product: Partial<Product>) {
     const payload = cleanProductPayload(product);
 
@@ -127,5 +158,5 @@ export const useProductStore = defineStore('products', () => {
     return saveProduct({ ...product, active: !product.active });
   }
 
-  return { products, activeProducts, featuredProducts, loading, fetchProducts, saveProduct, deleteProduct, toggleActive };
+  return { products, activeProducts, featuredProducts, loading, fetchProducts, fetchProductsByCategory, saveProduct, deleteProduct, toggleActive };
 });

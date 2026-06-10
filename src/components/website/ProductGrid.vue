@@ -6,7 +6,7 @@ defineProps<{ products: Product[] }>();
 </script>
 
 <template>
-  <div class="grid min-w-0 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:gap-5">
+  <div class="grid min-w-0 grid-cols-1 gap-3 min-[340px]:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 lg:gap-5">
     <ProductCard v-for="product in products" :key="product.id" :product="product" />
   </div>
 </template>

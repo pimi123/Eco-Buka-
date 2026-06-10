@@ -23,7 +23,7 @@ const error = ref<string | null>(null);
 const cardsToRender = computed(() => (props.cards?.length ? props.cards : loadedCards.value).filter((card) => card.active !== false));
 
 function cardLink(card: HomepagePromoCard) {
-  return card.button_link || (card.category_slug ? `/categories/${card.category_slug}` : '/products');
+  return card.button_link || (card.category_slug ? `/category/${card.category_slug}` : '/products');
 }
 
 function isExternal(link: string) {
@@ -50,7 +50,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <section v-if="loading || cardsToRender.length" class="bg-white py-10 sm:py-12 lg:py-14" aria-label="Promotional category cards">
+  <section v-if="loading || cardsToRender.length" class="bg-white py-8 sm:py-12 lg:py-14" aria-label="Promotional category cards">
     <div class="container-shell">
       <div v-if="loading" class="grid gap-5 md:grid-cols-2 lg:gap-6">
         <div v-for="index in 2" :key="index" class="h-[320px] animate-pulse rounded-lg bg-mist sm:h-[360px]" />
@@ -66,7 +66,7 @@ onMounted(async () => {
           :target="isExternal(cardLink(card)) ? '_blank' : undefined"
           :rel="isExternal(cardLink(card)) ? 'noreferrer' : undefined"
           :aria-label="ariaLabel(card)"
-          class="group relative min-h-[300px] overflow-hidden rounded-lg bg-ink shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-panel sm:min-h-[340px] lg:min-h-[380px]"
+          class="group relative min-h-[280px] overflow-hidden rounded-lg bg-ink shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-panel sm:min-h-[340px] lg:min-h-[380px]"
         >
           <img
             :src="card.background_image_url || card.mobile_background_image_url || fallbackUrl"
@@ -74,7 +74,7 @@ onMounted(async () => {
             class="absolute inset-0 h-full w-full object-cover transition duration-700 group-hover:scale-105"
             loading="lazy"
           />
-          <div class="absolute inset-0 bg-gradient-to-r from-black/76 via-black/35 to-black/5" />
+          <div class="absolute inset-0 bg-gradient-to-r from-black/82 via-black/45 to-black/10" />
           <div class="relative z-10 flex h-full max-w-md flex-col items-start p-5 text-white sm:p-7">
             <h2 v-if="card.title" class="text-xl font-black leading-tight sm:text-2xl">{{ card.title }}</h2>
             <p v-if="card.subtitle" class="mt-3 text-sm font-bold leading-6 text-white/95 sm:text-base">{{ card.subtitle }}</p>

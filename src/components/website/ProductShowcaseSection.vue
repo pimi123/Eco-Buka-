@@ -24,7 +24,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <section v-if="sectionVisible" class="bg-mist py-9 sm:py-11 lg:py-12">
+  <section v-if="sectionVisible" class="bg-mist py-8 sm:py-11 lg:py-12">
     <div class="container-shell">
       <div v-if="homepageStore.section?.title || homepageStore.section?.subtitle" class="mb-7 max-w-3xl">
         <h2 v-if="homepageStore.section?.title" class="text-2xl font-black leading-tight tracking-normal text-ink sm:text-3xl">
@@ -43,7 +43,7 @@ onMounted(async () => {
         <div class="grid gap-4 xl:grid-cols-[minmax(0,1fr)_286px] xl:gap-5">
           <div
             v-if="displayProducts.length"
-            class="flex min-w-0 gap-4 overflow-x-auto pb-2 [-ms-overflow-style:none] [scrollbar-width:none] xl:grid xl:grid-cols-4 xl:overflow-visible xl:pb-0 [&::-webkit-scrollbar]:hidden"
+            class="flex min-w-0 snap-x gap-4 overflow-x-auto pb-2 [-ms-overflow-style:none] [scrollbar-width:none] sm:grid sm:grid-cols-2 sm:overflow-visible sm:pb-0 xl:grid-cols-4 [&::-webkit-scrollbar]:hidden"
           >
             <ProductCard
               v-for="product in displayProducts"
@@ -52,7 +52,7 @@ onMounted(async () => {
               :show-specs="false"
               compact
               variant="showcase"
-              class="w-[260px] shrink-0 sm:w-[280px] xl:w-auto xl:shrink"
+              class="w-[82vw] max-w-[300px] shrink-0 snap-start sm:w-auto sm:max-w-none sm:shrink"
             />
           </div>
 
@@ -60,13 +60,13 @@ onMounted(async () => {
             No showcase products selected yet.
           </div>
 
-          <div v-if="displayCards.length" class="flex gap-4 overflow-x-auto pb-2 [-ms-overflow-style:none] [scrollbar-width:none] sm:grid sm:grid-cols-2 sm:overflow-visible sm:pb-0 xl:grid-cols-1 [&::-webkit-scrollbar]:hidden">
+          <div v-if="displayCards.length" class="flex snap-x gap-4 overflow-x-auto pb-2 [-ms-overflow-style:none] [scrollbar-width:none] sm:grid sm:grid-cols-2 sm:overflow-visible sm:pb-0 xl:grid-cols-1 [&::-webkit-scrollbar]:hidden">
             <CategoryNavigationCard
               v-for="card in displayCards"
               :key="card.id"
               :card="card"
               variant="showcase"
-              class="w-[260px] shrink-0 sm:w-auto sm:shrink"
+              class="w-[82vw] max-w-[300px] shrink-0 snap-start sm:w-auto sm:max-w-none sm:shrink"
             />
           </div>
         </div>

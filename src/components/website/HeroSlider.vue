@@ -58,7 +58,7 @@ const slides: HeroSlide[] = [
     title: 'Power Anywhere You Go',
     subtitle: 'Compact, powerful, and ready for home, travel, and outdoor use.',
     primaryButtonText: 'Discover More',
-    primaryButtonLink: '/categories/river-series',
+    primaryButtonLink: '/category/power-stations',
     secondaryButtonText: 'Browse Products',
     secondaryButtonLink: '/products',
     image: portableHeroUrl,
@@ -71,6 +71,7 @@ const slides: HeroSlide[] = [
 
 const activeIndex = ref(0);
 const isPaused = ref(false);
+const isMobileViewport = ref(false);
 const touchStartX = ref<number | null>(null);
 let autoplayId: number | undefined;
 
@@ -91,7 +92,7 @@ function previousSlide() {
 function startAutoplay() {
   stopAutoplay();
   autoplayId = window.setInterval(() => {
-    if (!isPaused.value) nextSlide();
+    if (!isPaused.value && !isMobileViewport.value) nextSlide();
   }, 6500);
 }
 
@@ -116,8 +117,21 @@ function handleTouchEnd(event: TouchEvent) {
   touchStartX.value = null;
 }
 
-onMounted(startAutoplay);
-onBeforeUnmount(stopAutoplay);
+function updateViewportState() {
+  isMobileViewport.value = window.matchMedia('(max-width: 767px)').matches;
+  if (isMobileViewport.value) activeIndex.value = 0;
+}
+
+onMounted(() => {
+  updateViewportState();
+  window.addEventListener('resize', updateViewportState);
+  startAutoplay();
+});
+
+onBeforeUnmount(() => {
+  stopAutoplay();
+  window.removeEventListener('resize', updateViewportState);
+});
 </script>
 
 <template>
@@ -129,34 +143,36 @@ onBeforeUnmount(stopAutoplay);
     @touchstart.passive="handleTouchStart"
     @touchend.passive="handleTouchEnd"
   >
-    <div class="relative h-[560px] min-h-[520px] sm:h-[620px] md:h-[68vh] md:min-h-[600px] lg:h-[78vh] lg:min-h-[660px] xl:h-[84vh] xl:min-h-[720px]">
+    <div class="relative h-[480px] min-h-[480px] sm:h-[600px] md:h-[68vh] md:min-h-[600px] lg:h-[78vh] lg:min-h-[660px] xl:h-[84vh] xl:min-h-[720px]">
       <div v-for="(slide, index) in slides" :key="slide.id" class="absolute inset-0 transition-opacity duration-700 ease-out" :class="index === activeIndex ? 'opacity-100' : 'pointer-events-none opacity-0'">
         <img
           :src="slide.image"
           :alt="slide.imageAlt"
-          class="absolute inset-0 h-full w-full object-cover"
+          class="absolute inset-0 h-full w-full object-cover object-center"
           :loading="index === 0 ? 'eager' : 'lazy'"
         />
         <div class="absolute inset-0" :class="slide.overlayStyle" />
+        <div class="absolute inset-0 bg-gradient-to-t from-black/78 via-black/34 to-black/12 md:hidden" />
+        <div class="absolute inset-0 bg-gradient-to-r from-black/54 via-black/18 to-transparent md:hidden" />
       </div>
 
-      <div class="container-shell relative z-10 flex h-full items-center pb-16 pt-12 sm:pb-20 lg:pb-24">
-        <div :key="activeSlide.id" class="max-w-[680px] animate-[fadeIn_700ms_ease-out] pt-10 sm:pt-8 lg:pt-0" :class="activeSlide.textColor">
-          <p class="text-xs font-bold uppercase tracking-[0.18em] text-white/80 sm:text-sm">{{ activeSlide.eyebrow }}</p>
-          <h1 class="mt-4 text-4xl font-black leading-[1.04] tracking-normal min-[420px]:text-5xl sm:mt-5 sm:text-6xl lg:text-7xl xl:text-8xl">
+      <div class="container-shell relative z-10 flex h-full items-end pb-14 pt-10 sm:items-center sm:pb-20 lg:pb-24">
+        <div :key="activeSlide.id" class="max-w-[680px] animate-[fadeIn_700ms_ease-out] pb-9 sm:pb-0 sm:pt-8 lg:pt-0" :class="activeSlide.textColor">
+          <p class="text-[11px] font-bold uppercase tracking-[0.18em] text-white/80 sm:text-sm">{{ activeSlide.eyebrow }}</p>
+          <h1 class="mt-2 max-w-[12.5ch] text-[1.75rem] font-black leading-[1.05] tracking-normal min-[390px]:text-[2rem] min-[430px]:text-[2.15rem] sm:mt-5 sm:max-w-[14ch] sm:text-6xl lg:text-7xl xl:text-8xl">
             {{ activeSlide.title }}
           </h1>
-          <p class="mt-5 max-w-2xl text-base font-medium leading-7 text-white/86 sm:text-xl sm:leading-8 lg:text-2xl">
+          <p class="mt-3 max-w-[17.5rem] text-sm font-semibold leading-6 text-white/92 min-[390px]:text-[15px] sm:mt-5 sm:max-w-xl sm:text-xl sm:leading-8 lg:max-w-2xl lg:text-2xl">
             {{ activeSlide.subtitle }}
           </p>
-          <div class="mt-8 flex flex-col gap-3 min-[420px]:flex-row min-[420px]:flex-wrap sm:mt-10">
-            <RouterLink :to="activeSlide.primaryButtonLink" class="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-md bg-white px-6 py-3 text-sm font-bold text-ink transition hover:bg-mist min-[420px]:w-auto">
+          <div class="mt-5 flex max-w-[20rem] flex-row flex-wrap gap-2 sm:mt-10 sm:max-w-none">
+            <RouterLink :to="activeSlide.primaryButtonLink" class="inline-flex min-h-11 flex-none items-center justify-center gap-2 rounded-md bg-white px-4 py-3 text-sm font-bold text-ink transition hover:bg-mist sm:min-h-12 sm:px-6">
               {{ activeSlide.primaryButtonText }} <ArrowRight class="h-4 w-4 shrink-0" />
             </RouterLink>
             <RouterLink
               v-if="activeSlide.secondaryButtonText && activeSlide.secondaryButtonLink"
               :to="activeSlide.secondaryButtonLink"
-              class="inline-flex min-h-12 w-full items-center justify-center rounded-md border border-white/55 bg-white/10 px-6 py-3 text-sm font-bold text-white backdrop-blur transition hover:bg-white/18 min-[420px]:w-auto"
+              class="inline-flex min-h-11 flex-none items-center justify-center rounded-md border border-white/55 bg-white/10 px-4 py-3 text-sm font-bold text-white backdrop-blur transition hover:bg-white/18 sm:min-h-12 sm:px-6"
             >
               {{ activeSlide.secondaryButtonText }}
             </RouterLink>
@@ -181,17 +197,21 @@ onBeforeUnmount(stopAutoplay);
         <ChevronRight class="h-6 w-6" />
       </button>
 
-      <div class="absolute bottom-6 left-1/2 z-20 flex -translate-x-1/2 items-center gap-3 sm:bottom-8">
+      <div class="absolute bottom-5 left-1/2 z-20 flex -translate-x-1/2 items-center gap-2 sm:bottom-8 sm:gap-3">
         <button
           v-for="(slide, index) in slides"
           :key="slide.id"
-          class="h-2.5 rounded-full transition-all"
-          :class="index === activeIndex ? 'w-9 bg-white' : 'w-2.5 bg-white/45 hover:bg-white/70'"
+          class="group grid h-8 place-items-center rounded-full px-0.5"
           type="button"
           :aria-label="`Go to hero slide ${index + 1}`"
           :aria-current="index === activeIndex ? 'true' : undefined"
           @click="goToSlide(index)"
-        />
+        >
+          <span
+            class="h-2.5 rounded-full transition-all"
+            :class="index === activeIndex ? 'w-9 bg-white' : 'w-2.5 bg-white/45 group-hover:bg-white/70'"
+          />
+        </button>
       </div>
     </div>
   </section>
