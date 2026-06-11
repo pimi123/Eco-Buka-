@@ -22,19 +22,21 @@
                         <textarea class="min-h-28 rounded-md border border-slate-300 px-3 py-2" name="{{ $field }}">{{ $value }}</textarea>
                     </label>
                 @elseif ($type === 'image')
+                    @php($previewUrl = $item->{$field.'_url'} ?? ($item->{$field} ? Storage::disk('public')->url($item->{$field}) : null))
                     <label class="grid gap-2">
                         <span class="text-xs font-bold uppercase text-slate-500">{{ str($field)->headline() }}</span>
                         <input class="rounded-md border border-slate-300 px-3 py-2" type="file" name="{{ $field }}" accept="image/*">
-                        @if ($item->{$field})
-                            <img class="h-24 w-32 rounded-md object-cover" src="{{ Storage::disk('public')->url($item->{$field}) }}" alt="">
+                        @if ($previewUrl)
+                            <img class="h-24 w-32 rounded-md object-cover" src="{{ $previewUrl }}" alt="">
                         @endif
                     </label>
                 @elseif ($type === 'video')
+                    @php($previewUrl = $item->{$field.'_url'} ?? ($item->{$field} ? Storage::disk('public')->url($item->{$field}) : null))
                     <label class="grid gap-2 md:col-span-2">
                         <span class="text-xs font-bold uppercase text-slate-500">{{ str($field)->headline() }}</span>
                         <input class="rounded-md border border-slate-300 px-3 py-2" type="file" name="{{ $field }}" accept="video/mp4,video/webm,video/ogg">
-                        @if ($item->{$field})
-                            <video class="h-32 w-full max-w-sm rounded-md bg-slate-950 object-cover" src="{{ Storage::disk('public')->url($item->{$field}) }}" muted controls></video>
+                        @if ($previewUrl)
+                            <video class="h-32 w-full max-w-sm rounded-md bg-slate-950 object-cover" src="{{ $previewUrl }}" muted controls></video>
                         @endif
                     </label>
                 @elseif ($type === 'gallery')

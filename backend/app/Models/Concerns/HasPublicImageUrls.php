@@ -20,6 +20,6 @@ trait HasPublicImageUrls
             return $path;
         }
 
-        return Storage::disk('public')->url($path);
+        return url(Storage::disk('public')->url($path));
     }
 }
