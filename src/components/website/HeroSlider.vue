@@ -4,6 +4,8 @@ import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import deltaHeroUrl from '../../assets/heroes/hero-delta-max.png';
 import portableHeroUrl from '../../assets/heroes/hero-portable-energy.png';
 import solarHeroUrl from '../../assets/heroes/hero-solar-home.png';
+import { apiGet, hasLaravelApiConfig } from '../../lib/api';
+import type { HomepageBanner } from '../../types/homepage';
 
 interface HeroSlide {
   id: string;
@@ -15,13 +17,14 @@ interface HeroSlide {
   secondaryButtonText?: string;
   secondaryButtonLink?: string;
   image: string;
+  mobileImage?: string;
   imageAlt: string;
   overlayStyle: string;
   textColor: string;
   alignment: 'left' | 'center';
 }
 
-const slides: HeroSlide[] = [
+const fallbackSlides: HeroSlide[] = [
   {
     id: 'delta-max',
     eyebrow: 'New Release',
@@ -73,12 +76,76 @@ const activeIndex = ref(0);
 const isPaused = ref(false);
 const isMobileViewport = ref(false);
 const touchStartX = ref<number | null>(null);
+const slides = ref<HeroSlide[]>(fallbackSlides);
 let autoplayId: number | undefined;
 
-const activeSlide = computed(() => slides[activeIndex.value]);
+const activeSlide = computed(() => slides.value[activeIndex.value] || fallbackSlides[0]);
+
+function bannerOverlay(banner: HomepageBanner) {
+  return banner.text_color === 'dark'
+    ? 'bg-gradient-to-r from-white/82 via-white/42 to-white/8'
+    : 'bg-gradient-to-r from-black/78 via-black/40 to-black/10';
+}
+
+function bannerTextClass(banner: HomepageBanner) {
+  return banner.text_color === 'dark' ? 'text-ink' : 'text-white';
+}
+
+function mapBannerToSlide(banner: HomepageBanner): HeroSlide {
+  return {
+    id: String(banner.id),
+    eyebrow: banner.eyebrow || '',
+    title: banner.title,
+    subtitle: banner.subtitle || '',
+    primaryButtonText: banner.button_text || 'Learn More',
+    primaryButtonLink: banner.button_link || '/products',
+    secondaryButtonText: banner.second_button_text || 'View Products',
+    secondaryButtonLink: banner.second_button_link || '/products',
+    image: banner.background_image_url || fallbackSlides[0].image,
+    mobileImage: banner.mobile_background_image_url || banner.background_image_url || fallbackSlides[0].image,
+    imageAlt: banner.title,
+    overlayStyle: bannerOverlay(banner),
+    textColor: bannerTextClass(banner),
+    alignment: banner.text_alignment === 'center' ? 'center' : 'left',
+  };
+}
+
+function preloadFirstHeroImage() {
+  if (typeof document === 'undefined') return;
+
+  const firstImage = slides.value[0]?.image;
+  if (!firstImage || document.head.querySelector(`link[rel="preload"][href="${firstImage}"]`)) return;
+
+  const link = document.createElement('link');
+  link.rel = 'preload';
+  link.as = 'image';
+  link.href = firstImage;
+  link.setAttribute('fetchpriority', 'high');
+  link.setAttribute('imagesizes', '100vw');
+  document.head.appendChild(link);
+}
+
+async function fetchHeroBanners() {
+  if (!hasLaravelApiConfig) return;
+
+  try {
+    const data = await apiGet<HomepageBanner[]>('/home/hero-banners');
+    const activeBanners = data
+      .filter((banner) => banner.active !== false)
+      .sort((a, b) => Number(a.sort_order || 0) - Number(b.sort_order || 0));
+
+    if (activeBanners.length) {
+      slides.value = activeBanners.map(mapBannerToSlide);
+      activeIndex.value = 0;
+      preloadFirstHeroImage();
+    }
+  } catch {
+    slides.value = fallbackSlides;
+  }
+}
 
 function goToSlide(index: number) {
-  activeIndex.value = (index + slides.length) % slides.length;
+  activeIndex.value = (index + slides.value.length) % slides.value.length;
 }
 
 function nextSlide() {
@@ -125,6 +192,8 @@ function updateViewportState() {
 onMounted(() => {
   updateViewportState();
   window.addEventListener('resize', updateViewportState);
+  preloadFirstHeroImage();
+  fetchHeroBanners();
   startAutoplay();
 });
 
@@ -145,12 +214,18 @@ onBeforeUnmount(() => {
   >
     <div class="relative h-[480px] min-h-[480px] sm:h-[600px] md:h-[68vh] md:min-h-[600px] lg:h-[78vh] lg:min-h-[660px] xl:h-[84vh] xl:min-h-[720px]">
       <div v-for="(slide, index) in slides" :key="slide.id" class="absolute inset-0 transition-opacity duration-700 ease-out" :class="index === activeIndex ? 'opacity-100' : 'pointer-events-none opacity-0'">
-        <img
-          :src="slide.image"
-          :alt="slide.imageAlt"
-          class="absolute inset-0 h-full w-full object-cover object-center"
-          :loading="index === 0 ? 'eager' : 'lazy'"
-        />
+        <picture>
+          <source v-if="slide.mobileImage" media="(max-width: 640px)" :srcset="slide.mobileImage" />
+          <img
+            :src="slide.image"
+            :alt="slide.imageAlt"
+            class="absolute inset-0 h-full w-full object-cover object-center"
+            :loading="index === 0 ? 'eager' : 'lazy'"
+            :fetchpriority="index === 0 ? 'high' : 'low'"
+            decoding="async"
+            sizes="100vw"
+          />
+        </picture>
         <div class="absolute inset-0" :class="slide.overlayStyle" />
         <div class="absolute inset-0 bg-gradient-to-t from-black/78 via-black/34 to-black/12 md:hidden" />
         <div class="absolute inset-0 bg-gradient-to-r from-black/54 via-black/18 to-transparent md:hidden" />

@@ -22,7 +22,6 @@
         <p class="font-semibold">Support</p>
         <div class="mt-3 grid gap-1 text-sm text-slate-300">
           <RouterLink to="/about" class="py-1.5">About Eco Buka</RouterLink>
-          <RouterLink to="/dashboard" class="py-1.5">Dashboard</RouterLink>
           <RouterLink to="/contact" class="py-1.5">Contact</RouterLink>
         </div>
       </div>

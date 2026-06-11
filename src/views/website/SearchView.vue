@@ -2,6 +2,7 @@
 import { computed, onMounted, ref } from 'vue';
 import WebsiteLayout from '../../components/layout/WebsiteLayout.vue';
 import ProductGrid from '../../components/website/ProductGrid.vue';
+import { useSeo } from '../../lib/seo';
 import { useProductStore } from '../../stores/productStore';
 
 const query = ref('');
@@ -10,6 +11,12 @@ const results = computed(() => {
   const term = query.value.toLowerCase().trim();
   if (!term) return productStore.activeProducts;
   return productStore.activeProducts.filter((product) => `${product.name} ${product.short_description} ${product.description}`.toLowerCase().includes(term));
+});
+
+useSeo({
+  title: 'Search Products',
+  description: 'Search Eco Buka portable power stations, solar panels, batteries, smart devices, and clean energy accessories.',
+  canonicalPath: '/search',
 });
 
 onMounted(() => productStore.fetchProducts());

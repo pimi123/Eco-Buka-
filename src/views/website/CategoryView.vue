@@ -3,6 +3,7 @@ import { computed, onMounted, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import WebsiteLayout from '../../components/layout/WebsiteLayout.vue';
 import ProductGrid from '../../components/website/ProductGrid.vue';
+import { useSeo } from '../../lib/seo';
 import { useCategoryStore } from '../../stores/categoryStore';
 import { useProductStore } from '../../stores/productStore';
 import type { Product } from '../../types/product';
@@ -16,6 +17,12 @@ const loading = ref(true);
 const error = ref('');
 const currentSlug = computed(() => String(route.params.slug || ''));
 const category = computed(() => categoryStore.categories.find((item) => item.slug === currentSlug.value));
+
+useSeo({
+  title: computed(() => category.value?.name || 'Product Category'),
+  description: computed(() => category.value?.description || `Browse Eco Buka products in the ${currentSlug.value.replace(/-/g, ' ')} category.`),
+  canonicalPath: computed(() => `/category/${currentSlug.value}`),
+});
 
 async function loadCategory(slug: string) {
   loading.value = true;

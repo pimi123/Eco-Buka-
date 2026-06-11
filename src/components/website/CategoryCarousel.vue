@@ -53,6 +53,9 @@ function scrollByDirection(direction: 'left' | 'right') {
               :src="category.image"
               :alt="category.title"
               class="max-h-[48px] w-auto max-w-[58px] object-contain transition duration-300 group-hover:scale-105 sm:max-h-[66px] sm:max-w-[78px]"
+              loading="lazy"
+              decoding="async"
+              sizes="78px"
             />
           </div>
           <p class="mt-2 max-w-[108px] text-[11px] font-semibold leading-4 text-slate-800 transition group-hover:text-black sm:max-w-[145px] sm:text-[13px] sm:leading-[17px]">

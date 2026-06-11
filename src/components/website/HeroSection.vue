@@ -22,7 +22,15 @@ import heroUrl from '../../assets/eco-buka-hero.png';
         </div>
       </div>
       <div class="relative overflow-hidden rounded-lg bg-white shadow-panel">
-        <img :src="heroUrl" alt="Eco Buka portable power and solar kit" class="aspect-[4/3] w-full object-cover sm:aspect-[16/10] lg:min-h-[360px]" />
+        <img
+          :src="heroUrl"
+          alt="Eco Buka portable power and solar kit"
+          class="aspect-[4/3] w-full object-cover sm:aspect-[16/10] lg:min-h-[360px]"
+          loading="eager"
+          fetchpriority="high"
+          decoding="async"
+          sizes="(max-width: 1023px) 100vw, 52vw"
+        />
         <div class="static grid gap-3 bg-white/95 p-4 backdrop-blur sm:absolute sm:bottom-4 sm:left-4 sm:right-4 sm:rounded-md sm:bg-white/92 sm:grid-cols-3">
           <div><p class="text-xl font-black">512Wh+</p><p class="text-xs text-slate-500">Portable capacity</p></div>
           <div><p class="text-xl font-black">220W</p><p class="text-xs text-slate-500">Solar charging</p></div>

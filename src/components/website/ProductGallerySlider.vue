@@ -37,7 +37,15 @@ watch(images, () => {
 <template>
   <div class="min-w-0">
     <div class="group relative overflow-hidden rounded-lg border border-line bg-mist">
-      <img :src="activeImage" :alt="title" class="aspect-[4/3] w-full object-contain p-3 sm:p-6" />
+      <img
+        :src="activeImage"
+        :alt="title"
+        class="aspect-[4/3] w-full object-contain p-3 sm:p-6"
+        loading="eager"
+        fetchpriority="high"
+        decoding="async"
+        sizes="(max-width: 1023px) 100vw, 52vw"
+      />
 
       <div v-if="!images.length" class="absolute inset-0 grid place-items-center text-slate-400">
         <ImageIcon class="h-10 w-10" />
@@ -84,7 +92,14 @@ watch(images, () => {
         :aria-label="`Show product image ${index + 1}`"
         @click="activeIndex = index"
       >
-        <img :src="image" :alt="`${title} image ${index + 1}`" class="h-full w-full object-contain p-2" />
+        <img
+          :src="image"
+          :alt="`${title} image ${index + 1}`"
+          class="h-full w-full object-contain p-2"
+          loading="lazy"
+          decoding="async"
+          sizes="112px"
+        />
       </button>
     </div>
   </div>

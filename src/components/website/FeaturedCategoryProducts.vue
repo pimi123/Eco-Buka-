@@ -77,6 +77,8 @@ onMounted(async () => {
           :alt="sectionTitle"
           class="absolute inset-0 h-full w-full object-cover"
           loading="lazy"
+          decoding="async"
+          sizes="(max-width: 767px) 100vw, 1200px"
         />
         <div class="absolute inset-0 bg-gradient-to-t from-black/86 via-black/52 to-black/18 sm:bg-gradient-to-r sm:from-black/82 sm:via-black/48 sm:to-black/10" />
         <div class="relative z-10 flex min-h-[280px] items-end p-4 text-white min-[390px]:p-5 sm:min-h-[320px] sm:items-center sm:p-8 lg:min-h-[360px] lg:p-10">
@@ -119,6 +121,8 @@ onMounted(async () => {
               :alt="product.name"
               class="h-full w-full object-contain p-3 transition duration-500 group-hover:scale-105 sm:p-5"
               loading="lazy"
+              decoding="async"
+              sizes="(max-width: 340px) 100vw, (max-width: 767px) 50vw, (max-width: 1023px) 33vw, 25vw"
             />
             <span v-if="product.badge" class="absolute left-2 top-2 rounded-full bg-energy px-2.5 py-1 text-[11px] font-bold leading-none text-white sm:left-3 sm:top-3 sm:text-xs">
               {{ product.badge }}

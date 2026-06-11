@@ -19,4 +19,11 @@
 
 <script setup lang="ts">
 import WebsiteLayout from '../../components/layout/WebsiteLayout.vue';
+import { useSeo } from '../../lib/seo';
+
+useSeo({
+  title: 'Request an Offer',
+  description: 'Contact Eco Buka to request an offer for portable power stations, solar generator kits, home backup systems, and business energy solutions.',
+  canonicalPath: '/contact',
+});
 </script>

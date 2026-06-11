@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { Menu, Search, ShoppingBag, UserCog, X } from 'lucide-vue-next';
-import { ref } from 'vue';
+import { Menu, Search, ShoppingBag, X } from 'lucide-vue-next';
+import { onBeforeUnmount, onMounted, ref } from 'vue';
 
 const open = ref(false);
+const headerRef = ref<HTMLElement | null>(null);
 const nav = [
   ['Power Stations', '/category/power-stations'],
   ['Solar Panels', '/category/solar-panels'],
@@ -11,10 +12,44 @@ const nav = [
   ['Accessories', '/category/accessories'],
   ['Solutions', '/category/solutions'],
 ];
+
+const closeMenu = () => {
+  open.value = false;
+};
+
+const handlePointerDown = (event: PointerEvent) => {
+  if (!open.value || headerRef.value?.contains(event.target as Node)) {
+    return;
+  }
+
+  closeMenu();
+};
+
+const handleKeydown = (event: KeyboardEvent) => {
+  if (event.key === 'Escape') {
+    closeMenu();
+  }
+};
+
+onMounted(() => {
+  document.addEventListener('pointerdown', handlePointerDown);
+  document.addEventListener('keydown', handleKeydown);
+  window.addEventListener('scroll', closeMenu, { passive: true });
+  window.addEventListener('wheel', closeMenu, { capture: true, passive: true });
+  window.addEventListener('touchmove', closeMenu, { capture: true, passive: true });
+});
+
+onBeforeUnmount(() => {
+  document.removeEventListener('pointerdown', handlePointerDown);
+  document.removeEventListener('keydown', handleKeydown);
+  window.removeEventListener('scroll', closeMenu);
+  window.removeEventListener('wheel', closeMenu, { capture: true });
+  window.removeEventListener('touchmove', closeMenu, { capture: true });
+});
 </script>
 
 <template>
-  <header class="sticky top-0 z-40 border-b border-line bg-white/95 backdrop-blur">
+  <header ref="headerRef" class="sticky top-0 z-40 border-b border-line bg-white/95 backdrop-blur">
     <div class="bg-ink px-4 py-1.5 text-center text-[11px] font-medium leading-4 text-white sm:py-2 sm:text-xs">
       Official energy solutions for homes, businesses and outdoor power
     </div>
@@ -29,7 +64,6 @@ const nav = [
         </RouterLink>
       </div>
       <div class="flex items-center gap-2">
-        <RouterLink to="/dashboard" class="grid h-10 w-10 place-items-center rounded-md hover:bg-mist" aria-label="Dashboard" @click="open = false"><UserCog class="h-5 w-5" /></RouterLink>
         <button class="grid h-10 w-10 place-items-center rounded-md hover:bg-mist" aria-label="Cart"><ShoppingBag class="h-5 w-5" /></button>
         <button class="grid h-10 w-10 place-items-center rounded-md hover:bg-mist xl:hidden" aria-label="Menu" @click="open = !open">
           <X v-if="open" class="h-5 w-5" /><Menu v-else class="h-5 w-5" />

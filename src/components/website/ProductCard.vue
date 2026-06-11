@@ -34,6 +34,8 @@ const money = (value?: number | null) => (value ? new Intl.NumberFormat('en-EU',
         class="h-full w-full transition duration-500 group-hover:scale-105"
         :class="variant === 'showcase' ? 'object-contain p-5 sm:p-7' : 'object-contain p-3 sm:p-5'"
         loading="lazy"
+        decoding="async"
+        sizes="(max-width: 340px) 100vw, (max-width: 767px) 50vw, (max-width: 1023px) 33vw, 25vw"
       />
       <span v-if="product.badge && variant !== 'showcase'" class="absolute left-2 top-2 rounded-full bg-energy px-2.5 py-1 text-[11px] font-bold leading-none text-white sm:left-3 sm:top-3 sm:px-3 sm:text-xs">{{ product.badge }}</span>
     </RouterLink>

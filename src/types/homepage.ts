@@ -44,6 +44,8 @@ export interface HomepageBanner {
   price_text?: string | null;
   button_text?: string | null;
   button_link?: string | null;
+  second_button_text?: string | null;
+  second_button_link?: string | null;
   background_video_url?: string | null;
   background_image_url?: string | null;
   mobile_background_image_url?: string | null;

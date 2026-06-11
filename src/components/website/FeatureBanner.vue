@@ -23,7 +23,14 @@ const alignmentClass = props.banner.text_alignment === 'center'
     <div class="relative min-h-[340px] overflow-hidden rounded-2xl bg-ink shadow-panel sm:min-h-[430px] sm:rounded-lg lg:min-h-[500px]">
       <picture>
         <source v-if="banner.mobile_background_image_url" media="(max-width: 640px)" :srcset="banner.mobile_background_image_url" />
-        <img :src="banner.background_image_url || fallbackUrl" :alt="banner.title" class="absolute inset-0 h-full w-full object-cover object-center" loading="lazy" />
+        <img
+          :src="banner.background_image_url || fallbackUrl"
+          :alt="banner.title"
+          class="absolute inset-0 h-full w-full object-cover object-center"
+          loading="lazy"
+          decoding="async"
+          sizes="(max-width: 767px) 100vw, 1200px"
+        />
       </picture>
       <div class="absolute inset-0" :class="overlayClass" />
       <div class="relative z-10 flex min-h-[340px] px-5 py-6 sm:min-h-[430px] sm:px-8 sm:py-10 lg:min-h-[500px] lg:px-12" :class="alignmentClass">

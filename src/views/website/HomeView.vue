@@ -10,11 +10,18 @@ import ProductGrid from '../../components/website/ProductGrid.vue';
 import ProductShowcaseSection from '../../components/website/ProductShowcaseSection.vue';
 import PromotionalCategoryCardsSection from '../../components/website/PromotionalCategoryCardsSection.vue';
 import PromoBanner from '../../components/website/PromoBanner.vue';
+import { useSeo } from '../../lib/seo';
 import { useCategoryStore } from '../../stores/categoryStore';
 import { useProductStore } from '../../stores/productStore';
 
 const categoryStore = useCategoryStore();
 const productStore = useProductStore();
+
+useSeo({
+  title: 'Portable Power and Solar Energy Solutions',
+  description: 'Shop Eco Buka portable power stations, solar panels, solar generator kits, home battery storage, and clean backup energy solutions.',
+  canonicalPath: '/',
+});
 
 onMounted(async () => {
   await Promise.all([categoryStore.fetchCategories(), productStore.fetchProducts()]);

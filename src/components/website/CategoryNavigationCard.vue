@@ -23,6 +23,9 @@ const { card, variant = 'default' } = defineProps<{ card: HomepageNavigationCard
       :alt="card.title"
       class="object-contain transition group-hover:scale-105"
       :class="variant === 'showcase' ? 'ml-auto mt-3 h-24 w-36 sm:h-28 sm:w-44' : 'h-20 w-24 shrink-0 sm:h-24 sm:w-28'"
+      loading="lazy"
+      decoding="async"
+      sizes="176px"
     />
   </RouterLink>
 </template>

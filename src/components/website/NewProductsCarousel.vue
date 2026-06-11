@@ -112,6 +112,8 @@ onMounted(() => {
               :alt="card.title"
               class="h-full w-full object-cover transition duration-700 group-hover:scale-105"
               loading="lazy"
+              decoding="async"
+              sizes="(max-width: 640px) 84vw, (max-width: 1023px) 360px, 410px"
             />
           </picture>
 

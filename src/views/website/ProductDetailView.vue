@@ -3,12 +3,19 @@ import { computed, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import WebsiteLayout from '../../components/layout/WebsiteLayout.vue';
 import ProductGallerySlider from '../../components/website/ProductGallerySlider.vue';
+import { useSeo } from '../../lib/seo';
 import { useProductStore } from '../../stores/productStore';
 
 const route = useRoute();
 const productStore = useProductStore();
 const product = computed(() => productStore.activeProducts.find((item) => item.slug === route.params.slug));
 const money = (value?: number | null) => (value ? new Intl.NumberFormat('en-EU', { style: 'currency', currency: 'EUR' }).format(value) : 'Request price');
+
+useSeo({
+  title: computed(() => product.value?.name || 'Product'),
+  description: computed(() => product.value?.short_description || product.value?.description || 'View Eco Buka product details, specs, pricing, and request-offer options.'),
+  canonicalPath: computed(() => `/products/${String(route.params.slug || '')}`),
+});
 
 onMounted(() => productStore.fetchProducts());
 </script>

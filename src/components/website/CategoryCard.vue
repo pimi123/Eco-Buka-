@@ -9,7 +9,14 @@ defineProps<{ category: Category }>();
 <template>
   <RouterLink :to="`/category/${category.slug}`" class="group min-w-0 overflow-hidden rounded-lg border border-line bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-panel">
     <div class="aspect-[4/3] overflow-hidden bg-mist">
-      <img :src="category.image_url || fallbackUrl" :alt="category.name" class="h-full w-full object-cover transition duration-500 group-hover:scale-105" />
+      <img
+        :src="category.image_url || fallbackUrl"
+        :alt="category.name"
+        class="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+        loading="lazy"
+        decoding="async"
+        sizes="(max-width: 767px) 100vw, (max-width: 1023px) 50vw, 33vw"
+      />
     </div>
     <div class="p-4 sm:p-5">
       <h3 class="text-base font-bold leading-6 sm:text-lg">{{ category.name }}</h3>

@@ -83,6 +83,8 @@ onMounted(async () => {
           :alt="content.heading"
           class="absolute inset-0 h-full w-full object-cover"
           loading="lazy"
+          decoding="async"
+          sizes="(max-width: 767px) 100vw, 1200px"
         />
 
         <video

@@ -2,9 +2,17 @@
 import { onMounted } from 'vue';
 import WebsiteLayout from '../../components/layout/WebsiteLayout.vue';
 import ProductGrid from '../../components/website/ProductGrid.vue';
+import { useSeo } from '../../lib/seo';
 import { useProductStore } from '../../stores/productStore';
 
 const productStore = useProductStore();
+
+useSeo({
+  title: 'Products',
+  description: 'Browse Eco Buka portable power stations, solar panels, solar generator kits, home battery systems, power banks, and accessories.',
+  canonicalPath: '/products',
+});
+
 onMounted(() => productStore.fetchProducts());
 </script>
 

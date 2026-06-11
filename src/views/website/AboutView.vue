@@ -12,4 +12,11 @@
 
 <script setup lang="ts">
 import WebsiteLayout from '../../components/layout/WebsiteLayout.vue';
+import { useSeo } from '../../lib/seo';
+
+useSeo({
+  title: 'About Eco Buka',
+  description: 'Learn about Eco Buka, a clean-energy product distributor for portable power, solar charging, home backup, and business energy needs.',
+  canonicalPath: '/about',
+});
 </script>

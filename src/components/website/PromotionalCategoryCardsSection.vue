@@ -79,6 +79,8 @@ onMounted(async () => {
             :alt="card.title"
             class="absolute inset-0 h-full w-full object-cover transition duration-700 group-hover:scale-105"
             loading="lazy"
+            decoding="async"
+            sizes="(max-width: 767px) 100vw, 50vw"
           />
           <div class="absolute inset-0 bg-gradient-to-r from-black/82 via-black/45 to-black/10" />
           <div class="relative z-10 flex h-full max-w-md flex-col items-start p-5 text-white sm:p-7">
