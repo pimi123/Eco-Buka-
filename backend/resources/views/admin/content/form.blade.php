@@ -10,7 +10,19 @@
 
         <div class="grid gap-4 md:grid-cols-2">
             @foreach ($config['fields'] as $field => $type)
-                @php($value = old($field, $type === 'json' ? json_encode($item->{$field} ?? new stdClass(), JSON_PRETTY_PRINT) : $item->{$field}))
+                @php
+                    $rawValue = $item->{$field};
+                    if ($type === 'json' && is_array($rawValue)) {
+                        $jsonLines = [];
+                        foreach ($rawValue as $specKey => $specValue) {
+                            $jsonLines[] = is_string($specKey)
+                                ? $specKey.': '.(is_scalar($specValue) ? $specValue : json_encode($specValue))
+                                : (is_scalar($specValue) ? $specValue : json_encode($specValue));
+                        }
+                        $rawValue = implode("\n", $jsonLines);
+                    }
+                    $value = old($field, $type === 'json' ? $rawValue : $item->{$field});
+                @endphp
                 @if ($type === 'boolean')
                     <label class="flex items-center gap-2 text-sm font-semibold">
                         <input type="checkbox" name="{{ $field }}" value="1" @checked(old($field, $item->exists ? $item->{$field} : true))>
@@ -20,6 +32,9 @@
                     <label class="grid gap-2 md:col-span-2">
                         <span class="text-xs font-bold uppercase text-slate-500">{{ str($field)->headline() }}</span>
                         <textarea class="min-h-28 rounded-md border border-slate-300 px-3 py-2" name="{{ $field }}">{{ $value }}</textarea>
+                        @if ($type === 'json')
+                            <span class="text-xs font-semibold text-slate-500">Use one spec per line, for example: Capacity: 2kWh</span>
+                        @endif
                     </label>
                 @elseif ($type === 'image')
                     @php($previewUrl = $item->{$field.'_url'} ?? ($item->{$field} ? Storage::disk('public')->url($item->{$field}) : null))

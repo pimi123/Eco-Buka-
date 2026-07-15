@@ -2,7 +2,6 @@ import { defineStore } from 'pinia';
 import { computed, ref } from 'vue';
 import { apiGet, hasLaravelApiConfig } from '../lib/api';
 import { demoHomepageShowcase, demoProducts } from '../lib/demoData';
-import { hasSupabaseConfig, supabase } from '../lib/supabase';
 import type { HomepageBanner, HomepageNavigationCard, HomepagePromoCard, HomepageSection, HomepageSectionProduct } from '../types/homepage';
 import type { Product } from '../types/product';
 
@@ -42,19 +41,19 @@ export const useHomepageStore = defineStore('homepage', () => {
     return section.value;
   }
 
-  function mapPromoCard(card: any): HomepagePromoCard {
+  function mapPromoCard(card: HomepagePromoCard): HomepagePromoCard {
     return {
       ...card,
       id: card.id,
-      background_image_url: card.background_image_url || card.background_image || null,
-      mobile_background_image_url: card.mobile_background_image_url || card.mobile_background_image || null,
+      background_image_url: card.background_image_url || (card as any).background_image || null,
+      mobile_background_image_url: card.mobile_background_image_url || (card as any).mobile_background_image || null,
       text_color: card.text_color || 'light',
       active: card.active !== false,
       sort_order: Number(card.sort_order || 0),
     };
   }
 
-  async function fetchPromoCards(sectionKey = DEFAULT_PROMO_SECTION_KEY, includeInactive = false) {
+  async function fetchPromoCards(sectionKey = DEFAULT_PROMO_SECTION_KEY) {
     promoCardsLoading.value = true;
     promoCardsError.value = null;
 
@@ -69,31 +68,11 @@ export const useHomepageStore = defineStore('homepage', () => {
       }
     }
 
-    if (!hasSupabaseConfig || !supabase) {
-      promoCards.value = [];
-      promoCardsLoading.value = false;
-      return;
-    }
-
-    let query = supabase
-      .from('homepage_promo_cards')
-      .select('*')
-      .eq('section_key', sectionKey)
-      .order('sort_order');
-
-    if (!includeInactive) query = query.eq('active', true);
-
-    const { data, error } = await query;
-    if (error) {
-      promoCards.value = [];
-      promoCardsError.value = error.message;
-    } else {
-      promoCards.value = (data || []).map(mapPromoCard);
-    }
+    promoCards.value = [];
     promoCardsLoading.value = false;
   }
 
-  async function fetchHomepageShowcase(sectionKey = DEFAULT_SECTION_KEY, includeInactive = false) {
+  async function fetchHomepageShowcase(sectionKey = DEFAULT_SECTION_KEY) {
     loading.value = true;
 
     if (hasLaravelApiConfig) {
@@ -127,156 +106,46 @@ export const useHomepageStore = defineStore('homepage', () => {
         loading.value = false;
         return;
       } catch {
-        // Fall through to the configured local/Supabase strategy.
+        // Fall through to demo content so the storefront stays usable offline.
       }
     }
 
-    if (!hasSupabaseConfig || !supabase) {
-      setDemoData();
-      loading.value = false;
-      return;
-    }
-
-    const { data: sectionData, error: sectionError } = await supabase
-      .from('homepage_sections')
-      .select('*')
-      .eq('section_key', sectionKey)
-      .maybeSingle();
-
-    if (sectionError) {
-      setDemoData();
-      loading.value = false;
-      return;
-    }
-
-    section.value =
-      (sectionData as HomepageSection | null) ||
-      ({
-        id: '',
-        section_key: sectionKey,
-        title: 'New Products',
-        subtitle: 'Fresh energy solutions selected for Eco Buka.',
-        layout_type: 'products_with_navigation_and_banner',
-        active: true,
-        sort_order: 10,
-      } as HomepageSection);
-
-    if (!sectionData?.id) {
-      productLinks.value = [];
-      navigationCards.value = [];
-      banners.value = [];
-      loading.value = false;
-      return;
-    }
-
-    const activeFilter = includeInactive ? undefined : true;
-
-    let productsQuery = supabase
-      .from('homepage_section_products')
-      .select('*, products(*, categories(name, slug))')
-      .eq('section_id', sectionData.id)
-      .order('sort_order');
-    if (activeFilter) productsQuery = productsQuery.eq('active', true);
-
-    let cardsQuery = supabase
-      .from('homepage_navigation_cards')
-      .select('*')
-      .eq('section_id', sectionData.id)
-      .order('sort_order');
-    if (activeFilter) cardsQuery = cardsQuery.eq('active', true);
-
-    let bannersQuery = supabase
-      .from('homepage_banners')
-      .select('*')
-      .eq('section_id', sectionData.id)
-      .order('sort_order');
-    if (activeFilter) bannersQuery = bannersQuery.eq('active', true);
-
-    const [productsResult, cardsResult, bannersResult] = await Promise.all([productsQuery, cardsQuery, bannersQuery]);
-
-    productLinks.value = productsResult.error
-      ? []
-      : productsResult.data.map((item: any) => ({
-          ...item,
-          product: item.products
-            ? {
-                ...item.products,
-                category: item.products.categories?.name,
-              }
-            : undefined,
-        }));
-    navigationCards.value = cardsResult.error ? [] : (cardsResult.data as HomepageNavigationCard[]);
-    banners.value = bannersResult.error ? [] : (bannersResult.data as HomepageBanner[]);
+    setDemoData();
     loading.value = false;
   }
 
   async function saveSection(payload: Partial<HomepageSection>) {
     const current = ensureLocalSection();
-    const next = { ...current, ...payload, section_key: payload.section_key || current.section_key || DEFAULT_SECTION_KEY };
-
-    if (!hasSupabaseConfig || !supabase) {
-      section.value = next as HomepageSection;
-      return section.value;
-    }
-
-    const payloadToSave = { ...next } as Partial<HomepageSection>;
-    if (!payloadToSave.id) delete payloadToSave.id;
-
-    const { data, error } = await supabase
-      .from('homepage_sections')
-      .upsert(payloadToSave, { onConflict: 'section_key' })
-      .select()
-      .single();
-    if (error) throw error;
-    section.value = data as HomepageSection;
+    section.value = { ...current, ...payload, section_key: payload.section_key || current.section_key || DEFAULT_SECTION_KEY } as HomepageSection;
     return section.value;
   }
 
   async function saveSectionProduct(payload: Partial<HomepageSectionProduct>) {
     const current = ensureLocalSection();
     const id = payload.id || crypto.randomUUID();
-    const next = { active: true, sort_order: productLinks.value.length + 1, ...payload, id, section_id: current.id };
-
-    if (!hasSupabaseConfig || !supabase || !current.id) {
-      const product = demoProducts.find((item) => item.id === next.product_id) || payload.product;
-      const localNext = { ...next, product } as HomepageSectionProduct;
-      productLinks.value = productLinks.value.some((item) => item.id === id)
-        ? productLinks.value.map((item) => (item.id === id ? localNext : item))
-        : [...productLinks.value, localNext];
-      return localNext;
-    }
-
-    const { data, error } = await supabase.from('homepage_section_products').upsert(next).select().single();
-    if (error) throw error;
-    await fetchHomepageShowcase(current.section_key, true);
-    return data as HomepageSectionProduct;
+    const product = demoProducts.find((item) => item.id === payload.product_id) || payload.product;
+    const next = { active: true, sort_order: productLinks.value.length + 1, ...payload, id, section_id: current.id, product } as HomepageSectionProduct;
+    productLinks.value = productLinks.value.some((item) => item.id === id)
+      ? productLinks.value.map((item) => (item.id === id ? next : item))
+      : [...productLinks.value, next];
+    return next;
   }
 
   async function deleteSectionProduct(id: string) {
-    if (hasSupabaseConfig && supabase) await supabase.from('homepage_section_products').delete().eq('id', id);
     productLinks.value = productLinks.value.filter((item) => item.id !== id);
   }
 
   async function saveNavigationCard(payload: Partial<HomepageNavigationCard>) {
     const current = ensureLocalSection();
     const id = payload.id || crypto.randomUUID();
-    const next = { title: '', link: '/', image_url: '', active: true, sort_order: navigationCards.value.length + 1, ...payload, id, section_id: current.id };
-
-    if (!hasSupabaseConfig || !supabase || !current.id) {
-      navigationCards.value = navigationCards.value.some((item) => item.id === id)
-        ? navigationCards.value.map((item) => (item.id === id ? (next as HomepageNavigationCard) : item))
-        : [...navigationCards.value, next as HomepageNavigationCard];
-      return next as HomepageNavigationCard;
-    }
-
-    const { data, error } = await supabase.from('homepage_navigation_cards').upsert(next).select().single();
-    if (error) throw error;
-    await fetchHomepageShowcase(current.section_key, true);
-    return data as HomepageNavigationCard;
+    const next = { title: '', link: '/', image_url: '', active: true, sort_order: navigationCards.value.length + 1, ...payload, id, section_id: current.id } as HomepageNavigationCard;
+    navigationCards.value = navigationCards.value.some((item) => item.id === id)
+      ? navigationCards.value.map((item) => (item.id === id ? next : item))
+      : [...navigationCards.value, next];
+    return next;
   }
 
   async function deleteNavigationCard(id: string) {
-    if (hasSupabaseConfig && supabase) await supabase.from('homepage_navigation_cards').delete().eq('id', id);
     navigationCards.value = navigationCards.value.filter((item) => item.id !== id);
   }
 
@@ -292,23 +161,14 @@ export const useHomepageStore = defineStore('homepage', () => {
       ...payload,
       id,
       section_id: current.id,
-    };
-
-    if (!hasSupabaseConfig || !supabase || !current.id) {
-      banners.value = banners.value.some((item) => item.id === id)
-        ? banners.value.map((item) => (item.id === id ? (next as HomepageBanner) : item))
-        : [...banners.value, next as HomepageBanner];
-      return next as HomepageBanner;
-    }
-
-    const { data, error } = await supabase.from('homepage_banners').upsert(next).select().single();
-    if (error) throw error;
-    await fetchHomepageShowcase(current.section_key, true);
-    return data as HomepageBanner;
+    } as HomepageBanner;
+    banners.value = banners.value.some((item) => item.id === id)
+      ? banners.value.map((item) => (item.id === id ? next : item))
+      : [...banners.value, next];
+    return next;
   }
 
   async function deleteBanner(id: string) {
-    if (hasSupabaseConfig && supabase) await supabase.from('homepage_banners').delete().eq('id', id);
     banners.value = banners.value.filter((item) => item.id !== id);
   }
 
@@ -323,22 +183,13 @@ export const useHomepageStore = defineStore('homepage', () => {
       ...payload,
       id,
     } as HomepagePromoCard;
-
-    if (!hasSupabaseConfig || !supabase) {
-      promoCards.value = promoCards.value.some((item) => item.id === id)
-        ? promoCards.value.map((item) => (item.id === id ? next : item))
-        : [...promoCards.value, next];
-      return next;
-    }
-
-    const { data, error } = await supabase.from('homepage_promo_cards').upsert(next).select().single();
-    if (error) throw error;
-    await fetchPromoCards(next.section_key, true);
-    return data as HomepagePromoCard;
+    promoCards.value = promoCards.value.some((item) => item.id === id)
+      ? promoCards.value.map((item) => (item.id === id ? next : item))
+      : [...promoCards.value, next];
+    return next;
   }
 
   async function deletePromoCard(id: string | number) {
-    if (hasSupabaseConfig && supabase) await supabase.from('homepage_promo_cards').delete().eq('id', id);
     promoCards.value = promoCards.value.filter((item) => item.id !== id);
   }
 

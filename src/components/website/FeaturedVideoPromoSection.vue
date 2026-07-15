@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue';
-import fallbackUrl from '../../assets/heroes/hero-solar-home.png';
 import { apiGet, hasLaravelApiConfig } from '../../lib/api';
 import { demoFeaturedVideoPromoBanners } from '../../lib/demoData';
+import { optimizedImageUrl } from '../../lib/responsiveImages';
 import type { HomepageBanner } from '../../types/homepage';
+
+const fallbackUrl = '/promo/optimized/summer-sale-1280.jpg';
 
 const props = withDefaults(
   defineProps<{
@@ -48,7 +50,7 @@ const content = computed(() => ({
   buttonText: props.buttonText || activeBanner.value?.button_text || 'Buy Now',
   buttonUrl: props.buttonUrl || activeBanner.value?.button_link || '/products',
   backgroundVideoUrl: props.backgroundVideoUrl || activeBanner.value?.background_video_url || '',
-  fallbackImageUrl: props.fallbackImageUrl || activeBanner.value?.background_image_url || activeBanner.value?.mobile_background_image_url || fallbackUrl,
+  fallbackImageUrl: optimizedImageUrl(props.fallbackImageUrl || activeBanner.value?.background_image_url || activeBanner.value?.mobile_background_image_url, 'desktop') || fallbackUrl,
 }));
 
 const sectionVisible = computed(() => loading.value || Boolean(content.value.heading));

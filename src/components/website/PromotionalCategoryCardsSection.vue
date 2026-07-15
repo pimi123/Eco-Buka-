@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { ArrowRight } from 'lucide-vue-next';
 import { computed, onMounted, ref } from 'vue';
-import fallbackUrl from '../../assets/heroes/hero-delta-max.png';
 import { apiGet, hasLaravelApiConfig } from '../../lib/api';
+import { optimizedImageUrl } from '../../lib/responsiveImages';
 import { demoPromotionalCategoryCards } from '../../lib/demoData';
 import type { HomepagePromoCard } from '../../types/homepage';
+
+const fallbackUrl = '/promo/optimized/delta-max-series-1280.jpg';
 
 const props = withDefaults(
   defineProps<{
@@ -75,7 +77,7 @@ onMounted(async () => {
           class="group relative min-h-[280px] overflow-hidden rounded-lg bg-ink shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-panel sm:min-h-[340px] lg:min-h-[380px]"
         >
           <img
-            :src="card.background_image_url || card.mobile_background_image_url || fallbackUrl"
+            :src="optimizedImageUrl(card.background_image_url || card.mobile_background_image_url, 'desktop') || fallbackUrl"
             :alt="card.title"
             class="absolute inset-0 h-full w-full object-cover transition duration-700 group-hover:scale-105"
             loading="lazy"

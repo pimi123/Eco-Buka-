@@ -1,6 +1,8 @@
 <script setup lang="ts">
+import { optimizedImageUrl } from '../../lib/responsiveImages';
 import type { HomepageBanner } from '../../types/homepage';
-import fallbackUrl from '../../assets/heroes/hero-delta-max.png';
+
+const fallbackUrl = '/promo/optimized/delta-max-series-1280.jpg';
 
 const props = defineProps<{ banner: HomepageBanner }>();
 
@@ -22,9 +24,9 @@ const alignmentClass = props.banner.text_alignment === 'center'
     </h2>
     <div class="relative min-h-[340px] overflow-hidden rounded-2xl bg-ink shadow-panel sm:min-h-[430px] sm:rounded-lg lg:min-h-[500px]">
       <picture>
-        <source v-if="banner.mobile_background_image_url" media="(max-width: 640px)" :srcset="banner.mobile_background_image_url" />
+        <source v-if="banner.mobile_background_image_url || banner.background_image_url" media="(max-width: 640px)" :srcset="optimizedImageUrl(banner.mobile_background_image_url || banner.background_image_url, 'mobile') || fallbackUrl" />
         <img
-          :src="banner.background_image_url || fallbackUrl"
+          :src="optimizedImageUrl(banner.background_image_url, 'desktop') || fallbackUrl"
           :alt="banner.title"
           class="absolute inset-0 h-full w-full object-cover object-center"
           loading="lazy"

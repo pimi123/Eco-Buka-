@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { ArrowRight } from 'lucide-vue-next';
 import type { Category } from '../../types/category';
-import fallbackUrl from '../../assets/eco-buka-hero.png';
 
 defineProps<{ category: Category }>();
+
+const fallbackUrl = '/promo/optimized/summer-sale-1280.jpg';
 </script>
 
 <template>

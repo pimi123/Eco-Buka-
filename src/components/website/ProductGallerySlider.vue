@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { ChevronLeft, ChevronRight, ImageIcon } from 'lucide-vue-next';
 import { computed, ref, watch } from 'vue';
-import fallbackUrl from '../../assets/eco-buka-hero.png';
+
+const fallbackUrl = '/promo/optimized/summer-sale-1280.jpg';
 
 const props = defineProps<{
   title: string;

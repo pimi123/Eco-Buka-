@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import { ArrowRight } from 'lucide-vue-next';
 import { computed, onMounted } from 'vue';
-import fallbackUrl from '../../assets/eco-buka-hero.png';
+import { optimizedImageUrl } from '../../lib/responsiveImages';
 import { useCategoryStore } from '../../stores/categoryStore';
 import { useProductStore } from '../../stores/productStore';
+
+const fallbackUrl = '/promo/optimized/summer-sale-1280.jpg';
 
 const props = withDefaults(
   defineProps<{
@@ -42,7 +44,7 @@ const products = computed(() => {
 
 const loading = computed(() => categoryStore.loading || productStore.loading);
 const featuredProduct = computed(() => products.value[0]);
-const bannerImage = computed(() => selectedCategory.value?.image_url || featuredProduct.value?.image_url || fallbackUrl);
+const bannerImage = computed(() => optimizedImageUrl(selectedCategory.value?.image_url || featuredProduct.value?.image_url, 'desktop') || fallbackUrl);
 
 const money = (value?: number | null) =>
   value ? new Intl.NumberFormat('en-EU', { style: 'currency', currency: 'EUR' }).format(value) : 'Request price';
@@ -117,7 +119,7 @@ onMounted(async () => {
         >
           <RouterLink :to="`/products/${product.slug}`" class="relative block aspect-square overflow-hidden bg-white sm:aspect-[4/3]">
             <img
-              :src="product.image_url || fallbackUrl"
+              :src="optimizedImageUrl(product.image_url, 'mobile') || fallbackUrl"
               :alt="product.name"
               class="h-full w-full object-contain p-3 transition duration-500 group-hover:scale-105 sm:p-5"
               loading="lazy"

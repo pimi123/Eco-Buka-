@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ArrowRight, Zap } from 'lucide-vue-next';
-import heroUrl from '../../assets/eco-buka-hero.png';
+
+const heroUrl = '/promo/optimized/summer-sale-1280.jpg';
 </script>
 
 <template>

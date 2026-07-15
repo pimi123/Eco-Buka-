@@ -10,8 +10,9 @@ import smartDevicesUrl from '../assets/categories/smart-devices.png';
 import solarPanelsUrl from '../assets/categories/solar-panels.png';
 import streamSeriesUrl from '../assets/categories/stream-series.png';
 import streamSolarSystemUrl from '../assets/categories/stream-solar-system.png';
-import showcaseBannerUrl from '../assets/heroes/hero-delta-max.png';
-import solarHomeUrl from '../assets/heroes/hero-solar-home.png';
+
+const showcaseBannerUrl = '/promo/optimized/delta-max-series-1280.jpg';
+const solarHomeUrl = '/promo/optimized/summer-sale-1280.jpg';
 
 export const demoCategories: Category[] = [
   { id: 'power-stations', name: 'Power Stations', slug: 'power-stations', description: 'Portable power stations for home backup, outdoor use, and business continuity.', image_url: deltaSeriesUrl, is_new: false, active: true },

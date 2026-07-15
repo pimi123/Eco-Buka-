@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-vue-next';
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
-import deltaHeroUrl from '../../assets/heroes/hero-delta-max.png';
-import portableHeroUrl from '../../assets/heroes/hero-portable-energy.png';
-import solarHeroUrl from '../../assets/heroes/hero-solar-home.png';
 import { apiGet, hasLaravelApiConfig } from '../../lib/api';
+import { optimizedImageUrl } from '../../lib/responsiveImages';
 import type { HomepageBanner } from '../../types/homepage';
+
+const deltaHeroUrl = '/promo/optimized/delta-max-series-1280.jpg';
+const portableHeroUrl = '/promo/optimized/delta-classic-1280.jpg';
+const solarHeroUrl = '/promo/optimized/summer-sale-1280.jpg';
 
 interface HeroSlide {
   id: string;
@@ -101,8 +103,8 @@ function mapBannerToSlide(banner: HomepageBanner): HeroSlide {
     primaryButtonLink: banner.button_link || '/products',
     secondaryButtonText: banner.second_button_text || 'View Products',
     secondaryButtonLink: banner.second_button_link || '/products',
-    image: banner.background_image_url || fallbackSlides[0].image,
-    mobileImage: banner.mobile_background_image_url || banner.background_image_url || fallbackSlides[0].image,
+    image: optimizedImageUrl(banner.background_image_url, 'desktop') || fallbackSlides[0].image,
+    mobileImage: optimizedImageUrl(banner.mobile_background_image_url || banner.background_image_url, 'mobile') || fallbackSlides[0].image,
     imageAlt: banner.title,
     overlayStyle: bannerOverlay(banner),
     textColor: bannerTextClass(banner),

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ChevronLeft, ChevronRight } from 'lucide-vue-next';
 import { onMounted, ref } from 'vue';
+import { optimizedImageUrl } from '../../lib/responsiveImages';
 import { useHomepageStore } from '../../stores/homepageStore';
 import type { HomepagePromoCard } from '../../types/homepage';
 
@@ -106,9 +107,9 @@ onMounted(() => {
           ]"
         >
           <picture v-if="card.background_image_url || card.mobile_background_image_url" class="absolute inset-0">
-            <source v-if="card.mobile_background_image_url" media="(max-width: 640px)" :srcset="card.mobile_background_image_url" />
+            <source v-if="card.mobile_background_image_url || card.background_image_url" media="(max-width: 640px)" :srcset="optimizedImageUrl(card.mobile_background_image_url || card.background_image_url, 'mobile') || ''" />
             <img
-              :src="card.background_image_url || card.mobile_background_image_url || ''"
+              :src="optimizedImageUrl(card.background_image_url || card.mobile_background_image_url, 'desktop') || ''"
               :alt="card.title"
               class="h-full w-full object-cover transition duration-700 group-hover:scale-105"
               loading="lazy"

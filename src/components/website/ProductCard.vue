@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { ArrowRight } from 'lucide-vue-next';
 import type { Product } from '../../types/product';
-import fallbackUrl from '../../assets/eco-buka-hero.png';
+
+const fallbackUrl = '/promo/optimized/summer-sale-1280.jpg';
 
 const {
   product,

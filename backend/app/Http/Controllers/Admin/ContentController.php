@@ -11,6 +11,7 @@ use App\Models\Product;
 use App\Models\PromoCard;
 use App\Models\ShowcaseSection;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
@@ -121,7 +122,7 @@ class ContentController extends Controller
             }
 
             if ($type === 'image' && $request->hasFile($field)) {
-                $data[$field] = $request->file($field)->store($config['folder'], 'public');
+                $data[$field] = $this->storeOptimizedImage($request->file($field), $config['folder']);
             }
 
             if ($type === 'video' && $request->hasFile($field)) {
@@ -131,18 +132,91 @@ class ContentController extends Controller
             if ($type === 'gallery') {
                 $existing = $item?->{$field} ?? [];
                 $uploaded = collect($request->file($field, []))
-                    ->map(fn ($file) => $file->store($config['folder'].'/gallery', 'public'))
+                    ->map(fn (UploadedFile $file) => $this->storeOptimizedImage($file, $config['folder'].'/gallery'))
                     ->all();
                 $data[$field] = array_values(array_filter([...$existing, ...$uploaded]));
             }
 
             if ($type === 'json') {
-                $decoded = json_decode($request->input($field, '{}'), true);
-                $data[$field] = is_array($decoded) ? $decoded : [];
+                $data[$field] = $this->parseStructuredText($request->input($field));
             }
         }
 
         return $data;
+    }
+
+    private function parseStructuredText(?string $value): array
+    {
+        $value = trim((string) $value);
+
+        if ($value === '') {
+            return [];
+        }
+
+        $decoded = json_decode($value, true);
+        if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+            return $decoded;
+        }
+
+        $specs = [];
+        foreach (preg_split('/\r\n|\r|\n/', $value) as $line) {
+            $line = trim($line);
+            if ($line === '') {
+                continue;
+            }
+
+            if (str_contains($line, ':')) {
+                [$key, $specValue] = array_map('trim', explode(':', $line, 2));
+                if ($key !== '' && $specValue !== '') {
+                    $specs[$key] = $specValue;
+                    continue;
+                }
+            }
+
+            $specs[] = $line;
+        }
+
+        return $specs;
+    }
+
+    private function storeOptimizedImage(UploadedFile $file, string $folder): string
+    {
+        if (! function_exists('imagewebp')) {
+            return $file->store($folder, 'public');
+        }
+
+        $source = match ($file->getMimeType()) {
+            'image/jpeg' => @imagecreatefromjpeg($file->getRealPath()),
+            'image/png' => @imagecreatefrompng($file->getRealPath()),
+            'image/webp' => @imagecreatefromwebp($file->getRealPath()),
+            default => false,
+        };
+
+        if (! $source) {
+            return $file->store($folder, 'public');
+        }
+
+        $sourceWidth = imagesx($source);
+        $sourceHeight = imagesy($source);
+        $maxWidth = 1800;
+        $ratio = min(1, $maxWidth / max(1, $sourceWidth));
+        $targetWidth = max(1, (int) round($sourceWidth * $ratio));
+        $targetHeight = max(1, (int) round($sourceHeight * $ratio));
+        $target = imagecreatetruecolor($targetWidth, $targetHeight);
+
+        imagealphablending($target, true);
+        imagecopyresampled($target, $source, 0, 0, 0, 0, $targetWidth, $targetHeight, $sourceWidth, $sourceHeight);
+
+        $filename = trim($folder, '/').'/'.uniqid('image_', true).'.webp';
+        $tempPath = tempnam(sys_get_temp_dir(), 'eco-buka-image');
+        imagewebp($target, $tempPath, 78);
+        Storage::disk('public')->put($filename, file_get_contents($tempPath));
+
+        @unlink($tempPath);
+        imagedestroy($source);
+        imagedestroy($target);
+
+        return $filename;
     }
 
     private function syncShowcaseProducts(Request $request, string $resource, Model $item): void

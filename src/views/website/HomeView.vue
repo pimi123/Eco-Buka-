@@ -1,18 +1,19 @@
 <script setup lang="ts">
-import { onMounted } from 'vue';
+import { defineAsyncComponent, onMounted } from 'vue';
 import WebsiteLayout from '../../components/layout/WebsiteLayout.vue';
 import CategoryCarousel from '../../components/website/CategoryCarousel.vue';
-import FeaturedCategoryProducts from '../../components/website/FeaturedCategoryProducts.vue';
-import FeaturedVideoPromoSection from '../../components/website/FeaturedVideoPromoSection.vue';
 import HeroSlider from '../../components/website/HeroSlider.vue';
-import NewProductsCarousel from '../../components/website/NewProductsCarousel.vue';
-import ProductGrid from '../../components/website/ProductGrid.vue';
-import ProductShowcaseSection from '../../components/website/ProductShowcaseSection.vue';
-import PromotionalCategoryCardsSection from '../../components/website/PromotionalCategoryCardsSection.vue';
-import PromoBanner from '../../components/website/PromoBanner.vue';
 import { useSeo } from '../../lib/seo';
 import { useCategoryStore } from '../../stores/categoryStore';
 import { useProductStore } from '../../stores/productStore';
+
+const FeaturedCategoryProducts = defineAsyncComponent(() => import('../../components/website/FeaturedCategoryProducts.vue'));
+const FeaturedVideoPromoSection = defineAsyncComponent(() => import('../../components/website/FeaturedVideoPromoSection.vue'));
+const NewProductsCarousel = defineAsyncComponent(() => import('../../components/website/NewProductsCarousel.vue'));
+const ProductGrid = defineAsyncComponent(() => import('../../components/website/ProductGrid.vue'));
+const ProductShowcaseSection = defineAsyncComponent(() => import('../../components/website/ProductShowcaseSection.vue'));
+const PromotionalCategoryCardsSection = defineAsyncComponent(() => import('../../components/website/PromotionalCategoryCardsSection.vue'));
+const PromoBanner = defineAsyncComponent(() => import('../../components/website/PromoBanner.vue'));
 
 const categoryStore = useCategoryStore();
 const productStore = useProductStore();
@@ -23,8 +24,20 @@ useSeo({
   canonicalPath: '/',
 });
 
-onMounted(async () => {
-  await Promise.all([categoryStore.fetchCategories(), productStore.fetchProducts()]);
+function runWhenIdle(callback: () => void) {
+  if ('requestIdleCallback' in window) {
+    window.requestIdleCallback(callback, { timeout: 1800 });
+    return;
+  }
+
+  globalThis.setTimeout(callback, 900);
+}
+
+onMounted(() => {
+  categoryStore.fetchCategories();
+  runWhenIdle(() => {
+    productStore.fetchProducts();
+  });
 });
 </script>
 

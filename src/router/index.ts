@@ -1,11 +1,12 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import HomeView from '../views/website/HomeView.vue';
-import ProductsView from '../views/website/ProductsView.vue';
-import CategoryView from '../views/website/CategoryView.vue';
-import ProductDetailView from '../views/website/ProductDetailView.vue';
-import SearchView from '../views/website/SearchView.vue';
-import AboutView from '../views/website/AboutView.vue';
-import ContactView from '../views/website/ContactView.vue';
+
+const ProductsView = () => import('../views/website/ProductsView.vue');
+const CategoryView = () => import('../views/website/CategoryView.vue');
+const ProductDetailView = () => import('../views/website/ProductDetailView.vue');
+const SearchView = () => import('../views/website/SearchView.vue');
+const AboutView = () => import('../views/website/AboutView.vue');
+const ContactView = () => import('../views/website/ContactView.vue');
 
 const router = createRouter({
   history: createWebHistory(),
