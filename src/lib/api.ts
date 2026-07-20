@@ -26,3 +26,26 @@ export async function apiGet<T>(path: string): Promise<T> {
 
   return response.json() as Promise<T>;
 }
+
+export async function apiPost<T>(path: string, payload: unknown): Promise<T> {
+  const base = String(apiBaseUrl).replace(/\/$/, '');
+  const cleanPath = path.startsWith('/') ? path : `/${path}`;
+  const response = await fetch(`${base}${cleanPath}`, {
+    method: 'POST',
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(payload),
+  });
+
+  const data = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    const error = new Error(`API request failed: ${response.status}`);
+    (error as Error & { response?: unknown }).response = data;
+    throw error;
+  }
+
+  return data as T;
+}

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ChevronLeft, ChevronRight, ImageIcon } from 'lucide-vue-next';
-import { computed, ref, watch } from 'vue';
+import { computed, nextTick, ref, watch } from 'vue';
 
 const fallbackUrl = '/promo/optimized/summer-sale-1280.jpg';
 
@@ -11,6 +11,8 @@ const props = defineProps<{
 }>();
 
 const activeIndex = ref(0);
+const mobileTrack = ref<HTMLElement | null>(null);
+let scrollFrame = 0;
 
 const images = computed(() => {
   const sources = [props.mainImage, ...(props.gallery || [])].filter(Boolean) as string[];
@@ -20,32 +22,114 @@ const images = computed(() => {
 const activeImage = computed(() => images.value[activeIndex.value] || fallbackUrl);
 const hasMultipleImages = computed(() => images.value.length > 1);
 
+function clampIndex(index: number) {
+  if (!images.value.length) return 0;
+  return Math.min(Math.max(index, 0), images.value.length - 1);
+}
+
+function updateActiveIndex(index: number, behavior: ScrollBehavior = 'smooth') {
+  activeIndex.value = clampIndex(index);
+
+  nextTick(() => {
+    const track = mobileTrack.value;
+    if (!track) return;
+
+    track.scrollTo({
+      left: activeIndex.value * track.clientWidth,
+      behavior,
+    });
+  });
+}
+
 function showPrevious() {
   if (!hasMultipleImages.value) return;
-  activeIndex.value = activeIndex.value === 0 ? images.value.length - 1 : activeIndex.value - 1;
+  updateActiveIndex(activeIndex.value === 0 ? images.value.length - 1 : activeIndex.value - 1);
 }
 
 function showNext() {
   if (!hasMultipleImages.value) return;
-  activeIndex.value = activeIndex.value === images.value.length - 1 ? 0 : activeIndex.value + 1;
+  updateActiveIndex(activeIndex.value === images.value.length - 1 ? 0 : activeIndex.value + 1);
+}
+
+function syncActiveFromScroll() {
+  const track = mobileTrack.value;
+  if (!track || !track.clientWidth) return;
+
+  if (scrollFrame) window.cancelAnimationFrame(scrollFrame);
+  scrollFrame = window.requestAnimationFrame(() => {
+    activeIndex.value = clampIndex(Math.round(track.scrollLeft / track.clientWidth));
+  });
+}
+
+function selectImage(index: number) {
+  updateActiveIndex(index);
+}
+
+function handleKeydown(event: KeyboardEvent) {
+  if (!hasMultipleImages.value) return;
+  if (event.key === 'ArrowLeft') {
+    event.preventDefault();
+    showPrevious();
+  }
+  if (event.key === 'ArrowRight') {
+    event.preventDefault();
+    showNext();
+  }
+}
+
+function handleImageError(event: Event) {
+  const image = event.currentTarget as HTMLImageElement;
+  if (image.src.endsWith(fallbackUrl)) return;
+  image.src = fallbackUrl;
 }
 
 watch(images, () => {
-  activeIndex.value = 0;
+  updateActiveIndex(0, 'auto');
 });
 </script>
 
 <template>
   <div class="min-w-0">
-    <div class="group relative overflow-hidden rounded-lg border border-line bg-mist">
+    <div
+      class="group relative overflow-hidden rounded-lg border border-line bg-mist focus-within:ring-4 focus-within:ring-energy/20"
+      tabindex="0"
+      role="region"
+      :aria-label="`${title} image gallery`"
+      @keydown="handleKeydown"
+    >
+      <div
+        ref="mobileTrack"
+        class="flex aspect-[4/3] snap-x snap-mandatory overflow-x-auto scroll-smooth [-ms-overflow-style:none] [overscroll-behavior-x:contain] [scrollbar-width:none] sm:hidden [&::-webkit-scrollbar]:hidden"
+        @scroll.passive="syncActiveFromScroll"
+      >
+        <div
+          v-for="(image, index) in images.length ? images : [fallbackUrl]"
+          :key="`${image}-${index}`"
+          class="grid h-full w-full shrink-0 snap-center place-items-center bg-mist"
+          :aria-hidden="index !== activeIndex"
+        >
+          <img
+            :src="image"
+            :alt="`${title} image ${index + 1}`"
+            class="h-full w-full object-contain p-3"
+            :loading="index === 0 ? 'eager' : 'lazy'"
+            :fetchpriority="index === 0 ? 'high' : 'auto'"
+            decoding="async"
+            sizes="100vw"
+            @error="handleImageError"
+          />
+        </div>
+      </div>
+
       <img
         :src="activeImage"
         :alt="title"
-        class="aspect-[4/3] w-full object-contain p-3 sm:p-6"
+        class="hidden aspect-[4/3] w-full object-contain p-3 sm:block sm:p-6"
         loading="eager"
         fetchpriority="high"
         decoding="async"
         sizes="(max-width: 1023px) 100vw, 52vw"
+        @error="handleImageError"
       />
 
       <div v-if="!images.length" class="absolute inset-0 grid place-items-center text-slate-400">
@@ -74,9 +158,23 @@ watch(images, () => {
 
       <div
         v-if="hasMultipleImages"
-        class="absolute bottom-3 left-1/2 rounded-full bg-white/90 px-3 py-1 text-xs font-bold text-slate-700 shadow-sm"
+        class="absolute bottom-3 left-1/2 -translate-x-1/2 rounded-full bg-white/90 px-3 py-1 text-xs font-bold text-slate-700 shadow-sm"
+        aria-live="polite"
       >
         {{ activeIndex + 1 }} / {{ images.length }}
+      </div>
+
+      <div v-if="hasMultipleImages" class="absolute bottom-3 right-3 flex gap-1.5 sm:hidden">
+        <button
+          v-for="(_, index) in images"
+          :key="`dot-${index}`"
+          type="button"
+          class="h-2 rounded-full transition"
+          :class="index === activeIndex ? 'w-5 bg-ink' : 'w-2 bg-white/80'"
+          :aria-label="`Show product image ${index + 1}`"
+          :aria-current="index === activeIndex ? 'true' : undefined"
+          @click="selectImage(index)"
+        />
       </div>
     </div>
 
@@ -91,7 +189,8 @@ watch(images, () => {
         class="h-16 w-20 shrink-0 overflow-hidden rounded-md border bg-mist transition sm:h-24 sm:w-28"
         :class="index === activeIndex ? 'border-ink ring-2 ring-ink/10' : 'border-line hover:border-slate-400'"
         :aria-label="`Show product image ${index + 1}`"
-        @click="activeIndex = index"
+        :aria-current="index === activeIndex ? 'true' : undefined"
+        @click="selectImage(index)"
       >
         <img
           :src="image"
@@ -100,6 +199,7 @@ watch(images, () => {
           loading="lazy"
           decoding="async"
           sizes="112px"
+          @error="handleImageError"
         />
       </button>
     </div>

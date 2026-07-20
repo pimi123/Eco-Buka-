@@ -20,12 +20,13 @@ const money = (value?: number | null) => (value ? new Intl.NumberFormat('en-EU',
 </script>
 
 <template>
-  <article
-    class="group flex h-full min-w-0 flex-col overflow-hidden rounded-xl bg-white transition sm:rounded-lg"
+  <RouterLink
+    :to="`/products/${product.slug}`"
+    class="group flex h-full min-w-0 cursor-pointer flex-col overflow-hidden rounded-xl bg-white transition focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-energy/25 sm:rounded-lg"
     :class="variant === 'showcase' ? 'border border-transparent shadow-sm hover:shadow-panel' : 'border border-line shadow-sm hover:-translate-y-1 hover:shadow-panel'"
+    :aria-label="`View ${product.name}`"
   >
-    <RouterLink
-      :to="`/products/${product.slug}`"
+    <div
       class="relative block overflow-hidden"
       :class="variant === 'showcase' ? 'h-44 bg-white sm:h-52 lg:h-56' : compact ? 'aspect-[5/4] bg-mist' : 'aspect-[4/3] bg-mist'"
     >
@@ -39,7 +40,7 @@ const money = (value?: number | null) => (value ? new Intl.NumberFormat('en-EU',
         sizes="(max-width: 340px) 100vw, (max-width: 767px) 50vw, (max-width: 1023px) 33vw, 25vw"
       />
       <span v-if="product.badge && variant !== 'showcase'" class="absolute left-2 top-2 rounded-full bg-energy px-2.5 py-1 text-[11px] font-bold leading-none text-white sm:left-3 sm:top-3 sm:px-3 sm:text-xs">{{ product.badge }}</span>
-    </RouterLink>
+    </div>
     <div class="flex min-w-0 flex-1 flex-col p-3 min-[390px]:p-3.5 sm:p-5" :class="variant === 'showcase' ? 'pt-0 sm:pt-0' : ''">
       <p v-if="product.badge && variant === 'showcase'" class="mb-3 text-sm font-medium leading-none text-red-600">{{ product.badge }}</p>
       <p class="text-[11px] font-bold uppercase tracking-wide text-slate-500 sm:text-xs">{{ product.category || 'Energy solution' }}</p>
@@ -53,10 +54,10 @@ const money = (value?: number | null) => (value ? new Intl.NumberFormat('en-EU',
           <p class="font-black text-ink" :class="variant === 'showcase' ? 'text-xl sm:text-2xl' : 'text-sm min-[390px]:text-[15px] sm:text-xl'">{{ money(product.price) }}</p>
           <p v-if="product.old_price" class="text-xs text-slate-400 line-through sm:text-sm">{{ money(product.old_price) }}</p>
         </div>
-        <RouterLink :to="`/products/${product.slug}`" class="grid h-9 w-9 shrink-0 place-items-center rounded-md border border-line transition hover:border-ink sm:h-10 sm:w-10" aria-label="View details">
+        <span class="grid h-9 w-9 shrink-0 place-items-center rounded-md border border-line transition group-hover:border-ink sm:h-10 sm:w-10" aria-hidden="true">
           <ArrowRight class="h-4 w-4" />
-        </RouterLink>
+        </span>
       </div>
     </div>
-  </article>
+  </RouterLink>
 </template>

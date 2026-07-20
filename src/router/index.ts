@@ -7,6 +7,9 @@ const ProductDetailView = () => import('../views/website/ProductDetailView.vue')
 const SearchView = () => import('../views/website/SearchView.vue');
 const AboutView = () => import('../views/website/AboutView.vue');
 const ContactView = () => import('../views/website/ContactView.vue');
+const CartView = () => import('../views/website/CartView.vue');
+const CheckoutView = () => import('../views/website/CheckoutView.vue');
+const OrderSuccessView = () => import('../views/website/OrderSuccessView.vue');
 
 const router = createRouter({
   history: createWebHistory(),
@@ -18,6 +21,9 @@ const router = createRouter({
     { path: '/category/:slug', name: 'category-short', component: CategoryView },
     { path: '/products/:slug', name: 'product-detail', component: ProductDetailView },
     { path: '/search', name: 'search', component: SearchView },
+    { path: '/cart', name: 'cart', component: CartView },
+    { path: '/checkout', name: 'checkout', component: CheckoutView },
+    { path: '/order-success', name: 'order-success', component: OrderSuccessView },
     { path: '/about', name: 'about', component: AboutView },
     { path: '/contact', name: 'contact', component: ContactView },
     { path: '/:pathMatch(.*)*', redirect: '/' },

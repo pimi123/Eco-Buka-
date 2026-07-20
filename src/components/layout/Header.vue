@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import { Menu, Search, ShoppingBag, X } from 'lucide-vue-next';
 import { onBeforeUnmount, onMounted, ref } from 'vue';
+import { useCartStore } from '../../stores/cartStore';
 
 const open = ref(false);
 const headerRef = ref<HTMLElement | null>(null);
+const cartStore = useCartStore();
 const nav = [
   ['Power Stations', '/category/power-stations'],
   ['Solar Panels', '/category/solar-panels'],
@@ -64,7 +66,10 @@ onBeforeUnmount(() => {
         </RouterLink>
       </div>
       <div class="flex items-center gap-2">
-        <button class="grid h-10 w-10 place-items-center rounded-md hover:bg-mist" aria-label="Cart"><ShoppingBag class="h-5 w-5" /></button>
+        <RouterLink to="/cart" class="relative grid h-10 w-10 place-items-center rounded-md hover:bg-mist" aria-label="Cart">
+          <ShoppingBag class="h-5 w-5" />
+          <span v-if="cartStore.count" class="absolute right-0 top-0 grid h-5 min-w-5 place-items-center rounded-full bg-energy px-1 text-[11px] font-black leading-none text-white">{{ cartStore.count }}</span>
+        </RouterLink>
         <button class="grid h-10 w-10 place-items-center rounded-md hover:bg-mist xl:hidden" aria-label="Menu" @click="open = !open">
           <X v-if="open" class="h-5 w-5" /><Menu v-else class="h-5 w-5" />
         </button>

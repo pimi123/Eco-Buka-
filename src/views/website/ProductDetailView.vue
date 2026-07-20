@@ -1,15 +1,19 @@
 <script setup lang="ts">
-import { computed, onMounted } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
 import WebsiteLayout from '../../components/layout/WebsiteLayout.vue';
 import ProductGallerySlider from '../../components/website/ProductGallerySlider.vue';
 import { useSeo } from '../../lib/seo';
+import { useCartStore } from '../../stores/cartStore';
 import { useProductStore } from '../../stores/productStore';
 
 const route = useRoute();
 const productStore = useProductStore();
+const cartStore = useCartStore();
 const product = computed(() => productStore.activeProducts.find((item) => item.slug === route.params.slug));
 const money = (value?: number | null) => (value ? new Intl.NumberFormat('en-EU', { style: 'currency', currency: 'EUR' }).format(value) : 'Request price');
+const quantity = ref(1);
+const addedMessage = ref('');
 
 type DetailData = Record<string, string> | string[] | null | undefined;
 
@@ -26,6 +30,15 @@ function detailEntries(data: DetailData) {
 
 function isUrl(value: string) {
   return /^https?:\/\//i.test(value) || value.startsWith('/');
+}
+
+function addToCart() {
+  if (!product.value) return;
+
+  const safeQuantity = Math.min(99, Math.max(1, Number(quantity.value) || 1));
+  quantity.value = safeQuantity;
+  cartStore.add(product.value, safeQuantity);
+  addedMessage.value = `${safeQuantity} ${safeQuantity === 1 ? 'item' : 'items'} added to cart.`;
 }
 
 const specEntries = computed(() => detailEntries(product.value?.specs));
@@ -54,8 +67,23 @@ onMounted(() => productStore.fetchProducts());
           <p v-if="product.old_price" class="text-slate-400 line-through">{{ money(product.old_price) }}</p>
         </div>
         <div class="mt-7 flex flex-col gap-3 min-[420px]:flex-row min-[420px]:flex-wrap sm:mt-8">
-          <RouterLink to="/contact" class="btn-primary w-full min-[420px]:w-auto">Request Offer</RouterLink>
+          <label class="grid gap-1">
+            <span class="text-xs font-bold uppercase text-slate-500">Quantity</span>
+            <input v-model.number="quantity" class="input-field w-28" type="number" min="1" max="99">
+          </label>
+          <button
+            type="button"
+            class="btn-primary w-full min-[420px]:w-auto"
+            @click="addToCart"
+          >
+            Add to Cart
+          </button>
+          <RouterLink to="/cart" class="btn-secondary w-full min-[420px]:w-auto">View Cart</RouterLink>
           <RouterLink to="/contact" class="btn-secondary w-full min-[420px]:w-auto">Contact Us</RouterLink>
+        </div>
+        <div v-if="addedMessage" class="mt-4 rounded-md border border-emerald-200 bg-emerald-50 p-3 text-sm font-semibold text-emerald-800" role="status">
+          {{ addedMessage }}
+          <RouterLink to="/cart" class="ml-2 underline underline-offset-4">Review cart</RouterLink>
         </div>
         <div v-if="specEntries.length" class="mt-7 grid gap-3 sm:mt-8 sm:grid-cols-2">
           <div v-for="entry in specEntries" :key="`${entry.label}-${entry.value}`" class="min-w-0 rounded-lg border border-line p-4">

@@ -13,6 +13,7 @@
             @auth
                 <nav class="mt-6 flex gap-2 overflow-x-auto lg:grid">
                     @foreach ([
+                        'orders' => ['label' => 'Orders', 'route' => route('admin.orders.index')],
                         'categories' => 'Categories',
                         'products' => 'Products',
                         'hero-banners' => 'Hero Banners',
@@ -21,7 +22,7 @@
                         'navigation-cards' => 'Navigation Cards',
                         'feature-banners' => 'Feature Banners',
                     ] as $key => $label)
-                        <a class="shrink-0 rounded-md px-3 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100 hover:text-slate-950" href="{{ route('admin.content.index', $key) }}">{{ $label }}</a>
+                        <a class="shrink-0 rounded-md px-3 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100 hover:text-slate-950" href="{{ is_array($label) ? $label['route'] : route('admin.content.index', $key) }}">{{ is_array($label) ? $label['label'] : $label }}</a>
                     @endforeach
                 </nav>
                 <form class="mt-6" method="post" action="{{ route('admin.logout') }}">

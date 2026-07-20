@@ -13,9 +13,11 @@ This backend is a simple Laravel CMS/API for the Vue Eco Buka frontend.
 - Showcase sections with selected products
 - Navigation cards
 - Feature banners
+- Cart and manual checkout API
+- Orders and order items management
 - Public API endpoints for the Vue frontend
 
-It does not include cart, checkout, orders, payments, shipping, customer accounts, coupons, or inventory.
+It does not include online card payments, shipping-rate automation, customer accounts, coupons, or inventory.
 
 ## Install Dependencies
 
@@ -62,7 +64,7 @@ Then run:
 
 ```bash
 php artisan key:generate
-php artisan migrate:fresh --seed
+php artisan migrate --seed
 php artisan storage:link
 php artisan serve
 ```
@@ -107,6 +109,7 @@ Restart Vite after changing env values.
 - `GET /api/products/search?query=delta`
 - `GET /api/products/category/{slug}`
 - `GET /api/products/{slug}`
+- `POST /api/orders`
 - `GET /api/home/hero-banners`
 - `GET /api/home/promo-cards/{section_key}`
 - `GET /api/home/showcase/{section_key}`

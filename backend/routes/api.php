@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\HomeController;
+use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\ProductController;
 use Illuminate\Support\Facades\Route;
 
@@ -14,6 +15,7 @@ Route::get('/products/featured', [ProductController::class, 'featured']);
 Route::get('/products/search', [ProductController::class, 'search']);
 Route::get('/products/category/{slug}', [ProductController::class, 'byCategory']);
 Route::get('/products/{slug}', [ProductController::class, 'show']);
+Route::post('/orders', [OrderController::class, 'store'])->middleware('throttle:orders');
 
 Route::get('/home/hero-banners', [HomeController::class, 'heroBanners']);
 Route::get('/home/promo-cards/{sectionKey}', [HomeController::class, 'promoCards']);

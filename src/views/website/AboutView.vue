@@ -4,7 +4,7 @@
       <div><p class="label">About</p><h1 class="mt-2 text-3xl font-black sm:text-4xl">Eco Buka energy distribution</h1></div>
       <div class="space-y-4 text-base leading-7 text-slate-600 sm:space-y-5 sm:text-lg sm:leading-8">
         <p>Eco Buka is positioned as a legal distributor for premium clean-energy products, serving homes, businesses, outdoor users, and professional teams.</p>
-        <p>The theme is ready for a polished catalogue, request-offer workflow, and future ecommerce features such as checkout, accounts, orders, and inventory.</p>
+        <p>The theme is ready for a polished catalogue, cart-based manual checkout, request-offer workflow, and future features such as accounts, payments, and inventory.</p>
       </div>
     </section>
   </WebsiteLayout>
