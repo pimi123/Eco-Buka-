@@ -11,6 +11,27 @@ const productStore = useProductStore();
 const product = computed(() => productStore.activeProducts.find((item) => item.slug === route.params.slug));
 const money = (value?: number | null) => (value ? new Intl.NumberFormat('en-EU', { style: 'currency', currency: 'EUR' }).format(value) : 'Request price');
 
+type DetailData = Record<string, string> | string[] | null | undefined;
+
+function detailEntries(data: DetailData) {
+  if (!data) return [];
+  if (Array.isArray(data)) {
+    return data.filter(Boolean).map((value) => ({ label: '', value }));
+  }
+
+  return Object.entries(data)
+    .filter(([, value]) => Boolean(value))
+    .map(([label, value]) => ({ label, value }));
+}
+
+function isUrl(value: string) {
+  return /^https?:\/\//i.test(value) || value.startsWith('/');
+}
+
+const specEntries = computed(() => detailEntries(product.value?.specs));
+const includedEntries = computed(() => detailEntries(product.value?.included_items));
+const downloadEntries = computed(() => detailEntries(product.value?.downloads));
+
 useSeo({
   title: computed(() => product.value?.name || 'Product'),
   description: computed(() => product.value?.short_description || product.value?.description || 'View Eco Buka product details, specs, pricing, and request-offer options.'),
@@ -36,20 +57,54 @@ onMounted(() => productStore.fetchProducts());
           <RouterLink to="/contact" class="btn-primary w-full min-[420px]:w-auto">Request Offer</RouterLink>
           <RouterLink to="/contact" class="btn-secondary w-full min-[420px]:w-auto">Contact Us</RouterLink>
         </div>
-        <div class="mt-7 grid gap-3 sm:mt-8 sm:grid-cols-2">
-          <div v-for="(value, key) in product.specs" :key="key" class="min-w-0 rounded-lg border border-line p-4">
-            <p class="text-xs font-bold uppercase text-slate-500">{{ key }}</p>
-            <p class="mt-1 text-lg font-black">{{ value }}</p>
+        <div v-if="specEntries.length" class="mt-7 grid gap-3 sm:mt-8 sm:grid-cols-2">
+          <div v-for="entry in specEntries" :key="`${entry.label}-${entry.value}`" class="min-w-0 rounded-lg border border-line p-4">
+            <p v-if="entry.label" class="text-xs font-bold uppercase text-slate-500">{{ entry.label }}</p>
+            <p class="mt-1 text-lg font-black">{{ entry.value }}</p>
           </div>
         </div>
       </div>
     </section>
     <section v-if="product" class="container-shell pb-8 sm:pb-14">
       <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 lg:gap-5">
-        <div class="rounded-lg border border-line bg-white p-4 sm:p-5"><h2 class="font-black">Overview</h2><p class="mt-3 text-sm leading-6 text-slate-600">{{ product.description }}</p></div>
-        <div class="rounded-lg border border-line bg-white p-4 sm:p-5"><h2 class="font-black">Specifications</h2><p class="mt-3 text-sm leading-6 text-slate-600">Structured specs are ready for expanded Supabase fields.</p></div>
-        <div class="rounded-lg border border-line bg-white p-4 sm:p-5"><h2 class="font-black">What is included</h2><p class="mt-3 text-sm leading-6 text-slate-600">Product unit, charging cable, documentation, and offer support.</p></div>
-        <div class="rounded-lg border border-line bg-white p-4 sm:p-5"><h2 class="font-black">Downloads</h2><p class="mt-3 text-sm leading-6 text-slate-600">Datasheets and manuals can be added through Supabase Storage.</p></div>
+        <div class="rounded-lg border border-line bg-white p-4 sm:p-5">
+          <h2 class="font-black">Overview</h2>
+          <p class="mt-3 text-sm leading-6 text-slate-600">{{ product.description || product.short_description }}</p>
+        </div>
+
+        <div class="rounded-lg border border-line bg-white p-4 sm:p-5">
+          <h2 class="font-black">Specifications</h2>
+          <dl v-if="specEntries.length" class="mt-3 grid gap-2 text-sm leading-6 text-slate-600">
+            <div v-for="entry in specEntries" :key="`detail-${entry.label}-${entry.value}`">
+              <dt v-if="entry.label" class="inline font-bold text-ink">{{ entry.label }}: </dt>
+              <dd class="inline">{{ entry.value }}</dd>
+            </div>
+          </dl>
+          <p v-else class="mt-3 text-sm leading-6 text-slate-600">Product specifications will be added soon.</p>
+        </div>
+
+        <div class="rounded-lg border border-line bg-white p-4 sm:p-5">
+          <h2 class="font-black">What is included</h2>
+          <ul v-if="includedEntries.length" class="mt-3 grid gap-2 text-sm leading-6 text-slate-600">
+            <li v-for="entry in includedEntries" :key="`included-${entry.label}-${entry.value}`">
+              <span v-if="entry.label" class="font-bold text-ink">{{ entry.label }}: </span>{{ entry.value }}
+            </li>
+          </ul>
+          <p v-else class="mt-3 text-sm leading-6 text-slate-600">Included items will be confirmed with your offer.</p>
+        </div>
+
+        <div class="rounded-lg border border-line bg-white p-4 sm:p-5">
+          <h2 class="font-black">Downloads</h2>
+          <ul v-if="downloadEntries.length" class="mt-3 grid gap-2 text-sm leading-6 text-slate-600">
+            <li v-for="entry in downloadEntries" :key="`download-${entry.label}-${entry.value}`">
+              <a v-if="isUrl(entry.value)" class="font-bold text-ink underline-offset-4 hover:underline" :href="entry.value" target="_blank" rel="noreferrer">
+                {{ entry.label || entry.value }}
+              </a>
+              <span v-else><span v-if="entry.label" class="font-bold text-ink">{{ entry.label }}: </span>{{ entry.value }}</span>
+            </li>
+          </ul>
+          <p v-else class="mt-3 text-sm leading-6 text-slate-600">Manuals and datasheets will be added soon.</p>
+        </div>
       </div>
     </section>
   </WebsiteLayout>

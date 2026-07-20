@@ -33,7 +33,15 @@
                         <span class="text-xs font-bold uppercase text-slate-500">{{ str($field)->headline() }}</span>
                         <textarea class="min-h-28 rounded-md border border-slate-300 px-3 py-2" name="{{ $field }}">{{ $value }}</textarea>
                         @if ($type === 'json')
-                            <span class="text-xs font-semibold text-slate-500">Use one spec per line, for example: Capacity: 2kWh</span>
+                            <span class="text-xs font-semibold text-slate-500">
+                                @if ($field === 'downloads')
+                                    Use one download per line, for example: Manual: https://example.com/manual.pdf
+                                @elseif ($field === 'included_items')
+                                    Use one included item per line, for example: Charging cable
+                                @else
+                                    Use one spec per line, for example: Capacity: 2kWh
+                                @endif
+                            </span>
                         @endif
                     </label>
                 @elseif ($type === 'image')

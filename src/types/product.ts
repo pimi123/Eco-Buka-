@@ -11,6 +11,8 @@ export interface Product {
   image_url?: string | null;
   gallery?: string[];
   specs?: Record<string, string>;
+  included_items?: Record<string, string> | string[];
+  downloads?: Record<string, string> | string[];
   badge?: string | null;
   featured: boolean;
   active: boolean;

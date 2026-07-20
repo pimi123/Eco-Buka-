@@ -204,7 +204,10 @@ class ContentController extends Controller
         $targetHeight = max(1, (int) round($sourceHeight * $ratio));
         $target = imagecreatetruecolor($targetWidth, $targetHeight);
 
-        imagealphablending($target, true);
+        imagealphablending($target, false);
+        imagesavealpha($target, true);
+        $transparent = imagecolorallocatealpha($target, 0, 0, 0, 127);
+        imagefilledrectangle($target, 0, 0, $targetWidth, $targetHeight, $transparent);
         imagecopyresampled($target, $source, 0, 0, 0, 0, $targetWidth, $targetHeight, $sourceWidth, $sourceHeight);
 
         $filename = trim($folder, '/').'/'.uniqid('image_', true).'.webp';
@@ -259,7 +262,7 @@ class ContentController extends Controller
                 'model' => Product::class,
                 'table' => 'products',
                 'folder' => 'products',
-                'fields' => ['category_id' => 'category', 'name' => 'required', 'slug' => 'slug', 'short_description' => 'textarea', 'description' => 'textarea', 'price' => 'price', 'old_price' => 'price', 'badge' => 'text', 'main_image' => 'image', 'gallery_images' => 'gallery', 'specs' => 'json', 'featured' => 'boolean', 'active' => 'boolean', 'sort_order' => 'number'],
+                'fields' => ['category_id' => 'category', 'name' => 'required', 'slug' => 'slug', 'short_description' => 'textarea', 'description' => 'textarea', 'price' => 'price', 'old_price' => 'price', 'badge' => 'text', 'main_image' => 'image', 'gallery_images' => 'gallery', 'specs' => 'json', 'included_items' => 'json', 'downloads' => 'json', 'featured' => 'boolean', 'active' => 'boolean', 'sort_order' => 'number'],
             ],
             'hero-banners' => [
                 'label' => 'Hero Banner',
