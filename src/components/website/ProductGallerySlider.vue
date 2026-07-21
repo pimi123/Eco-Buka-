@@ -91,7 +91,7 @@ watch(images, () => {
 <template>
   <div class="min-w-0">
     <div
-      class="group relative overflow-hidden rounded-lg border border-line bg-mist focus-within:ring-4 focus-within:ring-energy/20"
+      class="group relative overflow-hidden rounded-lg border border-line bg-mist outline-none focus-visible:ring-2 focus-visible:ring-slate-300/70"
       tabindex="0"
       role="region"
       :aria-label="`${title} image gallery`"
