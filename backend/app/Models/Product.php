@@ -44,7 +44,7 @@ class Product extends Model
         'sort_order' => 'integer',
     ];
 
-    protected $appends = ['main_image_url', 'gallery_image_urls'];
+    protected $appends = ['main_image_url', 'image_url', 'gallery_image_urls'];
 
     public function category(): BelongsTo
     {
@@ -61,6 +61,11 @@ class Product extends Model
     public function getMainImageUrlAttribute(): ?string
     {
         return $this->publicUrl($this->main_image);
+    }
+
+    public function getImageUrlAttribute(): ?string
+    {
+        return $this->main_image_url;
     }
 
     public function getGalleryImageUrlsAttribute(): array

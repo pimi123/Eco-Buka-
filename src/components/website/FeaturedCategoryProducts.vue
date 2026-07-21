@@ -44,7 +44,8 @@ const products = computed(() => {
 
 const loading = computed(() => categoryStore.loading || productStore.loading);
 const featuredProduct = computed(() => products.value[0]);
-const bannerImage = computed(() => optimizedImageUrl(selectedCategory.value?.image_url || featuredProduct.value?.image_url, 'desktop') || fallbackUrl);
+const productImage = (product?: { image_url?: string | null; main_image_url?: string | null }) => product?.image_url || product?.main_image_url || null;
+const bannerImage = computed(() => optimizedImageUrl(selectedCategory.value?.image_url || productImage(featuredProduct.value), 'desktop') || fallbackUrl);
 
 const money = (value?: number | null) =>
   value ? new Intl.NumberFormat('en-EU', { style: 'currency', currency: 'EUR' }).format(value) : 'Request price';
@@ -121,7 +122,7 @@ onMounted(async () => {
         >
           <div class="relative block aspect-square overflow-hidden bg-white sm:aspect-[4/3]">
             <img
-              :src="optimizedImageUrl(product.image_url, 'mobile') || fallbackUrl"
+              :src="optimizedImageUrl(productImage(product), 'mobile') || fallbackUrl"
               :alt="product.name"
               class="h-full w-full object-contain p-3 transition duration-500 group-hover:scale-105 sm:p-5"
               loading="lazy"

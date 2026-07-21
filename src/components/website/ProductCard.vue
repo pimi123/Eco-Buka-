@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ArrowRight } from 'lucide-vue-next';
+import { computed } from 'vue';
 import type { Product } from '../../types/product';
 
 const fallbackUrl = '/promo/optimized/summer-sale-1280.jpg';
@@ -17,6 +18,7 @@ const {
 }>();
 
 const money = (value?: number | null) => (value ? new Intl.NumberFormat('en-EU', { style: 'currency', currency: 'EUR' }).format(value) : 'Request price');
+const imageUrl = computed(() => product.image_url || product.main_image_url || fallbackUrl);
 </script>
 
 <template>
@@ -31,7 +33,7 @@ const money = (value?: number | null) => (value ? new Intl.NumberFormat('en-EU',
       :class="variant === 'showcase' ? 'h-44 bg-white sm:h-52 lg:h-56' : compact ? 'aspect-[5/4] bg-mist' : 'aspect-[4/3] bg-mist'"
     >
       <img
-        :src="product.image_url || fallbackUrl"
+        :src="imageUrl"
         :alt="product.name"
         class="h-full w-full transition duration-500 group-hover:scale-105"
         :class="variant === 'showcase' ? 'object-contain p-5 sm:p-7' : 'object-contain p-3 sm:p-5'"

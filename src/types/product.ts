@@ -9,7 +9,9 @@ export interface Product {
   price?: number | null;
   old_price?: number | null;
   image_url?: string | null;
+  main_image_url?: string | null;
   gallery?: string[];
+  gallery_image_urls?: string[];
   specs?: Record<string, string>;
   included_items?: Record<string, string> | string[];
   downloads?: Record<string, string> | string[];
