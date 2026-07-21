@@ -13,11 +13,15 @@ use App\Models\ShowcaseSection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 
 class ContentController extends Controller
 {
+    private array $pendingDeletedFiles = [];
+    private array $pendingUploadedFiles = [];
+
     public function index(string $resource)
     {
         $config = $this->config($resource);
@@ -46,9 +50,21 @@ class ContentController extends Controller
     public function store(Request $request, string $resource)
     {
         $config = $this->config($resource);
+        $this->pendingUploadedFiles = [];
         $data = $this->validatedData($request, $resource, $config);
-        $item = $config['model']::create($data);
-        $this->syncShowcaseProducts($request, $resource, $item);
+
+        try {
+            $item = DB::transaction(function () use ($request, $resource, $config, $data) {
+                $item = $config['model']::create($data);
+                $this->syncShowcaseProducts($request, $resource, $item);
+
+                return $item;
+            });
+            $this->pendingUploadedFiles = [];
+        } catch (\Throwable $exception) {
+            $this->deleteUploadedFiles();
+            throw $exception;
+        }
 
         return redirect()->route('admin.content.edit', [$resource, $item])->with('status', "{$config['label']} saved.");
     }
@@ -73,8 +89,22 @@ class ContentController extends Controller
     {
         $config = $this->config($resource);
         $item = $config['model']::findOrFail($id);
-        $item->update($this->validatedData($request, $resource, $config, $item));
-        $this->syncShowcaseProducts($request, $resource, $item);
+        $this->pendingDeletedFiles = [];
+        $this->pendingUploadedFiles = [];
+        $data = $this->validatedData($request, $resource, $config, $item);
+
+        try {
+            DB::transaction(function () use ($request, $resource, $item, $data): void {
+                $item->update($data);
+                $this->syncShowcaseProducts($request, $resource, $item);
+            });
+            $this->pendingUploadedFiles = [];
+        } catch (\Throwable $exception) {
+            $this->deleteUploadedFiles();
+            throw $exception;
+        }
+
+        $this->deletePendingFiles();
 
         return back()->with('status', "{$config['label']} updated.");
     }
@@ -104,6 +134,14 @@ class ContentController extends Controller
                 'json' => ['nullable', 'string'],
                 default => ['nullable', 'string'],
             };
+
+            if ($type === 'gallery') {
+                $rules[$field.'.*'] = ['image', 'max:8192'];
+                $rules[$field.'_existing'] = ['nullable', 'array'];
+                $rules[$field.'_existing.*'] = ['string'];
+                $rules[$field.'_remove'] = ['nullable', 'array'];
+                $rules[$field.'_remove.*'] = ['string'];
+            }
         }
 
         $data = $request->validate($rules);
@@ -117,7 +155,11 @@ class ContentController extends Controller
                 $data[$field] = (int) ($data[$field] ?? 0);
             }
 
-            if ($type === 'price' && ($data[$field] ?? null) === null) {
+            if ($type === 'price' && (($data[$field] ?? null) === null || ($data[$field] ?? null) === '')) {
+                $data[$field] = null;
+            }
+
+            if ($type === 'category' && (($data[$field] ?? null) === null || ($data[$field] ?? null) === '')) {
                 $data[$field] = null;
             }
 
@@ -127,14 +169,29 @@ class ContentController extends Controller
 
             if ($type === 'video' && $request->hasFile($field)) {
                 $data[$field] = $request->file($field)->store($config['folder'].'/videos', 'public');
+                $this->pendingUploadedFiles[] = $data[$field];
             }
 
             if ($type === 'gallery') {
-                $existing = $item?->{$field} ?? [];
+                $existing = collect($request->input($field.'_existing', $item?->{$field} ?? []))
+                    ->filter(fn ($path) => is_string($path) && $path !== '')
+                    ->values();
+                $remove = collect($request->input($field.'_remove', []))
+                    ->filter(fn ($path) => is_string($path) && $path !== '')
+                    ->values();
+                $kept = $existing
+                    ->reject(fn (string $path) => $remove->contains($path))
+                    ->values()
+                    ->all();
                 $uploaded = collect($request->file($field, []))
                     ->map(fn (UploadedFile $file) => $this->storeOptimizedImage($file, $config['folder'].'/gallery'))
                     ->all();
-                $data[$field] = array_values(array_filter([...$existing, ...$uploaded]));
+                $data[$field] = array_values(array_filter([...$kept, ...$uploaded]));
+                $this->pendingDeletedFiles = [
+                    ...$this->pendingDeletedFiles,
+                    ...$remove->intersect($existing)->diff($kept)->values()->all(),
+                ];
+                unset($data[$field.'_existing'], $data[$field.'_remove']);
             }
 
             if ($type === 'json') {
@@ -143,6 +200,47 @@ class ContentController extends Controller
         }
 
         return $data;
+    }
+
+    private function deletePendingFiles(): void
+    {
+        foreach (array_unique($this->pendingDeletedFiles) as $path) {
+            if (! $this->isPublicFileUsed($path)) {
+                Storage::disk('public')->delete($path);
+            }
+        }
+
+        $this->pendingDeletedFiles = [];
+    }
+
+    private function deleteUploadedFiles(): void
+    {
+        foreach (array_unique($this->pendingUploadedFiles) as $path) {
+            Storage::disk('public')->delete($path);
+        }
+
+        $this->pendingUploadedFiles = [];
+    }
+
+    private function isPublicFileUsed(string $path): bool
+    {
+        foreach ($this->configs() as $config) {
+            foreach ($config['fields'] as $field => $type) {
+                if (in_array($type, ['image', 'video'], true)) {
+                    if ($config['model']::query()->where($field, $path)->exists()) {
+                        return true;
+                    }
+                }
+
+                if ($type === 'gallery') {
+                    if ($config['model']::query()->whereJsonContains($field, $path)->exists()) {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        return false;
     }
 
     private function parseStructuredText(?string $value): array
@@ -182,7 +280,10 @@ class ContentController extends Controller
     private function storeOptimizedImage(UploadedFile $file, string $folder): string
     {
         if (! function_exists('imagewebp')) {
-            return $file->store($folder, 'public');
+            $path = $file->store($folder, 'public');
+            $this->pendingUploadedFiles[] = $path;
+
+            return $path;
         }
 
         $source = match ($file->getMimeType()) {
@@ -193,7 +294,10 @@ class ContentController extends Controller
         };
 
         if (! $source) {
-            return $file->store($folder, 'public');
+            $path = $file->store($folder, 'public');
+            $this->pendingUploadedFiles[] = $path;
+
+            return $path;
         }
 
         $sourceWidth = imagesx($source);
@@ -214,6 +318,7 @@ class ContentController extends Controller
         $tempPath = tempnam(sys_get_temp_dir(), 'eco-buka-image');
         imagewebp($target, $tempPath, 78);
         Storage::disk('public')->put($filename, file_get_contents($tempPath));
+        $this->pendingUploadedFiles[] = $filename;
 
         @unlink($tempPath);
         imagedestroy($source);
@@ -249,7 +354,16 @@ class ContentController extends Controller
 
     private function config(string $resource): array
     {
-        $configs = [
+        $configs = $this->configs();
+
+        abort_unless(isset($configs[$resource]), 404);
+
+        return $configs[$resource];
+    }
+
+    private function configs(): array
+    {
+        return [
             'categories' => [
                 'label' => 'Category',
                 'model' => Category::class,
@@ -300,9 +414,5 @@ class ContentController extends Controller
                 'fields' => ['section_key' => 'text', 'section_heading' => 'text', 'eyebrow' => 'text', 'title' => 'required', 'subtitle' => 'textarea', 'price_text' => 'text', 'button_text' => 'text', 'button_link' => 'text', 'background_video' => 'video', 'background_image' => 'image', 'mobile_background_image' => 'image', 'text_color' => 'text', 'text_alignment' => 'text', 'active' => 'boolean', 'sort_order' => 'number'],
             ],
         ];
-
-        abort_unless(isset($configs[$resource]), 404);
-
-        return $configs[$resource];
     }
 }
