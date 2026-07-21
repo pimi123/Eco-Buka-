@@ -94,7 +94,7 @@ onMounted(() => productStore.fetchProducts());
       </div>
     </section>
     <section v-if="product" class="container-shell pb-8 sm:pb-14">
-      <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 lg:gap-5">
+      <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 lg:gap-5">
         <div class="rounded-lg border border-line bg-white p-4 sm:p-5">
           <h2 class="font-black">Overview</h2>
           <p class="mt-3 text-sm leading-6 text-slate-600">{{ product.description || product.short_description }}</p>
@@ -121,6 +121,7 @@ onMounted(() => productStore.fetchProducts());
           <p v-else class="mt-3 text-sm leading-6 text-slate-600">Included items will be confirmed with your offer.</p>
         </div>
 
+        <!-- Downloads are paused until manuals/datasheets are ready to upload.
         <div class="rounded-lg border border-line bg-white p-4 sm:p-5">
           <h2 class="font-black">Downloads</h2>
           <ul v-if="downloadEntries.length" class="mt-3 grid gap-2 text-sm leading-6 text-slate-600">
@@ -133,6 +134,7 @@ onMounted(() => productStore.fetchProducts());
           </ul>
           <p v-else class="mt-3 text-sm leading-6 text-slate-600">Manuals and datasheets will be added soon.</p>
         </div>
+        -->
       </div>
     </section>
   </WebsiteLayout>
