@@ -142,6 +142,10 @@ class ContentController extends Controller
                 $rules[$field.'_remove'] = ['nullable', 'array'];
                 $rules[$field.'_remove.*'] = ['string'];
             }
+
+            if ($type === 'image') {
+                $rules[$field.'_remove'] = ['nullable', 'boolean'];
+            }
         }
 
         $data = $request->validate($rules);
@@ -163,8 +167,23 @@ class ContentController extends Controller
                 $data[$field] = null;
             }
 
-            if ($type === 'image' && $request->hasFile($field)) {
-                $data[$field] = $this->storeOptimizedImage($request->file($field), $config['folder']);
+            if ($type === 'image') {
+                $currentImage = $item?->{$field};
+                $removeImage = $request->boolean($field.'_remove');
+
+                if ($request->hasFile($field)) {
+                    $data[$field] = $this->storeOptimizedImage($request->file($field), $config['folder']);
+                    if ($currentImage) {
+                        $this->pendingDeletedFiles[] = $currentImage;
+                    }
+                } elseif ($removeImage) {
+                    $data[$field] = null;
+                    if ($currentImage) {
+                        $this->pendingDeletedFiles[] = $currentImage;
+                    }
+                }
+
+                unset($data[$field.'_remove']);
             }
 
             if ($type === 'video' && $request->hasFile($field)) {

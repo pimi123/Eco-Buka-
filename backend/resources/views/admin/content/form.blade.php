@@ -46,13 +46,22 @@
                     </label>
                 @elseif ($type === 'image')
                     @php($previewUrl = $item->{$field.'_url'} ?? ($item->{$field} ? Storage::disk('public')->url($item->{$field}) : null))
-                    <label class="grid gap-2">
-                        <span class="text-xs font-bold uppercase text-slate-500">{{ str($field)->headline() }}</span>
+                    <section class="grid gap-2">
+                        <div>
+                            <span class="text-xs font-bold uppercase text-slate-500">{{ str($field)->headline() }}</span>
+                            <p class="mt-1 text-xs font-semibold text-slate-500">Upload a new image to replace the current one, or remove the current image intentionally.</p>
+                        </div>
                         <input class="rounded-md border border-slate-300 px-3 py-2" type="file" name="{{ $field }}" accept="image/*">
                         @if ($previewUrl)
-                            <img class="h-24 w-32 rounded-md object-cover" src="{{ $previewUrl }}" alt="">
+                            <div class="rounded-lg border border-slate-200 bg-slate-50 p-3" data-image-item>
+                                <img class="h-24 w-32 rounded-md bg-white object-contain p-2" src="{{ $previewUrl }}" alt="">
+                                <label class="mt-3 inline-flex items-center gap-2 rounded-md border border-red-200 bg-white px-3 py-2 text-xs font-bold text-red-700">
+                                    <input type="checkbox" name="{{ $field }}_remove" value="1" data-image-remove>
+                                    Remove current image
+                                </label>
+                            </div>
                         @endif
-                    </label>
+                    </section>
                 @elseif ($type === 'video')
                     @php($previewUrl = $item->{$field.'_url'} ?? ($item->{$field} ? Storage::disk('public')->url($item->{$field}) : null))
                     <label class="grid gap-2 md:col-span-2">
@@ -155,6 +164,17 @@
                 }
 
                 checkbox.closest('[data-gallery-item]')?.classList.toggle('opacity-50', checkbox.checked);
+            });
+        });
+
+        document.querySelectorAll('[data-image-remove]').forEach((checkbox) => {
+            checkbox.addEventListener('change', () => {
+                if (checkbox.checked && !window.confirm('Remove this image when you save?')) {
+                    checkbox.checked = false;
+                    return;
+                }
+
+                checkbox.closest('[data-image-item]')?.classList.toggle('opacity-50', checkbox.checked);
             });
         });
 
