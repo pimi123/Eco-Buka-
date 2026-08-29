@@ -45,6 +45,10 @@ export const useCartStore = defineStore('cart', () => {
   }
 
   function add(product: Product, quantity = 1, selectedOptions: SelectedOptions = {}) {
+    if (product.in_stock === false) {
+      return;
+    }
+
     const safeQuantity = Math.max(1, Number(quantity) || 1);
     const key = cartKey(product.id, selectedOptions);
     const existing = items.value.find((item) => item.key === key);

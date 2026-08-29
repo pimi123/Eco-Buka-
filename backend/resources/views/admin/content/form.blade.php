@@ -44,6 +44,7 @@
                         'source_id' => 'Optional numeric ID for the chosen category or collection source.',
                         'source_slug' => 'Optional slug for the chosen category or collection source, for example home-backup.',
                         'display_limit' => 'Maximum number of products/cards this section should show.',
+                        'in_stock' => 'If unchecked, the product stays visible but customers cannot add it to cart or checkout with it.',
                     ][$field] ?? null;
                 @endphp
                 <div class="[display:contents]" data-homepage-section-field="{{ $field }}">

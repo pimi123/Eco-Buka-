@@ -14,6 +14,7 @@ const product = computed(() => productStore.activeProducts.find((item) => item.s
 const money = (value?: number | null) => (value ? new Intl.NumberFormat('en-EU', { style: 'currency', currency: 'EUR' }).format(value) : 'Request price');
 const quantity = ref(1);
 const addedMessage = ref('');
+const isInStock = computed(() => product.value?.in_stock !== false);
 
 type DetailData = Record<string, string> | string[] | null | undefined;
 
@@ -33,7 +34,7 @@ function isUrl(value: string) {
 }
 
 function addToCart() {
-  if (!product.value) return;
+  if (!product.value || !isInStock.value) return;
 
   const safeQuantity = Math.min(99, Math.max(1, Number(quantity.value) || 1));
   quantity.value = safeQuantity;
@@ -61,6 +62,12 @@ onMounted(() => productStore.fetchProducts());
       <div class="min-w-0">
         <p class="label">{{ product.category }}</p>
         <h1 class="mt-2 text-3xl font-black leading-tight min-[390px]:text-4xl">{{ product.name }}</h1>
+        <p
+          class="mt-4 inline-flex rounded-full px-3 py-1 text-xs font-black uppercase tracking-wide"
+          :class="isInStock ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-950 text-white'"
+        >
+          {{ isInStock ? 'In stock' : 'Out of stock' }}
+        </p>
         <p class="mt-4 text-base leading-7 text-slate-600 sm:text-lg sm:leading-8">{{ product.short_description }}</p>
         <div class="mt-6 flex flex-wrap items-end gap-3">
           <p class="text-2xl font-black sm:text-3xl">{{ money(product.price) }}</p>
@@ -74,9 +81,11 @@ onMounted(() => productStore.fetchProducts());
           <button
             type="button"
             class="btn-primary w-full min-[420px]:w-auto"
+            :disabled="!isInStock"
+            :class="!isInStock ? 'cursor-not-allowed opacity-50 hover:translate-y-0' : ''"
             @click="addToCart"
           >
-            Add to Cart
+            {{ isInStock ? 'Add to Cart' : 'Out of Stock' }}
           </button>
           <RouterLink to="/cart" class="btn-secondary w-full min-[420px]:w-auto">View Cart</RouterLink>
           <RouterLink to="/contact" class="btn-secondary w-full min-[420px]:w-auto">Contact Us</RouterLink>
@@ -84,6 +93,9 @@ onMounted(() => productStore.fetchProducts());
         <div v-if="addedMessage" class="mt-4 rounded-md border border-emerald-200 bg-emerald-50 p-3 text-sm font-semibold text-emerald-800" role="status">
           {{ addedMessage }}
           <RouterLink to="/cart" class="ml-2 underline underline-offset-4">Review cart</RouterLink>
+        </div>
+        <div v-if="!isInStock" class="mt-4 rounded-md border border-slate-200 bg-slate-50 p-3 text-sm font-semibold text-slate-700" role="status">
+          This product is currently out of stock. Contact us and we can confirm availability or alternatives.
         </div>
         <div v-if="specEntries.length" class="mt-7 grid gap-3 sm:mt-8 sm:grid-cols-2">
           <div v-for="entry in specEntries" :key="`${entry.label}-${entry.value}`" class="min-w-0 rounded-lg border border-line p-4">

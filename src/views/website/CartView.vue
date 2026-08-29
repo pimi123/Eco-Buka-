@@ -7,6 +7,7 @@ import { useCartStore } from '../../stores/cartStore';
 const cartStore = useCartStore();
 const fallbackUrl = '/promo/optimized/summer-sale-1280.jpg';
 const hasItems = computed(() => cartStore.items.length > 0);
+const hasUnavailableItems = computed(() => cartStore.items.some((item) => item.product.in_stock === false));
 
 const money = (value: number) => new Intl.NumberFormat('en-EU', { style: 'currency', currency: 'EUR' }).format(value);
 
@@ -64,6 +65,9 @@ useSeo({
               <p v-if="item.product.short_description" class="mt-2 line-clamp-2 text-sm leading-6 text-slate-600">
                 {{ item.product.short_description }}
               </p>
+              <p v-if="item.product.in_stock === false" class="mt-2 inline-flex rounded-full bg-slate-950 px-3 py-1 text-xs font-black uppercase tracking-wide text-white">
+                Out of stock
+              </p>
               <div v-if="optionEntries(item.selected_options).length" class="mt-3 flex flex-wrap gap-2">
                 <span
                   v-for="[label, value] in optionEntries(item.selected_options)"
@@ -107,7 +111,19 @@ useSeo({
               <span class="text-xl font-black">{{ money(cartStore.subtotal) }}</span>
             </div>
           </div>
-          <RouterLink to="/checkout" class="btn-primary mt-5 w-full">Proceed to Checkout</RouterLink>
+          <p v-if="hasUnavailableItems" class="mt-5 rounded-md border border-amber-200 bg-amber-50 p-3 text-sm font-semibold text-amber-900">
+            Remove out-of-stock products before checkout.
+          </p>
+          <RouterLink
+            v-if="!hasUnavailableItems"
+            to="/checkout"
+            class="btn-primary mt-5 w-full"
+          >
+            Proceed to Checkout
+          </RouterLink>
+          <button v-else class="btn-primary mt-3 w-full cursor-not-allowed opacity-50" type="button" disabled>
+            Proceed to Checkout
+          </button>
           <RouterLink to="/products" class="btn-secondary mt-3 w-full">Continue Shopping</RouterLink>
         </aside>
       </div>

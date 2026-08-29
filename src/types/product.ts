@@ -19,6 +19,7 @@ export interface Product {
   included_items?: Record<string, string> | string[];
   downloads?: Record<string, string> | string[];
   badge?: string | null;
+  in_stock: boolean;
   featured: boolean;
   active: boolean;
   sort_order?: number | null;

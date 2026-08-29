@@ -23,6 +23,7 @@ const form = reactive({
 
 const money = (value: number) => new Intl.NumberFormat('en-EU', { style: 'currency', currency: 'EUR' }).format(value);
 const hasItems = computed(() => cartStore.items.length > 0);
+const hasUnavailableItems = computed(() => cartStore.items.some((item) => item.product.in_stock === false));
 
 useSeo({
   title: 'Checkout',
@@ -39,7 +40,7 @@ function optionEntries(options?: Record<string, string>) {
 }
 
 async function submitOrder() {
-  if (loading.value || !hasItems.value) return;
+  if (loading.value || !hasItems.value || hasUnavailableItems.value) return;
 
   loading.value = true;
   errors.value = {};
@@ -85,6 +86,9 @@ async function submitOrder() {
       <div v-else class="mt-8 grid gap-6 lg:grid-cols-[1fr_380px]">
         <form class="grid gap-4 rounded-lg border border-line bg-white p-4 shadow-sm sm:p-5" @submit.prevent="submitOrder">
           <p v-if="fieldError('general')" class="rounded-md bg-red-50 p-3 text-sm font-semibold text-red-700">{{ fieldError('general') }}</p>
+          <p v-if="hasUnavailableItems" class="rounded-md border border-amber-200 bg-amber-50 p-3 text-sm font-semibold text-amber-900">
+            Your cart contains out-of-stock products. Please remove them before submitting the order.
+          </p>
 
           <div class="grid gap-4 sm:grid-cols-2">
             <label class="grid gap-2">
@@ -125,7 +129,7 @@ async function submitOrder() {
             <textarea v-model="form.customer_note" class="input-field min-h-24" />
           </label>
 
-          <button class="btn-primary w-full sm:w-fit" :disabled="loading">
+          <button class="btn-primary w-full disabled:cursor-not-allowed disabled:opacity-50 sm:w-fit" :disabled="loading || hasUnavailableItems">
             {{ loading ? 'Submitting order...' : 'Submit Order' }}
           </button>
         </form>
@@ -137,6 +141,7 @@ async function submitOrder() {
               <img class="h-16 w-16 rounded-md bg-mist object-contain p-2" :src="item.product.image_url || '/promo/optimized/summer-sale-1280.jpg'" :alt="item.product.name">
               <div class="min-w-0">
                 <p class="line-clamp-2 text-sm font-bold">{{ item.product.name }}</p>
+                <p v-if="item.product.in_stock === false" class="mt-1 text-xs font-black uppercase tracking-wide text-red-600">Out of stock</p>
                 <div v-if="optionEntries(item.selected_options).length" class="mt-2 grid gap-1">
                   <p v-for="[label, value] in optionEntries(item.selected_options)" :key="`${item.key}-${label}`" class="text-xs font-semibold text-slate-500">
                     {{ label }}: {{ value }}

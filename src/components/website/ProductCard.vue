@@ -19,13 +19,17 @@ const {
 
 const money = (value?: number | null) => (value ? new Intl.NumberFormat('en-EU', { style: 'currency', currency: 'EUR' }).format(value) : 'Request price');
 const imageUrl = computed(() => product.image_url || product.main_image_url || fallbackUrl);
+const isInStock = computed(() => product.in_stock !== false);
 </script>
 
 <template>
   <RouterLink
     :to="`/products/${product.slug}`"
-    class="group flex h-full min-w-0 cursor-pointer flex-col overflow-hidden rounded-xl bg-white transition focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-energy/25 sm:rounded-lg"
-    :class="variant === 'showcase' ? 'border border-transparent shadow-sm hover:shadow-panel' : 'border border-line shadow-sm hover:-translate-y-1 hover:shadow-panel'"
+    class="group relative flex h-full min-w-0 cursor-pointer flex-col overflow-hidden rounded-xl bg-white transition focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-energy/25 sm:rounded-lg"
+    :class="[
+      variant === 'showcase' ? 'border border-transparent shadow-sm hover:shadow-panel' : 'border border-line shadow-sm hover:-translate-y-1 hover:shadow-panel',
+      !isInStock ? 'grayscale-[35%]' : '',
+    ]"
     :aria-label="`View ${product.name}`"
   >
     <div
@@ -41,10 +45,14 @@ const imageUrl = computed(() => product.image_url || product.main_image_url || f
         decoding="async"
         sizes="(max-width: 340px) 100vw, (max-width: 767px) 50vw, (max-width: 1023px) 33vw, 25vw"
       />
-      <span v-if="product.badge && variant !== 'showcase'" class="absolute left-2 top-2 rounded-full bg-energy px-2.5 py-1 text-[11px] font-bold leading-none text-white sm:left-3 sm:top-3 sm:px-3 sm:text-xs">{{ product.badge }}</span>
+      <span v-if="product.badge && variant !== 'showcase' && isInStock" class="absolute left-2 top-2 rounded-full bg-energy px-2.5 py-1 text-[11px] font-bold leading-none text-white sm:left-3 sm:top-3 sm:px-3 sm:text-xs">{{ product.badge }}</span>
+      <div v-if="!isInStock" class="absolute inset-0 bg-slate-950/25" aria-hidden="true"></div>
+      <span v-if="!isInStock" class="absolute left-2 top-2 rounded-full bg-slate-950 px-3 py-1 text-[11px] font-black uppercase tracking-wide text-white shadow-sm sm:left-3 sm:top-3">
+        Out of stock
+      </span>
     </div>
     <div class="flex min-w-0 flex-1 flex-col p-3 min-[390px]:p-3.5 sm:p-5" :class="variant === 'showcase' ? 'pt-0 sm:pt-0' : ''">
-      <p v-if="product.badge && variant === 'showcase'" class="mb-3 text-sm font-medium leading-none text-red-600">{{ product.badge }}</p>
+      <p v-if="product.badge && variant === 'showcase' && isInStock" class="mb-3 text-sm font-medium leading-none text-red-600">{{ product.badge }}</p>
       <p class="text-[11px] font-bold uppercase tracking-wide text-slate-500 sm:text-xs">{{ product.category || 'Energy solution' }}</p>
       <h3 class="mt-1.5 line-clamp-2 font-bold text-ink" :class="variant === 'showcase' ? 'text-base leading-6 sm:min-h-12 sm:text-lg' : 'text-sm leading-5 min-[390px]:text-[15px] sm:mt-2 sm:text-lg sm:leading-6'">{{ product.name }}</h3>
       <p class="mt-1.5 line-clamp-2 text-xs leading-5 text-slate-600 min-[390px]:text-[13px] sm:mt-2 sm:text-sm sm:leading-6">{{ product.short_description }}</p>
@@ -55,6 +63,7 @@ const imageUrl = computed(() => product.image_url || product.main_image_url || f
         <div class="min-w-0">
           <p class="font-black text-ink" :class="variant === 'showcase' ? 'text-xl sm:text-2xl' : 'text-sm min-[390px]:text-[15px] sm:text-xl'">{{ money(product.price) }}</p>
           <p v-if="product.old_price" class="text-xs text-slate-400 line-through sm:text-sm">{{ money(product.old_price) }}</p>
+          <p v-if="!isInStock" class="mt-1 text-xs font-bold text-slate-500">Currently unavailable</p>
         </div>
         <span class="grid h-9 w-9 shrink-0 place-items-center rounded-md border border-line transition group-hover:border-ink sm:h-10 sm:w-10" aria-hidden="true">
           <ArrowRight class="h-4 w-4" />

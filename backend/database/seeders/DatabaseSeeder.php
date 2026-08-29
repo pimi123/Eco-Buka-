@@ -119,6 +119,7 @@ class DatabaseSeeder extends Seeder
                     'price' => $price,
                     'old_price' => $oldPrice,
                     'badge' => $badge,
+                    'in_stock' => true,
                     'main_image' => $image,
                     'gallery_images' => array_values(array_unique([$image, '/promo/delta-classic.png', '/promo/summer-sale.png'])),
                     'specs' => $specs,

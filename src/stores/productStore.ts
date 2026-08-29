@@ -59,6 +59,7 @@ function mapLaravelProduct(product: LaravelProduct): Product {
     collection_ids: product.collections?.map((collection) => String(collection.id)) || [],
     image_url: product.image_url || product.main_image_url || null,
     gallery: product.gallery || product.gallery_image_urls || [],
+    in_stock: product.in_stock !== false,
   };
 }
 
@@ -174,7 +175,7 @@ export const useProductStore = defineStore('products', () => {
   async function saveProduct(product: Partial<Product>) {
     const payload = cleanProductPayload(product);
     const id = payload.id || crypto.randomUUID();
-    const next = { active: true, featured: false, specs: {}, ...payload, id } as Product;
+  const next = { active: true, featured: false, in_stock: true, specs: {}, ...payload, id } as Product;
     products.value = products.value.some((item) => item.id === id)
       ? products.value.map((item) => (item.id === id ? next : item))
       : [next, ...products.value.filter((item) => item.id !== id)];

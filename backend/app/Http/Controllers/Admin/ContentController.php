@@ -561,7 +561,7 @@ class ContentController extends Controller
                 'table' => 'products',
                 'folder' => 'products',
                 'description' => 'The sellable item. Assign one primary category, optional extra technical categories, and any collections/campaigns where this product should appear.',
-                'fields' => ['category_id' => 'category', 'category_ids' => 'category_multi', 'collection_ids' => 'collection_multi', 'name' => 'required', 'slug' => 'slug', 'short_description' => 'textarea', 'description' => 'textarea', 'price' => 'price', 'old_price' => 'price', 'badge' => 'text', 'main_image' => 'image', 'gallery_images' => 'gallery', 'specs' => 'json', 'included_items' => 'json', 'downloads' => 'json', 'featured' => 'boolean', 'active' => 'boolean', 'sort_order' => 'number'],
+                'fields' => ['category_id' => 'category', 'category_ids' => 'category_multi', 'collection_ids' => 'collection_multi', 'name' => 'required', 'slug' => 'slug', 'short_description' => 'textarea', 'description' => 'textarea', 'price' => 'price', 'old_price' => 'price', 'badge' => 'text', 'in_stock' => 'boolean', 'main_image' => 'image', 'gallery_images' => 'gallery', 'specs' => 'json', 'included_items' => 'json', 'downloads' => 'json', 'featured' => 'boolean', 'active' => 'boolean', 'sort_order' => 'number'],
             ],
             'hero-banners' => [
                 'label' => 'Hero Banner',

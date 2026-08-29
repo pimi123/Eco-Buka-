@@ -31,6 +31,7 @@ class CreateOrderService
             $products = Product::query()
                 ->whereIn('id', $productIds)
                 ->where('active', true)
+                ->where('in_stock', true)
                 ->with('category:id,name,slug')
                 ->lockForUpdate()
                 ->get()
@@ -40,7 +41,7 @@ class CreateOrderService
                 $product = $products->get((int) $item['product_id']);
                 if (! $product) {
                     throw ValidationException::withMessages([
-                        "items.{$index}.product_id" => 'This product is not available for ordering.',
+                        "items.{$index}.product_id" => 'This product is currently out of stock.',
                     ]);
                 }
 
