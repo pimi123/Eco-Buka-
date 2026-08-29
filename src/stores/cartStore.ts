@@ -18,6 +18,11 @@ function cartKey(productId: string, selectedOptions: SelectedOptions = {}) {
   return `${productId}:${stableOptionsKey(selectedOptions)}`;
 }
 
+function isProductInStock(product: Product) {
+  const stockValue = product.in_stock as unknown;
+  return stockValue !== false && stockValue !== 0 && stockValue !== '0';
+}
+
 function loadCart(): CartItem[] {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -45,7 +50,7 @@ export const useCartStore = defineStore('cart', () => {
   }
 
   function add(product: Product, quantity = 1, selectedOptions: SelectedOptions = {}) {
-    if (product.in_stock === false) {
+    if (!isProductInStock(product)) {
       return;
     }
 
@@ -76,5 +81,5 @@ export const useCartStore = defineStore('cart', () => {
     persist();
   }
 
-  return { items, count, subtotal, add, updateQuantity, remove, clear };
+  return { items, count, subtotal, add, updateQuantity, remove, clear, isProductInStock };
 });

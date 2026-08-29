@@ -23,7 +23,7 @@ const form = reactive({
 
 const money = (value: number) => new Intl.NumberFormat('en-EU', { style: 'currency', currency: 'EUR' }).format(value);
 const hasItems = computed(() => cartStore.items.length > 0);
-const hasUnavailableItems = computed(() => cartStore.items.some((item) => item.product.in_stock === false));
+const hasUnavailableItems = computed(() => cartStore.items.some((item) => !cartStore.isProductInStock(item.product)));
 
 useSeo({
   title: 'Checkout',
@@ -141,7 +141,7 @@ async function submitOrder() {
               <img class="h-16 w-16 rounded-md bg-mist object-contain p-2" :src="item.product.image_url || '/promo/optimized/summer-sale-1280.jpg'" :alt="item.product.name">
               <div class="min-w-0">
                 <p class="line-clamp-2 text-sm font-bold">{{ item.product.name }}</p>
-                <p v-if="item.product.in_stock === false" class="mt-1 text-xs font-black uppercase tracking-wide text-red-600">Out of stock</p>
+                <p v-if="!cartStore.isProductInStock(item.product)" class="mt-1 text-xs font-black uppercase tracking-wide text-red-600">Out of stock</p>
                 <div v-if="optionEntries(item.selected_options).length" class="mt-2 grid gap-1">
                   <p v-for="[label, value] in optionEntries(item.selected_options)" :key="`${item.key}-${label}`" class="text-xs font-semibold text-slate-500">
                     {{ label }}: {{ value }}

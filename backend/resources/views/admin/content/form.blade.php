@@ -50,6 +50,7 @@
                 <div class="[display:contents]" data-homepage-section-field="{{ $field }}">
                 @if ($type === 'boolean')
                     <label class="flex items-center gap-2 text-sm font-semibold">
+                        <input type="hidden" name="{{ $field }}" value="0">
                         <input type="checkbox" name="{{ $field }}" value="1" @checked(old($field, $item->exists ? $item->{$field} : true))>
                         {{ str($field)->headline() }}
                     </label>

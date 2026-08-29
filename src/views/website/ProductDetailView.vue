@@ -14,7 +14,10 @@ const product = computed(() => productStore.activeProducts.find((item) => item.s
 const money = (value?: number | null) => (value ? new Intl.NumberFormat('en-EU', { style: 'currency', currency: 'EUR' }).format(value) : 'Request price');
 const quantity = ref(1);
 const addedMessage = ref('');
-const isInStock = computed(() => product.value?.in_stock !== false);
+const isInStock = computed(() => {
+  const stockValue = product.value?.in_stock as unknown;
+  return stockValue !== false && stockValue !== 0 && stockValue !== '0';
+});
 
 type DetailData = Record<string, string> | string[] | null | undefined;
 

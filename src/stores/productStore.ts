@@ -48,6 +48,10 @@ function mapProductListResponse(data: LaravelProduct[] | PaginatedProducts): Pro
   };
 }
 
+function normalizeStockValue(value: unknown) {
+  return value !== false && value !== 0 && value !== '0';
+}
+
 function mapLaravelProduct(product: LaravelProduct): Product {
   return {
     ...product,
@@ -59,7 +63,7 @@ function mapLaravelProduct(product: LaravelProduct): Product {
     collection_ids: product.collections?.map((collection) => String(collection.id)) || [],
     image_url: product.image_url || product.main_image_url || null,
     gallery: product.gallery || product.gallery_image_urls || [],
-    in_stock: product.in_stock !== false,
+    in_stock: normalizeStockValue(product.in_stock),
   };
 }
 

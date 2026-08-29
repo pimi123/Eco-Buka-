@@ -7,7 +7,7 @@ import { useCartStore } from '../../stores/cartStore';
 const cartStore = useCartStore();
 const fallbackUrl = '/promo/optimized/summer-sale-1280.jpg';
 const hasItems = computed(() => cartStore.items.length > 0);
-const hasUnavailableItems = computed(() => cartStore.items.some((item) => item.product.in_stock === false));
+const hasUnavailableItems = computed(() => cartStore.items.some((item) => !cartStore.isProductInStock(item.product)));
 
 const money = (value: number) => new Intl.NumberFormat('en-EU', { style: 'currency', currency: 'EUR' }).format(value);
 
@@ -65,7 +65,7 @@ useSeo({
               <p v-if="item.product.short_description" class="mt-2 line-clamp-2 text-sm leading-6 text-slate-600">
                 {{ item.product.short_description }}
               </p>
-              <p v-if="item.product.in_stock === false" class="mt-2 inline-flex rounded-full bg-slate-950 px-3 py-1 text-xs font-black uppercase tracking-wide text-white">
+              <p v-if="!cartStore.isProductInStock(item.product)" class="mt-2 inline-flex rounded-full bg-slate-950 px-3 py-1 text-xs font-black uppercase tracking-wide text-white">
                 Out of stock
               </p>
               <div v-if="optionEntries(item.selected_options).length" class="mt-3 flex flex-wrap gap-2">

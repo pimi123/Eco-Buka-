@@ -19,7 +19,10 @@ const {
 
 const money = (value?: number | null) => (value ? new Intl.NumberFormat('en-EU', { style: 'currency', currency: 'EUR' }).format(value) : 'Request price');
 const imageUrl = computed(() => product.image_url || product.main_image_url || fallbackUrl);
-const isInStock = computed(() => product.in_stock !== false);
+const isInStock = computed(() => {
+  const stockValue = product.in_stock as unknown;
+  return stockValue !== false && stockValue !== 0 && stockValue !== '0';
+});
 </script>
 
 <template>
