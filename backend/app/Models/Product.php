@@ -51,6 +51,22 @@ class Product extends Model
         return $this->belongsTo(Category::class);
     }
 
+    public function categories(): BelongsToMany
+    {
+        return $this->belongsToMany(Category::class)
+            ->withPivot(['sort_order', 'active'])
+            ->withTimestamps()
+            ->orderByPivot('sort_order');
+    }
+
+    public function collections(): BelongsToMany
+    {
+        return $this->belongsToMany(Collection::class)
+            ->withPivot(['sort_order', 'active'])
+            ->withTimestamps()
+            ->orderByPivot('sort_order');
+    }
+
     public function showcaseSections(): BelongsToMany
     {
         return $this->belongsToMany(ShowcaseSection::class, 'showcase_section_products')

@@ -21,7 +21,10 @@ class CategoryController extends Controller
         return Category::query()
             ->where('active', true)
             ->where('slug', $slug)
-            ->with(['products' => fn ($query) => $query->where('active', true)->orderBy('sort_order')])
+            ->with([
+                'products' => fn ($query) => $query->where('active', true)->orderBy('sort_order'),
+                'assignedProducts' => fn ($query) => $query->where('products.active', true)->wherePivot('active', true),
+            ])
             ->firstOrFail();
     }
 }

@@ -13,14 +13,12 @@
             @auth
                 <nav class="mt-6 flex gap-2 overflow-x-auto lg:grid">
                     @foreach ([
+                        'homepage-content-display' => ['label' => 'Homepage Content Display', 'route' => route('admin.homepage-content.index')],
                         'orders' => ['label' => 'Orders', 'route' => route('admin.orders.index')],
                         'categories' => 'Categories',
+                        'collections' => 'Collections',
                         'products' => 'Products',
                         'hero-banners' => 'Hero Banners',
-                        'promo-cards' => 'Promo Cards',
-                        'showcase-sections' => 'Showcase Sections',
-                        'navigation-cards' => 'Navigation Cards',
-                        'feature-banners' => 'Feature Banners',
                     ] as $key => $label)
                         <a class="shrink-0 rounded-md px-3 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100 hover:text-slate-950" href="{{ is_array($label) ? $label['route'] : route('admin.content.index', $key) }}">{{ is_array($label) ? $label['label'] : $label }}</a>
                     @endforeach

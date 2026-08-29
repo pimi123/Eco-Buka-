@@ -1,20 +1,25 @@
 <script setup lang="ts">
 import { ArrowRight } from 'lucide-vue-next';
-import { computed, onMounted } from 'vue';
+import { computed, onMounted, ref } from 'vue';
+import { apiGet, hasLaravelApiConfig } from '../../lib/api';
 import { optimizedImageUrl } from '../../lib/responsiveImages';
 import { useCategoryStore } from '../../stores/categoryStore';
 import { useProductStore } from '../../stores/productStore';
+import type { HomepageSection } from '../../types/homepage';
+import type { Product } from '../../types/product';
 
 const fallbackUrl = '/promo/optimized/summer-sale-1280.jpg';
 
 const props = withDefaults(
   defineProps<{
     categorySlug: string;
+    sectionKey?: string;
     title?: string;
     description?: string;
     limit?: number;
   }>(),
   {
+    sectionKey: 'power_stations_featured',
     title: '',
     description: '',
     limit: 8,
@@ -23,34 +28,83 @@ const props = withDefaults(
 
 const categoryStore = useCategoryStore();
 const productStore = useProductStore();
+const apiSection = ref<HomepageSection | null>(null);
+const apiProducts = ref<Product[]>([]);
+const apiLoading = ref(false);
+const apiError = ref<string | null>(null);
 
-const selectedCategory = computed(() => categoryStore.activeCategories.find((category) => category.slug === props.categorySlug));
-const sectionTitle = computed(() => props.title || selectedCategory.value?.name || props.categorySlug.replace(/-/g, ' '));
+const effectiveCategorySlug = computed(() => apiSection.value?.source_type === 'category' ? apiSection.value?.source_slug || props.categorySlug : props.categorySlug);
+const selectedCategory = computed(() => categoryStore.activeCategories.find((category) => category.slug === effectiveCategorySlug.value));
+const sectionTitle = computed(() => apiSection.value?.title || props.title || selectedCategory.value?.name || props.categorySlug.replace(/-/g, ' '));
 const sectionDescription = computed(
   () =>
+    apiSection.value?.subtitle ||
     props.description ||
     selectedCategory.value?.description ||
     'Explore reliable portable power solutions for home, outdoor, and backup energy.',
 );
+const bannerTitle = computed(() => apiSection.value?.banner_title || sectionTitle.value);
+const bannerDescription = computed(() => apiSection.value?.banner_subtitle || sectionDescription.value);
+const eyebrow = computed(() => apiSection.value?.eyebrow || 'Featured series');
+const sectionLimit = computed(() => apiSection.value?.display_limit || props.limit);
 
 const products = computed(() => {
+  if (apiProducts.value.length) return apiProducts.value.slice(0, sectionLimit.value);
+
   const category = selectedCategory.value;
   if (!category) return [];
 
   return productStore.activeProducts
     .filter((product) => String(product.category_id) === String(category.id))
-    .slice(0, props.limit);
+    .slice(0, sectionLimit.value);
 });
 
-const loading = computed(() => categoryStore.loading || productStore.loading);
+const loading = computed(() => apiLoading.value || categoryStore.loading || productStore.loading);
 const featuredProduct = computed(() => products.value[0]);
 const productImage = (product?: { image_url?: string | null; main_image_url?: string | null }) => product?.image_url || product?.main_image_url || null;
-const bannerImage = computed(() => optimizedImageUrl(selectedCategory.value?.image_url || productImage(featuredProduct.value), 'desktop') || fallbackUrl);
+const bannerImage = computed(() => optimizedImageUrl(apiSection.value?.banner_image_url || selectedCategory.value?.image_url || productImage(featuredProduct.value), 'desktop') || fallbackUrl);
+const mobileBannerImage = computed(() => optimizedImageUrl(apiSection.value?.mobile_banner_image_url || apiSection.value?.banner_image_url || selectedCategory.value?.image_url || productImage(featuredProduct.value), 'mobile') || bannerImage.value);
+const backgroundVideo = computed(() => apiSection.value?.background_video_url || null);
+
+const listingLink = computed(() => {
+  if (apiSection.value?.source_type === 'collection' && apiSection.value.source_slug) return `/collections/${apiSection.value.source_slug}`;
+  if (apiSection.value?.source_type === 'category' && apiSection.value.source_slug) return `/category/${apiSection.value.source_slug}`;
+  return `/category/${props.categorySlug}`;
+});
+
+const bannerLink = computed(() => apiSection.value?.button_link || listingLink.value);
+const buttonText = computed(() => apiSection.value?.button_text || 'Learn More');
 
 const money = (value?: number | null) =>
   value ? new Intl.NumberFormat('en-EU', { style: 'currency', currency: 'EUR' }).format(value) : 'Request price';
 
+function mapApiProduct(product: Product): Product {
+  return {
+    ...product,
+    id: String(product.id),
+    category_id: product.category_id ? String(product.category_id) : null,
+    image_url: product.image_url || product.main_image_url || null,
+    category: typeof (product as any).category === 'object' ? (product as any).category.name : product.category,
+    categories: product.categories?.map((category) => ({ ...category, id: String(category.id) })) || [],
+    collections: product.collections?.map((collection) => ({ ...collection, id: String(collection.id) })) || [],
+  };
+}
+
 onMounted(async () => {
+  if (hasLaravelApiConfig && props.sectionKey) {
+    apiLoading.value = true;
+    apiError.value = null;
+    try {
+      const data = await apiGet<{ section: HomepageSection; products: Product[] }>(`/home/showcase/${props.sectionKey}`);
+      apiSection.value = data.section;
+      apiProducts.value = data.products.map(mapApiProduct);
+    } catch (error) {
+      apiError.value = error instanceof Error ? error.message : 'Section data could not be loaded.';
+    } finally {
+      apiLoading.value = false;
+    }
+  }
+
   await Promise.all([categoryStore.fetchCategories(), productStore.fetchProducts()]);
 });
 </script>
@@ -65,7 +119,7 @@ onMounted(async () => {
           <p class="mt-3 max-w-2xl text-sm leading-6 text-slate-600 sm:text-base">{{ sectionDescription }}</p>
         </div>
         <RouterLink
-          :to="`/category/${categorySlug}`"
+          :to="listingLink"
           class="btn-secondary w-full sm:w-auto"
         >
           View All
@@ -75,30 +129,46 @@ onMounted(async () => {
       <div
         class="relative mt-6 min-h-[280px] overflow-hidden rounded-xl bg-ink shadow-sm sm:mt-8 sm:min-h-[320px] lg:min-h-[360px]"
       >
-        <img
-          :src="bannerImage"
-          :alt="sectionTitle"
+        <video
+          v-if="backgroundVideo"
           class="absolute inset-0 h-full w-full object-cover"
-          loading="lazy"
-          decoding="async"
-          sizes="(max-width: 767px) 100vw, 1200px"
-        />
+          :poster="mobileBannerImage || bannerImage"
+          autoplay
+          muted
+          loop
+          playsinline
+          preload="metadata"
+          aria-hidden="true"
+        >
+          <source :src="backgroundVideo" />
+        </video>
+        <picture v-else>
+          <source media="(max-width: 640px)" :srcset="mobileBannerImage" />
+          <img
+            :src="bannerImage"
+            :alt="sectionTitle"
+            class="absolute inset-0 h-full w-full object-cover"
+            loading="lazy"
+            decoding="async"
+            sizes="(max-width: 767px) 100vw, 1200px"
+          />
+        </picture>
         <div class="absolute inset-0 bg-gradient-to-t from-black/86 via-black/52 to-black/18 sm:bg-gradient-to-r sm:from-black/82 sm:via-black/48 sm:to-black/10" />
         <div class="relative z-10 flex min-h-[280px] items-end p-4 text-white min-[390px]:p-5 sm:min-h-[320px] sm:items-center sm:p-8 lg:min-h-[360px] lg:p-10">
           <div class="max-w-xl">
-            <p class="text-xs font-black uppercase tracking-wide text-orange-500 sm:text-sm">Featured series</p>
+            <p class="text-xs font-black uppercase tracking-wide text-orange-500 sm:text-sm">{{ eyebrow }}</p>
             <h3 class="mt-2 max-w-[16rem] text-2xl font-black leading-tight min-[390px]:text-3xl sm:max-w-xl sm:text-4xl">
-              {{ sectionTitle }}
+              {{ bannerTitle }}
             </h3>
             <p class="mt-3 line-clamp-3 max-w-md text-sm font-semibold leading-6 text-white/90 sm:text-base">
-              {{ sectionDescription }}
+              {{ bannerDescription }}
             </p>
             <div class="mt-5 flex flex-col gap-3 min-[390px]:flex-row min-[390px]:items-center">
               <RouterLink
-                :to="`/category/${categorySlug}`"
+                :to="bannerLink"
                 class="inline-flex min-h-11 w-full items-center justify-center rounded-full bg-white px-6 py-3 text-sm font-black text-ink transition hover:bg-mist min-[390px]:w-auto"
               >
-                Learn More
+                {{ buttonText }}
               </RouterLink>
               <p v-if="featuredProduct" class="text-sm font-black text-white sm:text-base">
                 From {{ money(featuredProduct.price) }}
@@ -157,7 +227,7 @@ onMounted(async () => {
       </div>
 
       <div v-else class="mt-6 rounded-lg border border-line bg-mist p-8 text-center text-sm font-semibold text-slate-600 sm:mt-8">
-        No products found in this category.
+        {{ apiError ? 'This section could not load products right now.' : 'No products found in this category.' }}
       </div>
     </div>
   </section>

@@ -4,6 +4,9 @@ export interface Product {
   name: string;
   slug: string;
   category?: string;
+  categories?: { id: string; name: string; slug: string }[];
+  collections?: { id: string; name: string; slug: string; type?: string }[];
+  collection_ids?: string[];
   short_description?: string | null;
   description?: string | null;
   price?: number | null;

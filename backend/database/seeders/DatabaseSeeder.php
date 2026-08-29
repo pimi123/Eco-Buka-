@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Category;
+use App\Models\Collection;
 use App\Models\FeatureBanner;
 use App\Models\HeroBanner;
 use App\Models\NavigationCard;
@@ -108,7 +109,7 @@ class DatabaseSeeder extends Seeder
             [$name, $slug, $categorySlug, $price, $oldPrice, $badge, $shortDescription, $specs, $image, $featured] = $product;
             $category = $categories->firstWhere('slug', $categorySlug);
 
-            return Product::query()->updateOrCreate(
+            $productModel = Product::query()->updateOrCreate(
                 ['slug' => $slug],
                 [
                     'category_id' => $category?->id,
@@ -126,7 +127,60 @@ class DatabaseSeeder extends Seeder
                     'sort_order' => $index + 1,
                 ],
             );
+
+            if ($category) {
+                $productModel->categories()->syncWithoutDetaching([
+                    $category->id => ['sort_order' => 1, 'active' => true],
+                ]);
+            }
+
+            return $productModel;
         });
+
+        $collectionData = [
+            ['name' => 'New Products', 'slug' => 'new-products', 'type' => 'merchandising', 'description' => 'Fresh launches and recently promoted products.'],
+            ['name' => 'Popular Eco Buka Solutions', 'slug' => 'popular-eco-buka-solutions', 'type' => 'featured', 'description' => 'Curated products that should be promoted as popular Eco Buka solutions.'],
+            ['name' => 'Summer Sale', 'slug' => 'summer-sale', 'type' => 'campaign', 'description' => 'Seasonal campaign products, bundles, and offers.'],
+            ['name' => 'Home Backup', 'slug' => 'home-backup', 'type' => 'solution', 'description' => 'Products useful for home backup during outages and daily resilience.'],
+            ['name' => 'Solar Solutions', 'slug' => 'solar-solutions', 'type' => 'solution', 'description' => 'Solar panels, solar generators, and clean charging products.'],
+            ['name' => 'Outdoor Power', 'slug' => 'outdoor-power', 'type' => 'solution', 'description' => 'Portable products for camping, travel, events, and field work.'],
+            ['name' => 'Business Solutions', 'slug' => 'business-solutions', 'type' => 'solution', 'description' => 'Backup and mobile energy solutions for shops, offices, and teams.'],
+        ];
+
+        $collections = collect($collectionData)->map(fn (array $collection, int $index) => Collection::query()->updateOrCreate(
+            ['slug' => $collection['slug']],
+            [
+                ...$collection,
+                'active' => true,
+                'sort_order' => $index + 1,
+            ],
+        ));
+
+        $collectionProductSlugs = [
+            'new-products' => ['stream-ultra-x', 'stream-ultra', 'delta-3-classic-1024wh', 'delta-3-max-series', 'rapid-pro-20k-power-bank'],
+            'popular-eco-buka-solutions' => $products->where('featured', true)->pluck('slug')->all(),
+            'summer-sale' => ['delta-3-classic-1024wh', 'delta-3-max-series', '220w-bifacial-portable-solar-panel', 'solar-generator-home-kit', 'balcony-solar-starter-kit'],
+            'home-backup' => ['delta-pro-3', 'delta-2-max', 'ocean-2-home-battery', 'eco-buka-home-backup-solution', 'business-backup-solar-kit'],
+            'solar-solutions' => ['220w-bifacial-portable-solar-panel', '400w-portable-solar-panel', 'solar-generator-home-kit', 'balcony-solar-starter-kit', 'all-in-one-home-solar-kit'],
+            'outdoor-power' => ['river-3-plus', 'river-3-series', 'camping-solar-generator-kit', 'rapid-pro-20k-power-bank', 'portable-solar-cable-kit'],
+            'business-solutions' => ['delta-pro-3', 'business-backup-solar-kit', '800w-alternator-charger', 'smart-home-battery-monitor'],
+        ];
+
+        foreach ($collectionProductSlugs as $collectionSlug => $productSlugs) {
+            $collection = $collections->firstWhere('slug', $collectionSlug);
+            if (! $collection) {
+                continue;
+            }
+
+            $sync = [];
+            foreach (array_values($productSlugs) as $index => $slug) {
+                $product = $products->firstWhere('slug', $slug);
+                if ($product) {
+                    $sync[$product->id] = ['sort_order' => $index + 1, 'active' => true];
+                }
+            }
+            $collection->products()->sync($sync);
+        }
 
         HeroBanner::query()->update(['active' => false]);
 
@@ -155,6 +209,34 @@ class DatabaseSeeder extends Seeder
             );
         }
 
+        $newProductsSection = ShowcaseSection::query()->updateOrCreate(
+            ['section_key' => 'new_products'],
+            [
+                'title' => 'New Products',
+                'subtitle' => 'Fresh energy launches, seasonal offers, and smart power picks for Eco Buka customers.',
+                'section_type' => 'promo_cards',
+                'source_type' => 'manual_cards',
+                'layout_variant' => 'carousel',
+                'display_limit' => 6,
+                'active' => true,
+                'sort_order' => 2,
+            ],
+        );
+
+        $promotionalCardsSection = ShowcaseSection::query()->updateOrCreate(
+            ['section_key' => 'promotional_category_cards'],
+            [
+                'title' => 'Promotional Category Cards',
+                'subtitle' => 'Visual campaign cards that guide customers into offers, categories, and solutions.',
+                'section_type' => 'promo_cards',
+                'source_type' => 'manual_cards',
+                'layout_variant' => 'two_cards',
+                'display_limit' => 2,
+                'active' => true,
+                'sort_order' => 7,
+            ],
+        );
+
         PromoCard::query()->update(['active' => false]);
 
         foreach ([
@@ -167,6 +249,7 @@ class DatabaseSeeder extends Seeder
             PromoCard::query()->updateOrCreate(
                 ['section_key' => 'new_products', 'title' => $title],
                 [
+                    'homepage_section_id' => $newProductsSection->id,
                     'label' => $label,
                     'subtitle' => $subtitle,
                     'button_text' => $button,
@@ -188,6 +271,7 @@ class DatabaseSeeder extends Seeder
             PromoCard::query()->updateOrCreate(
                 ['section_key' => 'promotional_category_cards', 'title' => $title],
                 [
+                    'homepage_section_id' => $promotionalCardsSection->id,
                     'subtitle' => $subtitle,
                     'button_text' => $button,
                     'button_link' => $link,
@@ -206,6 +290,10 @@ class DatabaseSeeder extends Seeder
             [
                 'title' => 'STREAM Solar Plant',
                 'subtitle' => 'Featured plug-and-play solar products selected for realistic homepage testing.',
+                'section_type' => 'mixed_showcase',
+                'source_type' => 'manual_products',
+                'source_slug' => 'new-products',
+                'display_limit' => 4,
                 'active' => true,
                 'sort_order' => 1,
             ],

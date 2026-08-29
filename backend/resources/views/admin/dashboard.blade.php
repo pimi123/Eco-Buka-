@@ -8,6 +8,7 @@
             'Active products' => $activeProducts,
             'Total categories' => $totalCategories,
             'Active categories' => $activeCategories,
+            'Collections' => $totalCollections,
             'Hero banners' => $heroBanners,
         ] as $label => $value)
             <div class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">

@@ -6,20 +6,30 @@ import ProductCard from './ProductCard.vue';
 import { useHomepageStore } from '../../stores/homepageStore';
 import { useProductStore } from '../../stores/productStore';
 
+const props = withDefaults(
+  defineProps<{
+    sectionKey?: string;
+  }>(),
+  {
+    sectionKey: 'solar_system_showcase',
+  },
+);
+
 const homepageStore = useHomepageStore();
 const productStore = useProductStore();
 
 const sectionVisible = computed(() => homepageStore.section?.active !== false);
+const displayLimit = computed(() => Number(homepageStore.section?.display_limit || 4));
 const displayProducts = computed(() => {
   const selected = homepageStore.showcaseProducts.filter((product) => product.active);
   const fallback = productStore.featuredProducts.length ? productStore.featuredProducts : productStore.activeProducts;
-  return (selected.length ? selected : fallback).slice(0, 4);
+  return (selected.length ? selected : fallback).slice(0, displayLimit.value);
 });
 const displayCards = computed(() => homepageStore.activeNavigationCards.slice(0, 2));
 const banner = computed(() => homepageStore.primaryBanner);
 
 onMounted(async () => {
-  await Promise.all([productStore.fetchProducts(), homepageStore.fetchHomepageShowcase()]);
+  await Promise.all([productStore.fetchProducts(), homepageStore.fetchHomepageShowcase(props.sectionKey)]);
 });
 </script>
 

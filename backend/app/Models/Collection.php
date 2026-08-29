@@ -6,16 +6,23 @@ use App\Models\Concerns\HasPublicImageUrls;
 use App\Models\Concerns\HasUniqueSlug;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class Category extends Model
+class Collection extends Model
 {
     use HasPublicImageUrls;
     use HasUniqueSlug;
 
+    public const TYPES = [
+        'solution',
+        'campaign',
+        'merchandising',
+        'featured',
+    ];
+
     protected $fillable = [
         'name',
         'slug',
+        'type',
         'description',
         'image',
         'active',
@@ -29,12 +36,7 @@ class Category extends Model
 
     protected $appends = ['image_url'];
 
-    public function products(): HasMany
-    {
-        return $this->hasMany(Product::class);
-    }
-
-    public function assignedProducts(): BelongsToMany
+    public function products(): BelongsToMany
     {
         return $this->belongsToMany(Product::class)
             ->withPivot(['sort_order', 'active'])

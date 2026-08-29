@@ -4,12 +4,12 @@ import { useRoute } from 'vue-router';
 import WebsiteLayout from '../../components/layout/WebsiteLayout.vue';
 import ProductGrid from '../../components/website/ProductGrid.vue';
 import { useSeo } from '../../lib/seo';
-import { useCategoryStore } from '../../stores/categoryStore';
+import { useCollectionStore } from '../../stores/collectionStore';
 import { useProductStore } from '../../stores/productStore';
 import type { Product } from '../../types/product';
 
 const route = useRoute();
-const categoryStore = useCategoryStore();
+const collectionStore = useCollectionStore();
 const productStore = useProductStore();
 
 const products = ref<Product[]>([]);
@@ -20,15 +20,15 @@ const page = ref(1);
 const hasMore = ref(false);
 const perPage = 24;
 const currentSlug = computed(() => String(route.params.slug || ''));
-const category = computed(() => categoryStore.categories.find((item) => item.slug === currentSlug.value));
+const collection = computed(() => collectionStore.collections.find((item) => item.slug === currentSlug.value));
 
 useSeo({
-  title: computed(() => category.value?.name || 'Product Category'),
-  description: computed(() => category.value?.description || `Browse Eco Buka products in the ${currentSlug.value.replace(/-/g, ' ')} category.`),
-  canonicalPath: computed(() => `/category/${currentSlug.value}`),
+  title: computed(() => collection.value?.name || 'Eco Buka Collection'),
+  description: computed(() => collection.value?.description || `Browse Eco Buka products selected for ${currentSlug.value.replace(/-/g, ' ')}.`),
+  canonicalPath: computed(() => `/collections/${currentSlug.value}`),
 });
 
-async function loadCategory(slug: string) {
+async function loadCollection(slug: string) {
   loading.value = true;
   error.value = '';
   products.value = [];
@@ -36,18 +36,18 @@ async function loadCategory(slug: string) {
   hasMore.value = false;
 
   try {
-    if (!categoryStore.categories.length) await categoryStore.fetchCategories();
+    if (!collectionStore.collections.length) await collectionStore.fetchCollections();
 
-    if (!category.value) {
+    if (!collection.value) {
       loading.value = false;
       return;
     }
 
-    const result = await productStore.fetchProductsByCategory(slug, page.value, perPage);
+    const result = await productStore.fetchProductsByCollection(slug, page.value, perPage);
     products.value = result.products;
     hasMore.value = result.hasMore;
   } catch {
-    error.value = 'We could not load this category right now.';
+    error.value = 'We could not load this collection right now.';
   } finally {
     loading.value = false;
   }
@@ -60,7 +60,7 @@ async function loadMoreProducts() {
 
   try {
     const nextPage = page.value + 1;
-    const result = await productStore.fetchProductsByCategory(currentSlug.value, nextPage, perPage);
+    const result = await productStore.fetchProductsByCollection(currentSlug.value, nextPage, perPage);
     products.value = [...products.value, ...result.products];
     page.value = result.currentPage;
     hasMore.value = result.hasMore;
@@ -71,19 +71,20 @@ async function loadMoreProducts() {
   }
 }
 
-onMounted(() => loadCategory(currentSlug.value));
-watch(currentSlug, (slug) => loadCategory(slug));
+onMounted(() => loadCollection(currentSlug.value));
+watch(currentSlug, (slug) => loadCollection(slug));
 </script>
 
 <template>
   <WebsiteLayout>
     <section class="bg-mist py-10 sm:py-12 lg:py-14">
       <div class="container-shell">
-        <p class="label">Category</p>
-        <h1 class="mt-2 text-3xl font-black sm:text-4xl">{{ category?.name || (loading ? 'Loading category' : 'Category not found') }}</h1>
-        <p v-if="category?.description" class="mt-4 max-w-2xl text-sm leading-6 text-slate-600 sm:text-base">{{ category.description }}</p>
+        <p class="label">{{ collection?.type || 'Collection' }}</p>
+        <h1 class="mt-2 text-3xl font-black capitalize sm:text-4xl">{{ collection?.name || (loading ? 'Loading collection' : 'Collection not found') }}</h1>
+        <p v-if="collection?.description" class="mt-4 max-w-2xl text-sm leading-6 text-slate-600 sm:text-base">{{ collection.description }}</p>
       </div>
     </section>
+
     <section class="container-shell py-10 sm:py-12">
       <div v-if="loading" class="rounded-lg border border-line bg-white p-6 text-sm font-semibold text-slate-600">
         Loading products...
@@ -91,11 +92,11 @@ watch(currentSlug, (slug) => loadCategory(slug));
       <div v-else-if="error" class="rounded-lg border border-red-100 bg-red-50 p-6 text-sm font-semibold text-red-700">
         {{ error }}
       </div>
-      <div v-else-if="!category" class="rounded-lg border border-line bg-white p-6 text-sm font-semibold text-slate-600">
-        Category not found.
+      <div v-else-if="!collection" class="rounded-lg border border-line bg-white p-6 text-sm font-semibold text-slate-600">
+        Collection not found.
       </div>
       <div v-else-if="!products.length" class="rounded-lg border border-line bg-white p-6 text-sm font-semibold text-slate-600">
-        No products found in this category.
+        No products found in this collection.
       </div>
       <template v-else>
         <ProductGrid :products="products" />

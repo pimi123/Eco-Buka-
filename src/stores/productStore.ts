@@ -8,7 +8,45 @@ type LaravelProduct = Omit<Product, 'category'> & {
   main_image_url?: string | null;
   gallery_image_urls?: string[];
   category?: { id: number | string; name: string; slug: string } | string;
+  categories?: { id: number | string; name: string; slug: string }[];
+  collections?: { id: number | string; name: string; slug: string; type?: string }[];
 };
+
+type PaginatedProducts = {
+  data: LaravelProduct[];
+  current_page: number;
+  last_page: number;
+  per_page: number;
+  total?: number;
+};
+
+export type ProductListResult = {
+  products: Product[];
+  hasMore: boolean;
+  currentPage: number;
+  lastPage: number;
+  total?: number;
+};
+
+function mapProductListResponse(data: LaravelProduct[] | PaginatedProducts): ProductListResult {
+  if (Array.isArray(data)) {
+    return {
+      products: data.map(mapLaravelProduct),
+      hasMore: false,
+      currentPage: 1,
+      lastPage: 1,
+      total: data.length,
+    };
+  }
+
+  return {
+    products: data.data.map(mapLaravelProduct),
+    hasMore: data.current_page < data.last_page,
+    currentPage: data.current_page,
+    lastPage: data.last_page,
+    total: data.total,
+  };
+}
 
 function mapLaravelProduct(product: LaravelProduct): Product {
   return {
@@ -16,6 +54,9 @@ function mapLaravelProduct(product: LaravelProduct): Product {
     id: String(product.id),
     category_id: product.category_id ? String(product.category_id) : null,
     category: typeof product.category === 'object' ? product.category.name : product.category,
+    categories: product.categories?.map((category) => ({ ...category, id: String(category.id) })) || [],
+    collections: product.collections?.map((collection) => ({ ...collection, id: String(collection.id) })) || [],
+    collection_ids: product.collections?.map((collection) => String(collection.id)) || [],
     image_url: product.image_url || product.main_image_url || null,
     gallery: product.gallery || product.gallery_image_urls || [],
   };
@@ -57,14 +98,14 @@ export const useProductStore = defineStore('products', () => {
     loading.value = false;
   }
 
-  async function fetchProductsByCategory(slug: string) {
+  async function fetchProductsByCategory(slug: string, page = 1, perPage = 24): Promise<ProductListResult> {
     loading.value = true;
 
     if (hasLaravelApiConfig) {
       try {
-        const data = await apiGet<LaravelProduct[]>(`/products/category/${slug}`);
+        const data = await apiGet<LaravelProduct[] | PaginatedProducts>(`/products/category/${slug}?page=${page}&per_page=${perPage}`);
         loading.value = false;
-        return data.map(mapLaravelProduct);
+        return mapProductListResponse(data);
       } catch {
         // Fall through to the configured local/Supabase strategy.
       }
@@ -84,8 +125,50 @@ export const useProductStore = defineStore('products', () => {
       return categoryId === normalizedSlug || categoryNameSlug === normalizedSlug;
     });
 
+    const start = (page - 1) * perPage;
+    const pagedProducts = filteredProducts.slice(start, start + perPage);
+
     loading.value = false;
-    return filteredProducts;
+    return {
+      products: pagedProducts,
+      hasMore: start + perPage < filteredProducts.length,
+      currentPage: page,
+      lastPage: Math.max(Math.ceil(filteredProducts.length / perPage), 1),
+      total: filteredProducts.length,
+    };
+  }
+
+  async function fetchProductsByCollection(slug: string, page = 1, perPage = 24): Promise<ProductListResult> {
+    loading.value = true;
+
+    if (hasLaravelApiConfig) {
+      try {
+        const data = await apiGet<LaravelProduct[] | PaginatedProducts>(`/collections/${slug}/products?page=${page}&per_page=${perPage}`);
+        loading.value = false;
+        return mapProductListResponse(data);
+      } catch {
+        // Fall through to local filtering for offline previews.
+      }
+    }
+
+    if (!products.value.length) await fetchProducts();
+
+    const normalizedSlug = slug.toLowerCase();
+    const filteredProducts = activeProducts.value.filter((product) =>
+      product.collections?.some((collection) => collection.slug === normalizedSlug),
+    );
+
+    const start = (page - 1) * perPage;
+    const pagedProducts = filteredProducts.slice(start, start + perPage);
+
+    loading.value = false;
+    return {
+      products: pagedProducts,
+      hasMore: start + perPage < filteredProducts.length,
+      currentPage: page,
+      lastPage: Math.max(Math.ceil(filteredProducts.length / perPage), 1),
+      total: filteredProducts.length,
+    };
   }
 
   async function saveProduct(product: Partial<Product>) {
@@ -106,5 +189,5 @@ export const useProductStore = defineStore('products', () => {
     return saveProduct({ ...product, active: !product.active });
   }
 
-  return { products, activeProducts, featuredProducts, loading, fetchProducts, fetchProductsByCategory, saveProduct, deleteProduct, toggleActive };
+  return { products, activeProducts, featuredProducts, loading, fetchProducts, fetchProductsByCategory, fetchProductsByCollection, saveProduct, deleteProduct, toggleActive };
 });

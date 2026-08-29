@@ -1,12 +1,15 @@
 <script setup lang="ts">
 import { Menu, Search, ShoppingBag, X } from 'lucide-vue-next';
-import { onBeforeUnmount, onMounted, ref } from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import { useCartStore } from '../../stores/cartStore';
+import { useCollectionStore } from '../../stores/collectionStore';
 
 const open = ref(false);
 const headerRef = ref<HTMLElement | null>(null);
 const cartStore = useCartStore();
-const nav = [
+const collectionStore = useCollectionStore();
+
+const fallbackNav = [
   ['Power Stations', '/category/power-stations'],
   ['Solar Panels', '/category/solar-panels'],
   ['Solar Generators', '/category/solar-generators'],
@@ -14,6 +17,11 @@ const nav = [
   ['Accessories', '/category/accessories'],
   ['Solutions', '/category/solutions'],
 ];
+
+const nav = computed(() => {
+  const solutions = collectionStore.solutionCollections.slice(0, 4).map((collection) => [collection.name, `/collections/${collection.slug}`]);
+  return solutions.length ? [...solutions, ['Power Stations', '/category/power-stations'], ['Accessories', '/category/accessories']] : fallbackNav;
+});
 
 const closeMenu = () => {
   open.value = false;
@@ -34,6 +42,7 @@ const handleKeydown = (event: KeyboardEvent) => {
 };
 
 onMounted(() => {
+  collectionStore.fetchCollections();
   document.addEventListener('pointerdown', handlePointerDown);
   document.addEventListener('keydown', handleKeydown);
   window.addEventListener('scroll', closeMenu, { passive: true });
@@ -61,8 +70,8 @@ onBeforeUnmount(() => {
         <RouterLink v-for="[label, to] in nav" :key="label" :to="to" class="hover:text-energy">{{ label }}</RouterLink>
       </nav>
       <div class="hidden min-w-0 flex-1 justify-end lg:flex">
-        <RouterLink to="/search" class="flex h-10 w-full max-w-[220px] items-center gap-2 rounded-md border border-line px-3 text-sm text-slate-500 2xl:max-w-xs">
-          <Search class="h-4 w-4" /> Search products
+        <RouterLink to="/search">
+          <Search class="h-4 w-4" />
         </RouterLink>
       </div>
       <div class="flex items-center gap-2">
@@ -77,8 +86,8 @@ onBeforeUnmount(() => {
     </div>
     <div v-if="open" class="absolute left-0 right-0 top-full border-t border-line bg-white shadow-panel xl:hidden">
       <div class="container-shell grid max-h-[calc(100vh-6.25rem)] gap-1 overflow-y-auto py-4">
-        <RouterLink to="/search" class="mb-2 flex min-h-11 items-center gap-2 rounded-md border border-line px-3 text-sm text-slate-500" @click="open = false">
-          <Search class="h-4 w-4" /> Search products
+        <RouterLink to="/search" class="mb-2 px-3 flex min-h-11 items-center gap-2 rounded-md text-slate-500" @click="open = false">
+          <Search class="h-4 w-4" />
         </RouterLink>
         <RouterLink v-for="[label, to] in nav" :key="label" :to="to" class="rounded-md px-3 py-3 text-base font-semibold hover:bg-mist sm:text-sm" @click="open = false">{{ label }}</RouterLink>
       </div>

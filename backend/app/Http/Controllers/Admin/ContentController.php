@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Category;
+use App\Models\Collection;
 use App\Models\FeatureBanner;
 use App\Models\HeroBanner;
 use App\Models\NavigationCard;
@@ -26,7 +27,9 @@ class ContentController extends Controller
     {
         $config = $this->config($resource);
         $items = $config['model']::query()
-            ->when($resource === 'products', fn ($query) => $query->with('category'))
+            ->when($resource === 'products', fn ($query) => $query->with(['category', 'categories', 'collections']))
+            ->when($resource === 'collections', fn ($query) => $query->withCount('products'))
+            ->when($resource === 'promo-cards', fn ($query) => $query->with('homepageSection'))
             ->orderBy('sort_order')
             ->latest()
             ->paginate(20);
@@ -43,7 +46,7 @@ class ContentController extends Controller
             'resource' => $resource,
             'config' => $config,
             'item' => $item,
-            'options' => $this->options(),
+            'options' => $this->options($resource),
         ]);
     }
 
@@ -56,6 +59,8 @@ class ContentController extends Controller
         try {
             $item = DB::transaction(function () use ($request, $resource, $config, $data) {
                 $item = $config['model']::create($data);
+                $this->syncProductRelations($request, $resource, $item);
+                $this->syncCollectionProducts($request, $resource, $item);
                 $this->syncShowcaseProducts($request, $resource, $item);
 
                 return $item;
@@ -76,13 +81,55 @@ class ContentController extends Controller
         if ($resource === 'showcase-sections') {
             $item->load('products');
         }
+        if ($resource === 'products') {
+            $item->load(['categories', 'collections']);
+        }
+        if ($resource === 'collections') {
+            $item->load('products.category');
+        }
+        if ($resource === 'promo-cards') {
+            $item->load('homepageSection');
+        }
 
         return view('admin.content.form', [
             'resource' => $resource,
             'config' => $config,
             'item' => $item,
-            'options' => $this->options(),
+            'options' => $this->options($resource),
         ]);
+    }
+
+    public function productPicker(Request $request)
+    {
+        $query = trim((string) $request->query('query', ''));
+        $selectedIds = collect(explode(',', (string) $request->query('selected', '')))
+            ->filter()
+            ->map(fn ($id) => (int) $id)
+            ->values();
+
+        $products = Product::query()
+            ->with('category:id,name,slug')
+            ->when($query !== '', function ($builder) use ($query): void {
+                $builder->where(function ($inner) use ($query): void {
+                    $inner->where('name', 'like', "%{$query}%")
+                        ->orWhere('slug', 'like', "%{$query}%")
+                        ->orWhere('short_description', 'like', "%{$query}%");
+                });
+            })
+            ->when($query === '' && $selectedIds->isNotEmpty(), fn ($builder) => $builder->whereIn('id', $selectedIds))
+            ->orderBy('name')
+            ->limit(20)
+            ->get(['id', 'category_id', 'name', 'slug', 'price', 'active'])
+            ->map(fn (Product $product) => [
+                'id' => $product->id,
+                'name' => $product->name,
+                'slug' => $product->slug,
+                'price' => $product->price,
+                'active' => $product->active,
+                'category' => $product->category?->name,
+            ]);
+
+        return response()->json($products);
     }
 
     public function update(Request $request, string $resource, int $id)
@@ -96,6 +143,8 @@ class ContentController extends Controller
         try {
             DB::transaction(function () use ($request, $resource, $item, $data): void {
                 $item->update($data);
+                $this->syncProductRelations($request, $resource, $item);
+                $this->syncCollectionProducts($request, $resource, $item);
                 $this->syncShowcaseProducts($request, $resource, $item);
             });
             $this->pendingUploadedFiles = [];
@@ -131,9 +180,28 @@ class ContentController extends Controller
                 'video' => ['nullable', 'file', 'mimetypes:video/mp4,video/webm,video/ogg', 'max:51200'],
                 'gallery' => ['nullable', 'array'],
                 'category' => ['nullable', 'integer', 'exists:categories,id'],
+                'category_multi' => ['nullable', 'array'],
+                'collection_multi' => ['nullable', 'array'],
+                'product_multi' => ['nullable', 'array'],
+                'homepage_section' => ['nullable', 'integer', 'exists:showcase_sections,id'],
+                'collection_type' => ['nullable', Rule::in(Collection::TYPES)],
+                'section_type' => ['nullable', Rule::in(['product_grid', 'product_carousel', 'promo_cards', 'category_carousel', 'hero_banner', 'video_banner', 'mixed_showcase'])],
+                'source_type' => ['nullable', Rule::in(['manual_products', 'category', 'collection', 'manual_cards'])],
                 'json' => ['nullable', 'string'],
                 default => ['nullable', 'string'],
             };
+
+            if ($type === 'category_multi') {
+                $rules[$field.'.*'] = ['integer', 'exists:categories,id'];
+            }
+
+            if ($type === 'collection_multi') {
+                $rules[$field.'.*'] = ['integer', 'exists:collections,id'];
+            }
+
+            if ($type === 'product_multi') {
+                $rules[$field.'.*'] = ['integer', 'exists:products,id'];
+            }
 
             if ($type === 'gallery') {
                 $rules[$field.'.*'] = ['image', 'max:8192'];
@@ -146,6 +214,10 @@ class ContentController extends Controller
             if ($type === 'image') {
                 $rules[$field.'_remove'] = ['nullable', 'boolean'];
             }
+
+            if ($type === 'video') {
+                $rules[$field.'_remove'] = ['nullable', 'boolean'];
+            }
         }
 
         $data = $request->validate($rules);
@@ -156,7 +228,11 @@ class ContentController extends Controller
             }
 
             if ($type === 'number') {
-                $data[$field] = (int) ($data[$field] ?? 0);
+                if ($field === 'source_id' && (($data[$field] ?? null) === null || ($data[$field] ?? null) === '')) {
+                    $data[$field] = null;
+                } else {
+                    $data[$field] = (int) ($data[$field] ?? 0);
+                }
             }
 
             if ($type === 'price' && (($data[$field] ?? null) === null || ($data[$field] ?? null) === '')) {
@@ -165,6 +241,22 @@ class ContentController extends Controller
 
             if ($type === 'category' && (($data[$field] ?? null) === null || ($data[$field] ?? null) === '')) {
                 $data[$field] = null;
+            }
+
+            if ($type === 'homepage_section') {
+                $sectionId = $data[$field] ?? null;
+                $data[$field] = $sectionId ?: null;
+
+                if ($resource === 'promo-cards' && $sectionId) {
+                    $section = ShowcaseSection::query()->find($sectionId);
+                    if ($section) {
+                        $data['section_key'] = $section->section_key;
+                    }
+                }
+            }
+
+            if (in_array($type, ['category_multi', 'collection_multi', 'product_multi'], true)) {
+                unset($data[$field]);
             }
 
             if ($type === 'image') {
@@ -186,9 +278,26 @@ class ContentController extends Controller
                 unset($data[$field.'_remove']);
             }
 
-            if ($type === 'video' && $request->hasFile($field)) {
-                $data[$field] = $request->file($field)->store($config['folder'].'/videos', 'public');
-                $this->pendingUploadedFiles[] = $data[$field];
+            if ($type === 'video') {
+                $currentVideo = $item?->{$field};
+                $removeVideo = $request->boolean($field.'_remove');
+
+                if ($request->hasFile($field)) {
+                    $data[$field] = $request->file($field)->store($config['folder'].'/videos', 'public');
+                    $this->pendingUploadedFiles[] = $data[$field];
+
+                    if ($currentVideo) {
+                        $this->pendingDeletedFiles[] = $currentVideo;
+                    }
+                } elseif ($removeVideo) {
+                    $data[$field] = null;
+
+                    if ($currentVideo) {
+                        $this->pendingDeletedFiles[] = $currentVideo;
+                    }
+                }
+
+                unset($data[$field.'_remove']);
             }
 
             if ($type === 'gallery') {
@@ -363,12 +472,59 @@ class ContentController extends Controller
         $item->products()->sync($sync);
     }
 
-    private function options(): array
+    private function syncProductRelations(Request $request, string $resource, Model $item): void
     {
-        return [
+        if ($resource !== 'products') {
+            return;
+        }
+
+        $categoryIds = collect($request->input('category_ids', []))
+            ->push($item->category_id)
+            ->filter()
+            ->unique()
+            ->values();
+
+        $categorySync = [];
+        foreach ($categoryIds as $index => $categoryId) {
+            $categorySync[$categoryId] = ['sort_order' => $index + 1, 'active' => true];
+        }
+
+        $collectionSync = [];
+        foreach (collect($request->input('collection_ids', []))->filter()->unique()->values() as $index => $collectionId) {
+            $collectionSync[$collectionId] = ['sort_order' => $index + 1, 'active' => true];
+        }
+
+        $item->categories()->sync($categorySync);
+        $item->collections()->sync($collectionSync);
+    }
+
+    private function syncCollectionProducts(Request $request, string $resource, Model $item): void
+    {
+        if ($resource !== 'collections') {
+            return;
+        }
+
+        $sync = [];
+        foreach (collect($request->input('product_ids', []))->filter()->unique()->values() as $index => $productId) {
+            $sync[$productId] = ['sort_order' => $index + 1, 'active' => true];
+        }
+
+        $item->products()->sync($sync);
+    }
+
+    private function options(string $resource): array
+    {
+        $options = [
             'categories' => Category::orderBy('name')->pluck('name', 'id'),
-            'products' => Product::orderBy('name')->get(),
+            'collections' => Collection::orderBy('type')->orderBy('name')->get(),
+            'homepageSections' => ShowcaseSection::orderBy('sort_order')->orderBy('title')->get(),
         ];
+
+        if ($resource === 'showcase-sections') {
+            $options['products'] = Product::orderBy('name')->get();
+        }
+
+        return $options;
     }
 
     private function config(string $resource): array
@@ -388,14 +544,24 @@ class ContentController extends Controller
                 'model' => Category::class,
                 'table' => 'categories',
                 'folder' => 'categories',
+                'description' => 'Technical product grouping: what the product is, such as Power Stations, Solar Panels, DELTA Series, or Accessories.',
                 'fields' => ['name' => 'required', 'slug' => 'slug', 'description' => 'textarea', 'image' => 'image', 'active' => 'boolean', 'sort_order' => 'number'],
+            ],
+            'collections' => [
+                'label' => 'Collection',
+                'model' => Collection::class,
+                'table' => 'collections',
+                'folder' => 'collections',
+                'description' => 'Flexible marketing or solution group: Home Backup, Summer Sale, New Products, Popular Products, or Business Solutions.',
+                'fields' => ['name' => 'required', 'slug' => 'slug', 'type' => 'collection_type', 'description' => 'textarea', 'image' => 'image', 'product_ids' => 'product_multi', 'active' => 'boolean', 'sort_order' => 'number'],
             ],
             'products' => [
                 'label' => 'Product',
                 'model' => Product::class,
                 'table' => 'products',
                 'folder' => 'products',
-                'fields' => ['category_id' => 'category', 'name' => 'required', 'slug' => 'slug', 'short_description' => 'textarea', 'description' => 'textarea', 'price' => 'price', 'old_price' => 'price', 'badge' => 'text', 'main_image' => 'image', 'gallery_images' => 'gallery', 'specs' => 'json', 'included_items' => 'json', 'downloads' => 'json', 'featured' => 'boolean', 'active' => 'boolean', 'sort_order' => 'number'],
+                'description' => 'The sellable item. Assign one primary category, optional extra technical categories, and any collections/campaigns where this product should appear.',
+                'fields' => ['category_id' => 'category', 'category_ids' => 'category_multi', 'collection_ids' => 'collection_multi', 'name' => 'required', 'slug' => 'slug', 'short_description' => 'textarea', 'description' => 'textarea', 'price' => 'price', 'old_price' => 'price', 'badge' => 'text', 'main_image' => 'image', 'gallery_images' => 'gallery', 'specs' => 'json', 'included_items' => 'json', 'downloads' => 'json', 'featured' => 'boolean', 'active' => 'boolean', 'sort_order' => 'number'],
             ],
             'hero-banners' => [
                 'label' => 'Hero Banner',
@@ -404,19 +570,21 @@ class ContentController extends Controller
                 'folder' => 'hero-banners',
                 'fields' => ['eyebrow' => 'text', 'title' => 'required', 'subtitle' => 'textarea', 'button_text' => 'text', 'button_link' => 'text', 'second_button_text' => 'text', 'second_button_link' => 'text', 'background_image' => 'image', 'mobile_background_image' => 'image', 'text_color' => 'text', 'text_alignment' => 'text', 'active' => 'boolean', 'sort_order' => 'number'],
             ],
-            'promo-cards' => [
+                'promo-cards' => [
                 'label' => 'Promo Card',
                 'model' => PromoCard::class,
                 'table' => 'promo_cards',
                 'folder' => 'promo-cards',
-                'fields' => ['section_key' => 'text', 'label' => 'text', 'title' => 'required', 'subtitle' => 'textarea', 'button_text' => 'text', 'button_link' => 'text', 'category_slug' => 'text', 'background_image' => 'image', 'mobile_background_image' => 'image', 'text_color' => 'text', 'active' => 'boolean', 'sort_order' => 'number'],
+                'description' => 'Marketing card, not necessarily a product. Use this for campaign cards, sale cards, or visual links into categories/collections.',
+                'fields' => ['homepage_section_id' => 'homepage_section', 'label' => 'text', 'title' => 'required', 'subtitle' => 'textarea', 'button_text' => 'text', 'button_link' => 'text', 'category_slug' => 'text', 'background_image' => 'image', 'mobile_background_image' => 'image', 'background_video' => 'video', 'text_color' => 'text', 'active' => 'boolean', 'sort_order' => 'number'],
             ],
             'showcase-sections' => [
-                'label' => 'Showcase Section',
+                'label' => 'Homepage Section',
                 'model' => ShowcaseSection::class,
                 'table' => 'showcase_sections',
                 'folder' => 'showcase-sections',
-                'fields' => ['section_key' => 'required', 'title' => 'text', 'subtitle' => 'textarea', 'active' => 'boolean', 'sort_order' => 'number'],
+                'description' => 'Homepage display block. Choose how it should look and whether products come from manual selection, a category, or a collection.',
+                'fields' => ['section_key' => 'required', 'title' => 'text', 'subtitle' => 'textarea', 'section_type' => 'section_type', 'source_type' => 'source_type', 'source_id' => 'number', 'source_slug' => 'text', 'display_limit' => 'number', 'layout_variant' => 'text', 'banner_image' => 'image', 'mobile_banner_image' => 'image', 'button_text' => 'text', 'button_link' => 'text', 'active' => 'boolean', 'sort_order' => 'number'],
             ],
             'navigation-cards' => [
                 'label' => 'Navigation Card',

@@ -5,6 +5,11 @@
         <h1 class="text-2xl font-black">{{ $config['label'] }}s</h1>
         <a class="rounded-md bg-slate-950 px-4 py-3 text-center text-sm font-bold text-white" href="{{ route('admin.content.create', $resource) }}">Add {{ $config['label'] }}</a>
     </div>
+    @if (!empty($config['description']))
+        <p class="mt-3 max-w-3xl rounded-lg border border-sky-100 bg-sky-50 p-3 text-sm font-semibold leading-6 text-sky-900">
+            {{ $config['description'] }}
+        </p>
+    @endif
     <div class="mt-5 overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
         <div class="overflow-x-auto">
             <table class="min-w-[760px] w-full text-left text-sm">
@@ -15,7 +20,13 @@
                     @foreach ($items as $item)
                         <tr>
                             <td class="px-4 py-3 font-semibold">{{ $item->name ?? $item->title ?? $item->section_heading ?? $item->section_key }}</td>
-                            <td class="px-4 py-3">{{ $item->slug ?? $item->section_key ?? '-' }}</td>
+                            <td class="px-4 py-3">
+                                @if ($resource === 'promo-cards')
+                                    {{ $item->homepageSection?->title ?: $item->section_key ?: '-' }}
+                                @else
+                                    {{ $item->slug ?? $item->section_key ?? '-' }}
+                                @endif
+                            </td>
                             <td class="px-4 py-3">{{ $item->sort_order }}</td>
                             <td class="px-4 py-3">{{ $item->active ? 'Yes' : 'No' }}</td>
                             <td class="px-4 py-3">

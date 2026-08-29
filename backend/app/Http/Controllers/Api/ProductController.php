@@ -14,10 +14,10 @@ class ProductController extends Controller
         $categorySlug = trim((string) $request->query('category', ''));
 
         if ($categorySlug !== '') {
-            return $this->productsForCategorySlug($categorySlug)->get();
+            return $this->productListResponse($request, $this->productsForCategorySlug($categorySlug));
         }
 
-        return $this->activeProducts()->get();
+        return $this->productListResponse($request, $this->activeProducts());
     }
 
     public function featured()
@@ -40,9 +40,9 @@ class ProductController extends Controller
             ->get();
     }
 
-    public function byCategory(string $slug)
+    public function byCategory(Request $request, string $slug)
     {
-        return $this->productsForCategorySlug($slug)->get();
+        return $this->productListResponse($request, $this->productsForCategorySlug($slug));
     }
 
     public function show(string $slug)
@@ -54,7 +54,7 @@ class ProductController extends Controller
     {
         return Product::query()
             ->where('active', true)
-            ->with('category:id,name,slug')
+            ->with(['category:id,name,slug', 'categories:id,name,slug', 'collections:id,name,slug,type'])
             ->orderBy('sort_order')
             ->orderByDesc('created_at');
     }
@@ -63,6 +63,23 @@ class ProductController extends Controller
     {
         $category = Category::query()->where('active', true)->where('slug', $slug)->firstOrFail();
 
-        return $this->activeProducts()->where('category_id', $category->id);
+        return $this->activeProducts()
+            ->where(function ($query) use ($category): void {
+                $query->where('category_id', $category->id)
+                    ->orWhereHas('categories', fn ($inner) => $inner
+                        ->where('categories.id', $category->id)
+                        ->where('category_product.active', true));
+            });
+    }
+
+    private function productListResponse(Request $request, $query)
+    {
+        if (!$request->has('per_page')) {
+            return $query->get();
+        }
+
+        $perPage = min(max((int) $request->query('per_page', 24), 1), 60);
+
+        return $query->paginate($perPage);
     }
 }

@@ -4,7 +4,7 @@ import { computed, onMounted, ref } from 'vue';
 import { apiGet, hasLaravelApiConfig } from '../../lib/api';
 import { optimizedImageUrl } from '../../lib/responsiveImages';
 import { demoPromotionalCategoryCards } from '../../lib/demoData';
-import type { HomepagePromoCard } from '../../types/homepage';
+import type { HomepagePromoCard, HomepageSection } from '../../types/homepage';
 
 const fallbackUrl = '/promo/optimized/delta-max-series-1280.jpg';
 
@@ -20,13 +20,25 @@ const props = withDefaults(
 );
 
 const loadedCards = ref<HomepagePromoCard[]>([]);
+const section = ref<HomepageSection | null>(null);
 const loading = ref(false);
 const error = ref<string | null>(null);
 
 const activeLoadedCards = computed(() => loadedCards.value.filter((card) => card.active !== false));
 const cardsToRender = computed(() =>
-  (props.cards?.length ? props.cards : activeLoadedCards.value.length ? activeLoadedCards.value : demoPromotionalCategoryCards).filter((card) => card.active !== false),
+  (props.cards?.length ? props.cards : activeLoadedCards.value.length ? activeLoadedCards.value : demoPromotionalCategoryCards)
+    .filter((card) => card.active !== false)
+    .slice(0, Number(section.value?.display_limit || 24)),
 );
+const sectionTitle = computed(() => section.value?.title || '');
+const sectionSubtitle = computed(() => section.value?.subtitle || '');
+const layoutVariant = computed(() => {
+  const variant = section.value?.layout_variant || (cardsToRender.value.length === 1 ? 'single_banner' : 'two_cards');
+  return ['single_banner', 'two_cards', 'grid', 'carousel'].includes(variant) ? variant : 'two_cards';
+});
+const isSingleBanner = computed(() => layoutVariant.value === 'single_banner');
+const isCarousel = computed(() => layoutVariant.value === 'carousel');
+const isGrid = computed(() => layoutVariant.value === 'grid');
 
 function cardLink(card: HomepagePromoCard) {
   const link = card.button_link || (card.category_slug ? `/category/${card.category_slug}` : '/products');
@@ -41,13 +53,43 @@ function ariaLabel(card: HomepagePromoCard) {
   return card.category_slug ? `View products in ${card.title} category` : `View ${card.title}`;
 }
 
+function wrapperClass() {
+  if (isCarousel.value) {
+    return 'flex snap-x gap-4 overflow-x-auto pb-2 [-ms-overflow-style:none] [scrollbar-width:none] sm:gap-5 lg:gap-6 [&::-webkit-scrollbar]:hidden';
+  }
+
+  if (isGrid.value) {
+    return 'grid gap-4 sm:grid-cols-2 lg:grid-cols-3';
+  }
+
+  if (isSingleBanner.value) {
+    return 'grid gap-5';
+  }
+
+  return 'grid gap-5 md:grid-cols-2 lg:gap-6';
+}
+
+function cardClass() {
+  if (isCarousel.value) {
+    return 'w-[82vw] max-w-[420px] shrink-0 snap-start sm:w-[46vw] lg:w-[38vw]';
+  }
+
+  if (isSingleBanner.value) {
+    return 'min-h-[320px] sm:min-h-[420px] lg:min-h-[460px]';
+  }
+
+  return 'min-h-[280px] sm:min-h-[340px] lg:min-h-[380px]';
+}
+
 onMounted(async () => {
   if (props.cards?.length || !hasLaravelApiConfig) return;
 
   loading.value = true;
   error.value = null;
   try {
-    loadedCards.value = await apiGet<HomepagePromoCard[]>(`/home/promo-cards/${props.sectionKey}`);
+    const data = await apiGet<{ section: HomepageSection | null; cards: HomepagePromoCard[] }>(`/home/promo-card-section/${props.sectionKey}`);
+    section.value = data.section;
+    loadedCards.value = data.cards;
   } catch (requestError) {
     error.value = requestError instanceof Error ? requestError.message : 'Promotional cards could not be loaded.';
     loadedCards.value = demoPromotionalCategoryCards;
@@ -60,11 +102,20 @@ onMounted(async () => {
 <template>
   <section v-if="loading || cardsToRender.length" class="bg-white py-8 sm:py-12 lg:py-14" aria-label="Promotional category cards">
     <div class="container-shell">
-      <div v-if="loading" class="grid gap-5 md:grid-cols-2 lg:gap-6">
+      <div v-if="sectionTitle || sectionSubtitle" class="mb-5 max-w-3xl sm:mb-7">
+        <h2 v-if="sectionTitle" class="text-2xl font-black leading-tight text-ink sm:text-3xl">
+          {{ sectionTitle }}
+        </h2>
+        <p v-if="sectionSubtitle" class="mt-2 text-sm leading-6 text-slate-600 sm:text-base">
+          {{ sectionSubtitle }}
+        </p>
+      </div>
+
+      <div v-if="loading" :class="wrapperClass()">
         <div v-for="index in 2" :key="index" class="h-[320px] animate-pulse rounded-lg bg-mist sm:h-[360px]" />
       </div>
 
-      <div v-else class="grid gap-5 md:grid-cols-2 lg:gap-6">
+      <div v-else :class="wrapperClass()">
         <component
           :is="isExternal(cardLink(card)) ? 'a' : 'RouterLink'"
           v-for="card in cardsToRender"
@@ -74,9 +125,23 @@ onMounted(async () => {
           :target="isExternal(cardLink(card)) ? '_blank' : undefined"
           :rel="isExternal(cardLink(card)) ? 'noreferrer' : undefined"
           :aria-label="ariaLabel(card)"
-          class="group relative min-h-[280px] overflow-hidden rounded-lg bg-ink shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-panel sm:min-h-[340px] lg:min-h-[380px]"
+          class="group relative cursor-pointer overflow-hidden rounded-lg bg-ink shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-panel"
+          :class="cardClass()"
         >
+          <video
+            v-if="card.background_video_url"
+            class="absolute inset-0 h-full w-full object-cover transition duration-700 group-hover:scale-105"
+            :poster="optimizedImageUrl(card.background_image_url || card.mobile_background_image_url, 'desktop') || fallbackUrl"
+            autoplay
+            muted
+            loop
+            playsinline
+            preload="metadata"
+          >
+            <source :src="card.background_video_url" />
+          </video>
           <img
+            v-else
             :src="optimizedImageUrl(card.background_image_url || card.mobile_background_image_url, 'desktop') || fallbackUrl"
             :alt="card.title"
             class="absolute inset-0 h-full w-full object-cover transition duration-700 group-hover:scale-105"
@@ -88,7 +153,7 @@ onMounted(async () => {
           <div class="relative z-10 flex h-full max-w-md flex-col items-start p-5 text-white sm:p-7">
             <h2 v-if="card.title" class="text-xl font-black leading-tight sm:text-2xl">{{ card.title }}</h2>
             <p v-if="card.subtitle" class="mt-3 text-sm font-bold leading-6 text-white/95 sm:text-base">{{ card.subtitle }}</p>
-            <span class="mt-4 inline-flex items-center gap-1 text-sm font-black text-white transition group-hover:gap-2">
+            <span class="mt-5 inline-flex min-h-11 items-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-black text-ink shadow-sm transition duration-300 group-hover:gap-3 group-hover:bg-white/90">
               {{ card.button_text || 'View Products' }}
               <ArrowRight class="h-4 w-4" />
             </span>
