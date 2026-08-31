@@ -22,6 +22,7 @@ class HomepageContentController extends Controller
     {
         $sections = ShowcaseSection::query()
             ->withCount(['products', 'promoCards'])
+            ->whereIn('section_type', ShowcaseSection::SECTION_TYPES)
             ->orderBy('sort_order')
             ->orderBy('title')
             ->get()
@@ -118,7 +119,7 @@ class HomepageContentController extends Controller
             'cards.*.background_image_remove' => ['nullable', 'boolean'],
             'cards.*.mobile_background_image_remove' => ['nullable', 'boolean'],
             'cards.*.background_video_remove' => ['nullable', 'boolean'],
-        ]);
+        ], $this->uploadValidationMessages());
 
         $uploadedFiles = [];
         $filesToDelete = [];
@@ -132,7 +133,7 @@ class HomepageContentController extends Controller
                     'sort_order' => (int) ($data['sort_order'] ?? 0),
                     'active' => $request->boolean('active'),
                     'source_type' => 'manual_cards',
-                    'layout_variant' => $data['layout_variant'] ?? 'two_cards',
+                    'layout_variant' => $data['layout_variant'] ?? 'carousel',
                 ]);
 
                 foreach ($data['cards'] ?? [] as $index => $cardData) {
@@ -214,7 +215,7 @@ class HomepageContentController extends Controller
 
     public function editFeaturedProducts(ShowcaseSection $section)
     {
-        abort_unless(in_array($section->section_type, ['product_grid', 'product_carousel', 'featured_category'], true), 404);
+        abort_unless(in_array($section->section_type, ['product_grid', 'featured_category'], true), 404);
 
         return view('admin.homepage-content.featured-products', [
             'section' => $section,
@@ -225,7 +226,7 @@ class HomepageContentController extends Controller
 
     public function updateFeaturedProducts(Request $request, ShowcaseSection $section)
     {
-        abort_unless(in_array($section->section_type, ['product_grid', 'product_carousel', 'featured_category'], true), 404);
+        abort_unless(in_array($section->section_type, ['product_grid', 'featured_category'], true), 404);
 
         $data = $request->validate([
             'title' => ['nullable', 'string', 'max:255'],
@@ -247,7 +248,7 @@ class HomepageContentController extends Controller
             'banner_image_remove' => ['nullable', 'boolean'],
             'mobile_banner_image_remove' => ['nullable', 'boolean'],
             'background_video_remove' => ['nullable', 'boolean'],
-        ]);
+        ], $this->uploadValidationMessages());
 
         $source = $this->resolveFeaturedSource($data);
         if (! $source) {
@@ -382,7 +383,7 @@ class HomepageContentController extends Controller
             'banner.background_image_remove' => ['nullable', 'boolean'],
             'banner.mobile_background_image_remove' => ['nullable', 'boolean'],
             'banner.background_video_remove' => ['nullable', 'boolean'],
-        ]);
+        ], $this->uploadValidationMessages());
 
         $source = $this->resolveMixedSource($data);
         if (in_array($data['source_type'], ['category', 'collection'], true) && ! $source) {
@@ -547,6 +548,131 @@ class HomepageContentController extends Controller
         return back()->with('status', 'Mixed showcase section updated.');
     }
 
+    public function editVideoBanner(ShowcaseSection $section)
+    {
+        abort_unless($section->section_type === 'video_banner', 404);
+
+        $banner = FeatureBanner::query()
+            ->where('section_key', $section->section_key)
+            ->orderByDesc('active')
+            ->orderBy('sort_order')
+            ->orderBy('id')
+            ->first();
+
+        return view('admin.homepage-content.video-banner', [
+            'section' => $section,
+            'banner' => $banner,
+        ]);
+    }
+
+    public function updateVideoBanner(Request $request, ShowcaseSection $section)
+    {
+        abort_unless($section->section_type === 'video_banner', 404);
+
+        $data = $request->validate([
+            'section_title' => ['nullable', 'string', 'max:255'],
+            'section_subtitle' => ['nullable', 'string'],
+            'section_heading' => ['nullable', 'string', 'max:255'],
+            'eyebrow' => ['nullable', 'string', 'max:255'],
+            'title' => ['nullable', 'string', 'max:255'],
+            'subtitle' => ['nullable', 'string'],
+            'price_text' => ['nullable', 'string', 'max:255'],
+            'button_text' => ['nullable', 'string', 'max:255'],
+            'button_link' => ['nullable', 'string', 'max:255'],
+            'text_color' => ['nullable', Rule::in(['light', 'dark'])],
+            'text_alignment' => ['nullable', Rule::in(['left', 'center', 'right'])],
+            'sort_order' => ['nullable', 'integer', 'min:0'],
+            'active' => ['nullable', 'boolean'],
+            'background_image' => ['nullable', 'image', 'max:8192'],
+            'mobile_background_image' => ['nullable', 'image', 'max:8192'],
+            'background_video' => ['nullable', 'file', 'mimetypes:video/mp4,video/webm,video/ogg', 'max:51200'],
+            'background_image_remove' => ['nullable', 'boolean'],
+            'mobile_background_image_remove' => ['nullable', 'boolean'],
+            'background_video_remove' => ['nullable', 'boolean'],
+        ], $this->uploadValidationMessages());
+
+        $banner = FeatureBanner::query()
+            ->where('section_key', $section->section_key)
+            ->orderByDesc('active')
+            ->orderBy('sort_order')
+            ->orderBy('id')
+            ->first();
+
+        $uploadedFiles = [];
+        $filesToDelete = [];
+
+        try {
+            DB::transaction(function () use ($request, $section, $data, &$banner, &$uploadedFiles, &$filesToDelete): void {
+                $section->update([
+                    'title' => $data['section_title'] ?? null,
+                    'subtitle' => $data['section_subtitle'] ?? null,
+                    'source_type' => 'manual_cards',
+                    'source_id' => null,
+                    'source_slug' => null,
+                    'display_limit' => 1,
+                    'layout_variant' => 'wide_video_banner',
+                    'sort_order' => (int) ($data['sort_order'] ?? 0),
+                    'active' => $request->boolean('active'),
+                ]);
+
+                $banner ??= new FeatureBanner();
+                $banner->fill([
+                    'section_key' => $section->section_key,
+                    'section_heading' => $data['section_heading'] ?? null,
+                    'eyebrow' => $data['eyebrow'] ?? null,
+                    'title' => ($data['title'] ?? null) ?: ($data['section_title'] ?? 'Featured Promo'),
+                    'subtitle' => $data['subtitle'] ?? null,
+                    'price_text' => $data['price_text'] ?? null,
+                    'button_text' => $data['button_text'] ?? null,
+                    'button_link' => $data['button_link'] ?? null,
+                    'text_color' => $data['text_color'] ?? 'light',
+                    'text_alignment' => $data['text_alignment'] ?? 'left',
+                    'sort_order' => 1,
+                    'active' => $request->boolean('active'),
+                ]);
+
+                foreach (['background_image', 'mobile_background_image', 'background_video'] as $fileField) {
+                    if ($request->boolean($fileField.'_remove') && $banner->{$fileField}) {
+                        $filesToDelete[] = $banner->{$fileField};
+                        $banner->{$fileField} = null;
+                    }
+
+                    if ($request->hasFile($fileField)) {
+                        if ($banner->{$fileField}) {
+                            $filesToDelete[] = $banner->{$fileField};
+                        }
+
+                        $folder = $fileField === 'background_video' ? 'feature-banners/videos' : 'feature-banners';
+                        $path = $request->file($fileField)->store($folder, 'public');
+                        $uploadedFiles[] = $path;
+                        $banner->{$fileField} = $path;
+                    }
+                }
+
+                $banner->save();
+
+                FeatureBanner::query()
+                    ->where('section_key', $section->section_key)
+                    ->whereKeyNot($banner->id)
+                    ->update(['active' => false]);
+            });
+        } catch (\Throwable $exception) {
+            foreach ($uploadedFiles as $path) {
+                Storage::disk('public')->delete($path);
+            }
+
+            throw $exception;
+        }
+
+        foreach (array_unique(array_filter($filesToDelete)) as $path) {
+            if (! $this->homepageMediaIsUsedElsewhere($path)) {
+                Storage::disk('public')->delete($path);
+            }
+        }
+
+        return back()->with('status', 'Video banner section updated.');
+    }
+
     private function resolveMixedSource(array $data): Category|Collection|null
     {
         if (($data['source_type'] ?? null) === 'category' && ! empty($data['category_id'])) {
@@ -631,6 +757,24 @@ class HomepageContentController extends Controller
                 $filesToDelete[] = $card->{$field};
             }
         }
+    }
+
+    private function uploadValidationMessages(): array
+    {
+        return [
+            'background_image.max' => 'File size is too large. Maximum image size is 8 MB.',
+            'mobile_background_image.max' => 'File size is too large. Maximum image size is 8 MB.',
+            'banner_image.max' => 'File size is too large. Maximum image size is 8 MB.',
+            'mobile_banner_image.max' => 'File size is too large. Maximum image size is 8 MB.',
+            'background_video.max' => 'File size is too large. Maximum video size is 50 MB. Please upload an optimized MP4, WebM, or Ogg video.',
+            'banner.background_image.max' => 'File size is too large. Maximum image size is 8 MB.',
+            'banner.mobile_background_image.max' => 'File size is too large. Maximum image size is 8 MB.',
+            'banner.background_video.max' => 'File size is too large. Maximum video size is 50 MB. Please upload an optimized MP4, WebM, or Ogg video.',
+            'cards.*.image.max' => 'File size is too large. Maximum image size is 8 MB.',
+            'cards.*.background_image.max' => 'File size is too large. Maximum image size is 8 MB.',
+            'cards.*.mobile_background_image.max' => 'File size is too large. Maximum image size is 8 MB.',
+            'cards.*.background_video.max' => 'File size is too large. Maximum video size is 50 MB. Please upload an optimized MP4, WebM, or Ogg video.',
+        ];
     }
 
     private function promoImageIsUsedElsewhere(string $path): bool

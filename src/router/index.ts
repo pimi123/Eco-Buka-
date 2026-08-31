@@ -9,6 +9,7 @@ const SearchView = () => import('../views/website/SearchView.vue');
 const AboutView = () => import('../views/website/AboutView.vue');
 const ContactView = () => import('../views/website/ContactView.vue');
 const CompanyInformationView = () => import('../views/website/CompanyInformationView.vue');
+const PowerOceanView = () => import('../views/website/PowerOceanView.vue');
 const CartView = () => import('../views/website/CartView.vue');
 const CheckoutView = () => import('../views/website/CheckoutView.vue');
 const OrderSuccessView = () => import('../views/website/OrderSuccessView.vue');
@@ -30,6 +31,7 @@ const router = createRouter({
     { path: '/order-success', name: 'order-success', component: OrderSuccessView },
     { path: '/about', name: 'about', component: AboutView },
     { path: '/company-information', name: 'company-information', component: CompanyInformationView },
+    { path: '/solutions/powerocean', name: 'powerocean', component: PowerOceanView },
     { path: '/contact', name: 'contact', component: ContactView },
     { path: '/:pathMatch(.*)*', redirect: '/' },
   ],

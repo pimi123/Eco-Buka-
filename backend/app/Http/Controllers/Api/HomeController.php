@@ -27,6 +27,7 @@ class HomeController extends Controller
     {
         $section = ShowcaseSection::query()
             ->where('active', true)
+            ->where('section_type', 'promo_cards')
             ->where('section_key', $sectionKey)
             ->first();
 
@@ -61,6 +62,7 @@ class HomeController extends Controller
         $section = ShowcaseSection::query()
             ->where('section_key', $sectionKey)
             ->where('active', true)
+            ->whereIn('section_type', ShowcaseSection::SECTION_TYPES)
             ->firstOrFail();
 
         $products = $this->productsForSection($section);
@@ -93,6 +95,7 @@ class HomeController extends Controller
     {
         $showcaseSections = ShowcaseSection::query()
             ->where('active', true)
+            ->whereIn('section_type', ShowcaseSection::SECTION_TYPES)
             ->orderBy('sort_order')
             ->get()
             ->map(fn (ShowcaseSection $section) => [

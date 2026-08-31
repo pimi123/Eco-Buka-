@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { ChevronLeft, ChevronRight } from 'lucide-vue-next';
-import { onMounted, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
+import { apiGet, hasLaravelApiConfig } from '../../lib/api';
+import { demoPromotionalCategoryCards } from '../../lib/demoData';
 import { optimizedImageUrl } from '../../lib/responsiveImages';
-import { useHomepageStore } from '../../stores/homepageStore';
-import type { HomepagePromoCard } from '../../types/homepage';
+import type { HomepagePromoCard, HomepageSection } from '../../types/homepage';
 
 const props = withDefaults(
   defineProps<{
@@ -18,8 +19,21 @@ const props = withDefaults(
   },
 );
 
-const homepageStore = useHomepageStore();
 const carousel = ref<HTMLElement | null>(null);
+const loadedCards = ref<HomepagePromoCard[]>([]);
+const loadedSection = ref<HomepageSection | null>(null);
+const loading = ref(false);
+const error = ref<string | null>(null);
+
+const activeCards = computed(() =>
+  loadedCards.value
+    .filter((card) => card.active !== false)
+    .sort((a, b) => Number(a.sort_order || 0) - Number(b.sort_order || 0))
+    .slice(0, Number(loadedSection.value?.display_limit || 24)),
+);
+
+const sectionTitle = computed(() => props.title || loadedSection.value?.title || 'New Products');
+const sectionSubtitle = computed(() => props.subtitle || loadedSection.value?.subtitle || '');
 
 function scrollCards(direction: -1 | 1) {
   const container = carousel.value;
@@ -39,22 +53,49 @@ function isExternal(link?: string | null) {
   return Boolean(link && /^https?:\/\//i.test(link));
 }
 
-onMounted(() => {
-  homepageStore.fetchPromoCards(props.sectionKey);
+function mapPromoCard(card: HomepagePromoCard): HomepagePromoCard {
+  return {
+    ...card,
+    background_image_url: card.background_image_url || (card as any).background_image || null,
+    mobile_background_image_url: card.mobile_background_image_url || (card as any).mobile_background_image || null,
+    text_color: card.text_color || 'light',
+    active: card.active !== false,
+    sort_order: Number(card.sort_order || 0),
+  };
+}
+
+onMounted(async () => {
+  loading.value = true;
+  error.value = null;
+
+  if (hasLaravelApiConfig) {
+    try {
+      const data = await apiGet<{ section: HomepageSection | null; cards: HomepagePromoCard[] }>(`/home/promo-card-section/${props.sectionKey}`);
+      loadedSection.value = data.section;
+      loadedCards.value = (data.cards || []).map(mapPromoCard);
+      loading.value = false;
+      return;
+    } catch (requestError) {
+      error.value = requestError instanceof Error ? requestError.message : 'Promo cards could not be loaded.';
+    }
+  }
+
+  loadedCards.value = demoPromotionalCategoryCards.map(mapPromoCard);
+  loading.value = false;
 });
 </script>
 
 <template>
   <section
-    v-if="homepageStore.promoCardsLoading || homepageStore.activePromoCards.length"
+    v-if="loading || activeCards.length"
     class="bg-mist py-8 sm:py-11 lg:py-12"
-    aria-label="New product promotions"
+    :aria-label="sectionTitle"
   >
     <div class="container-shell">
       <div class="mb-5 flex items-end justify-between gap-4 sm:mb-6">
         <div class="min-w-0">
-          <h2 class="text-2xl font-black leading-tight text-ink sm:text-3xl">{{ title }}</h2>
-          <p v-if="subtitle" class="mt-3 max-w-3xl text-sm leading-6 text-slate-600 sm:text-base">{{ subtitle }}</p>
+          <h2 class="text-2xl font-black leading-tight text-ink sm:text-3xl">{{ sectionTitle }}</h2>
+          <p v-if="sectionSubtitle" class="mt-3 max-w-3xl text-sm leading-6 text-slate-600 sm:text-base">{{ sectionSubtitle }}</p>
         </div>
 
         <div class="hidden shrink-0 gap-2 lg:flex">
@@ -78,7 +119,7 @@ onMounted(() => {
       </div>
 
       <div
-        v-if="homepageStore.promoCardsLoading"
+        v-if="loading"
         class="flex gap-4 overflow-hidden"
       >
         <div
@@ -94,7 +135,7 @@ onMounted(() => {
         class="flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2 [-ms-overflow-style:none] [scrollbar-width:none] lg:gap-5 [&::-webkit-scrollbar]:hidden"
       >
         <article
-          v-for="(card, index) in homepageStore.activePromoCards"
+          v-for="(card, index) in activeCards"
           :key="card.id"
           class="group relative h-[280px] w-[84vw] max-w-[360px] shrink-0 snap-start overflow-hidden rounded-lg bg-slate-200 shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-panel sm:h-[330px] sm:w-[360px] lg:h-[356px] lg:w-[390px] xl:w-[410px]"
           :class="[
@@ -154,8 +195,8 @@ onMounted(() => {
         </article>
       </div>
 
-      <p v-if="homepageStore.promoCardsError && !homepageStore.activePromoCards.length" class="mt-4 text-sm font-semibold text-red-600">
-        {{ homepageStore.promoCardsError }}
+      <p v-if="error && !activeCards.length" class="mt-4 text-sm font-semibold text-red-600">
+        {{ error }}
       </p>
     </div>
   </section>

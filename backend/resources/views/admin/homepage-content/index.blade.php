@@ -62,9 +62,9 @@
                 $typeHelp = match ($type) {
                     'promo_cards' => 'This section displays marketing cards. Edit the section title, subtitle, order, and the cards from one screen.',
                     'featured_category' => 'This section displays a category or collection with a large banner and product cards.',
-                    'mixed_showcase' => 'This section displays selected products plus optional navigation cards and a feature banner.',
-                    'product_grid', 'product_carousel' => 'This section displays product cards from a category, collection, or manual selection.',
-                    'video_banner' => 'This section is controlled by Feature Banners with video/image fields.',
+                    'mixed_showcase' => 'This section displays products plus optional side cards and a feature banner, managed from one focused screen.',
+                    'product_grid' => 'This section displays product cards from a category, collection, or manual selection.',
+                    'video_banner' => 'This section displays one wide video/image banner with CTA, managed from one focused screen.',
                     default => 'This section controls one homepage display block.',
                 };
             @endphp
@@ -131,13 +131,12 @@
                         </label>
                         @if ($type === 'promo_cards')
                             <a class="rounded-md border border-slate-300 px-4 py-2 text-center text-sm font-bold" href="{{ route('admin.homepage-content.promo-cards.edit', $section) }}">Edit Section and Cards</a>
-                        @elseif (in_array($type, ['product_grid', 'product_carousel', 'featured_category'], true))
+                        @elseif (in_array($type, ['product_grid', 'featured_category'], true))
                             <a class="rounded-md border border-slate-300 px-4 py-2 text-center text-sm font-bold" href="{{ route('admin.homepage-content.featured-products.edit', $section) }}">Edit Banner and Products</a>
                         @elseif ($type === 'mixed_showcase')
                             <a class="rounded-md border border-slate-300 px-4 py-2 text-center text-sm font-bold" href="{{ route('admin.homepage-content.mixed-showcase.edit', $section) }}">Edit Complete Section</a>
                         @elseif ($type === 'video_banner')
-                            <a class="rounded-md border border-slate-300 px-4 py-2 text-center text-sm font-bold" href="{{ route('admin.content.edit', ['showcase-sections', $section]) }}">Edit Section Info</a>
-                            <a class="rounded-md border border-slate-300 px-4 py-2 text-center text-sm font-bold" href="{{ route('admin.content.index', 'feature-banners') }}">Manage Video Banner</a>
+                            <a class="rounded-md border border-slate-300 px-4 py-2 text-center text-sm font-bold" href="{{ route('admin.homepage-content.video-banner.edit', $section) }}">Edit Video Banner</a>
                         @else
                             <a class="rounded-md border border-slate-300 px-4 py-2 text-center text-sm font-bold" href="{{ route('admin.content.edit', ['showcase-sections', $section]) }}">Edit Section Info</a>
                         @endif

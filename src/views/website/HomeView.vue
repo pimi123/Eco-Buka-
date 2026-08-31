@@ -11,7 +11,6 @@ import type { HomepageSection } from '../../types/homepage';
 const FeaturedCategoryProducts = defineAsyncComponent(() => import('../../components/website/FeaturedCategoryProducts.vue'));
 const FeaturedVideoPromoSection = defineAsyncComponent(() => import('../../components/website/FeaturedVideoPromoSection.vue'));
 const HomepageProductGridSection = defineAsyncComponent(() => import('../../components/website/HomepageProductGridSection.vue'));
-const NewProductsCarousel = defineAsyncComponent(() => import('../../components/website/NewProductsCarousel.vue'));
 const ProductShowcaseSection = defineAsyncComponent(() => import('../../components/website/ProductShowcaseSection.vue'));
 const PromotionalCategoryCardsSection = defineAsyncComponent(() => import('../../components/website/PromotionalCategoryCardsSection.vue'));
 const PromoBanner = defineAsyncComponent(() => import('../../components/website/PromoBanner.vue'));
@@ -117,16 +116,11 @@ async function fetchHomepageSections() {
     <CategoryCarousel :categories="categoryStore.activeCategories" />
 
     <template v-for="section in orderedSections" :key="section.id || section.section_key">
-      <NewProductsCarousel
-        v-if="section.section_type === 'promo_cards' && section.section_key === 'new_products'"
-        :section-key="section.section_key"
-        :title="section.title || 'New Products'"
-        :subtitle="section.subtitle || ''"
-      />
-
       <PromotionalCategoryCardsSection
-        v-else-if="section.section_type === 'promo_cards'"
+        v-if="section.section_type === 'promo_cards'"
         :section-key="section.section_key"
+        :title="section.title || ''"
+        :subtitle="section.subtitle || ''"
       />
 
       <FeaturedCategoryProducts
@@ -142,10 +136,7 @@ async function fetchHomepageSections() {
         :section-key="section.section_key"
       />
 
-      <HomepageProductGridSection
-        v-else-if="section.section_type === 'product_grid' || section.section_type === 'product_carousel'"
-        :section-key="section.section_key"
-      />
+      <HomepageProductGridSection v-else-if="section.section_type === 'product_grid'" :section-key="section.section_key" />
 
       <FeaturedVideoPromoSection
         v-else-if="section.section_type === 'video_banner'"

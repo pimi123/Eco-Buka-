@@ -15,6 +15,7 @@
           <RouterLink to="/category/solar-panels" class="py-1.5">Solar panels</RouterLink>
           <RouterLink to="/category/solar-generators" class="py-1.5">Solar generators</RouterLink>
           <RouterLink to="/category/accessories" class="py-1.5">Accessories</RouterLink>
+          <RouterLink to="/solutions/powerocean" class="py-1.5">PowerOcean</RouterLink>
           <RouterLink to="/contact" class="py-1.5">Request offer</RouterLink>
         </div>
       </div>

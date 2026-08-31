@@ -42,7 +42,7 @@
                             'grid' => 'Responsive card grid',
                             'carousel' => 'Horizontal carousel',
                         ] as $optionValue => $label)
-                            <option value="{{ $optionValue }}" @selected(old('layout_variant', $section->layout_variant ?: 'two_cards') === $optionValue)>{{ $label }}</option>
+                            <option value="{{ $optionValue }}" @selected(old('layout_variant', $section->layout_variant ?: 'carousel') === $optionValue)>{{ $label }}</option>
                         @endforeach
                     </select>
                     <span class="text-xs font-semibold text-slate-500">Use single banner for one strong promotion, two cards for paired campaigns, grid/carousel when there are more items.</span>

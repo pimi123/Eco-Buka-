@@ -41,5 +41,89 @@
             @yield('content')
         </main>
     </div>
+    <script>
+        (() => {
+            const imageLimitBytes = 8 * 1024 * 1024;
+            const videoLimitBytes = 50 * 1024 * 1024;
+
+            function fileLimit(input) {
+                const accept = String(input.getAttribute('accept') || '').toLowerCase();
+                const name = String(input.getAttribute('name') || '').toLowerCase();
+
+                if (accept.includes('video') || name.includes('video')) {
+                    return {
+                        bytes: videoLimitBytes,
+                        label: '50 MB',
+                        type: 'video',
+                    };
+                }
+
+                if (accept.includes('image') || name.includes('image') || name.includes('gallery')) {
+                    return {
+                        bytes: imageLimitBytes,
+                        label: '8 MB',
+                        type: 'image',
+                    };
+                }
+
+                return null;
+            }
+
+            function clearUploadError(input) {
+                input.classList.remove('border-red-400', 'bg-red-50');
+                input.parentElement?.querySelector('[data-upload-size-error]')?.remove();
+            }
+
+            function showUploadError(input, message) {
+                clearUploadError(input);
+                input.classList.add('border-red-400', 'bg-red-50');
+
+                const error = document.createElement('p');
+                error.dataset.uploadSizeError = 'true';
+                error.className = 'text-sm font-semibold text-red-700';
+                error.textContent = message;
+                input.insertAdjacentElement('afterend', error);
+            }
+
+            function validateUpload(input) {
+                const limit = fileLimit(input);
+                if (!limit || !input.files?.length) {
+                    clearUploadError(input);
+                    return true;
+                }
+
+                const oversizedFile = Array.from(input.files).find((file) => file.size > limit.bytes);
+                if (!oversizedFile) {
+                    clearUploadError(input);
+                    return true;
+                }
+
+                showUploadError(
+                    input,
+                    `File size is too large. Maximum ${limit.type} size is ${limit.label}. Please upload an optimized file.`,
+                );
+                input.value = '';
+                return false;
+            }
+
+            document.addEventListener('change', (event) => {
+                if (event.target instanceof HTMLInputElement && event.target.type === 'file') {
+                    validateUpload(event.target);
+                }
+            });
+
+            document.addEventListener('submit', (event) => {
+                const form = event.target;
+                if (!(form instanceof HTMLFormElement)) return;
+
+                const invalidInput = Array.from(form.querySelectorAll('input[type="file"]')).find((input) => !validateUpload(input));
+                if (!invalidInput) return;
+
+                event.preventDefault();
+                invalidInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                invalidInput.focus();
+            });
+        })();
+    </script>
 </body>
 </html>

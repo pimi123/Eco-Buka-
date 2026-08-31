@@ -26,6 +26,8 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::put('/homepage-content-display/{section}/featured-products', [HomepageContentController::class, 'updateFeaturedProducts'])->name('homepage-content.featured-products.update');
     Route::get('/homepage-content-display/{section}/mixed-showcase', [HomepageContentController::class, 'editMixedShowcase'])->name('homepage-content.mixed-showcase.edit');
     Route::put('/homepage-content-display/{section}/mixed-showcase', [HomepageContentController::class, 'updateMixedShowcase'])->name('homepage-content.mixed-showcase.update');
+    Route::get('/homepage-content-display/{section}/video-banner', [HomepageContentController::class, 'editVideoBanner'])->name('homepage-content.video-banner.edit');
+    Route::put('/homepage-content-display/{section}/video-banner', [HomepageContentController::class, 'updateVideoBanner'])->name('homepage-content.video-banner.update');
     Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
     Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
     Route::patch('/orders/{order}', [OrderController::class, 'update'])->name('orders.update');

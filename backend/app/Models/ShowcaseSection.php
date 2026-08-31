@@ -11,6 +11,14 @@ class ShowcaseSection extends Model
 {
     use HasPublicImageUrls;
 
+    public const SECTION_TYPES = [
+        'promo_cards',
+        'featured_category',
+        'mixed_showcase',
+        'product_grid',
+        'video_banner',
+    ];
+
     protected $fillable = [
         'section_key',
         'title',

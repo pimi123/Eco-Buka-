@@ -185,7 +185,7 @@ class ContentController extends Controller
                 'product_multi' => ['nullable', 'array'],
                 'homepage_section' => ['nullable', 'integer', 'exists:showcase_sections,id'],
                 'collection_type' => ['nullable', Rule::in(Collection::TYPES)],
-                'section_type' => ['nullable', Rule::in(['product_grid', 'product_carousel', 'promo_cards', 'category_carousel', 'hero_banner', 'video_banner', 'mixed_showcase'])],
+                'section_type' => ['nullable', Rule::in(ShowcaseSection::SECTION_TYPES)],
                 'source_type' => ['nullable', Rule::in(['manual_products', 'category', 'collection', 'manual_cards'])],
                 'json' => ['nullable', 'string'],
                 default => ['nullable', 'string'],
@@ -220,7 +220,7 @@ class ContentController extends Controller
             }
         }
 
-        $data = $request->validate($rules);
+        $data = $request->validate($rules, $this->uploadValidationMessages());
 
         foreach ($config['fields'] as $field => $type) {
             if ($type === 'boolean') {
@@ -327,7 +327,27 @@ class ContentController extends Controller
             }
         }
 
+        if ($resource === 'showcase-sections' && ($data['section_type'] ?? null) === 'promo_cards') {
+            $data['source_type'] = 'manual_cards';
+            $data['layout_variant'] = $data['layout_variant'] ?: 'carousel';
+            $data['display_limit'] = (int) ($data['display_limit'] ?: 6);
+        }
+
         return $data;
+    }
+
+    private function uploadValidationMessages(): array
+    {
+        return [
+            '*.image' => 'Please upload a valid image file.',
+            '*.mimetypes' => 'Please upload a valid video file. Allowed formats are MP4, WebM, or Ogg.',
+            'image.max' => 'File size is too large. Maximum image size is 8 MB.',
+            'background_image.max' => 'File size is too large. Maximum image size is 8 MB.',
+            'mobile_background_image.max' => 'File size is too large. Maximum image size is 8 MB.',
+            'main_image.max' => 'File size is too large. Maximum image size is 8 MB.',
+            'gallery_images.*.max' => 'File size is too large. Maximum image size is 8 MB.',
+            'background_video.max' => 'File size is too large. Maximum video size is 50 MB. Please upload an optimized MP4, WebM, or Ogg video.',
+        ];
     }
 
     private function deletePendingFiles(): void

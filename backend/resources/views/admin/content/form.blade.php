@@ -39,7 +39,7 @@
                         'product_ids' => 'Products attached to this collection. This does not duplicate products.',
                         'homepage_section_id' => 'Choose the homepage section where this card should appear. This replaces typing hidden keys like new_products.',
                         'type' => 'Solution = customer use case, Campaign = timed sale, Merchandising = curated group, Featured = highlighted group.',
-                        'section_type' => 'Controls how the homepage block is displayed: product grid, carousel, promo cards, video, etc.',
+                        'section_type' => 'Controls the homepage block type: promo cards, featured category, mixed showcase, product grid, or video banner.',
                         'source_type' => 'Controls where section products/cards come from: manual products, category, collection, or manual cards.',
                         'source_id' => 'Optional numeric ID for the chosen category or collection source.',
                         'source_slug' => 'Optional slug for the chosen category or collection source, for example home-backup.',
@@ -278,7 +278,7 @@
                             <span class="grid h-4 w-4 place-items-center rounded-full bg-slate-200 text-[10px] text-slate-600">?</span>
                         </span>
                         <select class="rounded-md border border-slate-300 px-3 py-2" name="{{ $field }}">
-                            @foreach (['product_grid' => 'Product Grid', 'product_carousel' => 'Product Carousel', 'promo_cards' => 'Promo Cards', 'category_carousel' => 'Category Carousel', 'hero_banner' => 'Hero Banner', 'video_banner' => 'Video Banner', 'mixed_showcase' => 'Mixed Showcase'] as $optionValue => $label)
+                            @foreach (['promo_cards' => 'Promo Cards', 'featured_category' => 'Featured Category', 'mixed_showcase' => 'Mixed Showcase', 'product_grid' => 'Product Grid', 'video_banner' => 'Video Banner'] as $optionValue => $label)
                                 <option value="{{ $optionValue }}" @selected((string) old($field, $item->{$field} ?: 'product_grid') === $optionValue)>{{ $label }}</option>
                             @endforeach
                         </select>
@@ -574,17 +574,14 @@
             const helpText = {
                 promo_cards: 'Promo Section: use Homepage Content Display to manage layout, title, and cards from one focused screen.',
                 featured_category: 'Featured Category/Product Section: choose category or collection source, optional banner image, CTA, and display limit.',
-                mixed_showcase: 'Product Showcase: choose products/source here; side cards live in Navigation Cards and the lower feature banner lives in Feature Banners.',
+                mixed_showcase: 'Mixed Showcase: products, side cards, and the feature banner are managed from one focused screen.',
                 product_grid: 'Product Grid: choose category, collection, or manual products. This does not use promo-card image settings.',
-                product_carousel: 'Product Carousel: choose category, collection, or manual products. This does not use promo-card image settings.',
-                video_banner: 'Video Banner: only section name/order lives here. Video, fallback image, headline, and CTA live in Feature Banners.',
-                category_carousel: 'Category Carousel: controlled by Categories, not product or promo-card settings.',
-                hero_banner: 'Hero Slider: controlled by Hero Banners, not product or promo-card settings.',
+                video_banner: 'Video Banner: one wide image/video CTA banner managed from Homepage Content Display.',
             };
 
             const setSourceForType = (type) => {
                 if (!sourceType) return;
-                if (type === 'promo_cards' || type === 'video_banner' || type === 'hero_banner' || type === 'category_carousel') {
+                if (type === 'promo_cards' || type === 'video_banner') {
                     sourceType.value = 'manual_cards';
                 }
             };
@@ -595,7 +592,7 @@
 
                 const visible = new Set(fieldGroups.shared);
 
-                if (['product_grid', 'product_carousel', 'mixed_showcase'].includes(type)) {
+                if (['product_grid', 'mixed_showcase'].includes(type)) {
                     fieldGroups.product.forEach((field) => visible.add(field));
                 }
 
@@ -616,7 +613,7 @@
                 });
 
                 const manualProducts = sourceType?.value === 'manual_products';
-                productsPanel?.classList.toggle('hidden', !manualProducts || !['product_grid', 'product_carousel', 'mixed_showcase', 'featured_category'].includes(type));
+                productsPanel?.classList.toggle('hidden', !manualProducts || !['product_grid', 'mixed_showcase', 'featured_category'].includes(type));
 
                 if (help) help.textContent = helpText[type] || 'Choose the settings for this homepage section.';
             };
