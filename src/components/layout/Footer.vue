@@ -2,7 +2,9 @@
   <footer class="border-t border-line bg-ink text-white">
     <div class="container-shell grid gap-8 py-8 sm:py-10 md:grid-cols-[1.4fr_1fr_1fr]">
       <div>
-        <p class="text-2xl font-black">Eco Buka</p>
+        <RouterLink to="/" class="inline-flex rounded-md bg-white px-3 py-2" aria-label="Eco Buka home">
+          <img :src="logoUrl" alt="Eco Buka" class="h-9 w-auto max-w-[220px] object-contain" />
+        </RouterLink>
         <p class="mt-3 max-w-md text-sm leading-6 text-slate-300">
           Premium portable energy, solar charging, and backup solutions for Albania, homes, businesses, and outdoor teams.
         </p>
@@ -33,3 +35,7 @@
     </div>
   </footer>
 </template>
+
+<script setup lang="ts">
+import logoUrl from '../../assets/eco-buka-logo.svg';
+</script>
