@@ -9,15 +9,15 @@ const fallbackUrl = '/promo/optimized/summer-sale-1280.jpg';
 const hasItems = computed(() => cartStore.items.length > 0);
 const hasUnavailableItems = computed(() => cartStore.items.some((item) => !cartStore.isProductInStock(item.product)));
 
-const money = (value: number) => new Intl.NumberFormat('en-EU', { style: 'currency', currency: 'EUR' }).format(value);
+const money = (value: number) => new Intl.NumberFormat('sq-XK', { style: 'currency', currency: 'EUR' }).format(value);
 
 function optionEntries(options?: Record<string, string>) {
   return Object.entries(options || {}).filter(([, value]) => Boolean(value));
 }
 
 useSeo({
-  title: 'Cart',
-  description: 'Review your Eco Buka cart before continuing to checkout.',
+  title: 'Shporta',
+  description: 'Kontrolloni produktet në shportën Eco Buka para se të vazhdoni me porosinë.',
   canonicalPath: '/cart',
 });
 </script>
@@ -27,17 +27,17 @@ useSeo({
     <section class="container-shell py-8 sm:py-12">
       <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p class="label">Review order</p>
-          <h1 class="mt-2 text-3xl font-black sm:text-4xl">Cart</h1>
+          <p class="label">Kontrollo porosinë</p>
+          <h1 class="mt-2 text-3xl font-black sm:text-4xl">Shporta</h1>
           <p class="mt-3 max-w-2xl text-sm leading-6 text-slate-600 sm:text-base">
-            Check your selected products before sending the order request. Payment is handled manually after confirmation.
+            Kontrolloni produktet e zgjedhura para se ta dërgoni kërkesën për porosi. Pagesa koordinohet pas konfirmimit nga ekipi ynë.
           </p>
         </div>
-        <RouterLink to="/products" class="btn-secondary w-full sm:w-auto">Continue Shopping</RouterLink>
+        <RouterLink to="/products" class="btn-secondary w-full sm:w-auto">Vazhdo blerjen</RouterLink>
       </div>
 
       <div v-if="!hasItems" class="mt-8 rounded-lg border border-line bg-white p-6 text-sm font-semibold text-slate-600">
-        Your cart is empty. Add products first, then come back here to review them.
+        Shporta juaj është e zbrazët. Shtoni produkte dhe pastaj kthehuni këtu për t'i kontrolluar.
       </div>
 
       <div v-else class="mt-8 grid gap-6 lg:grid-cols-[1fr_360px]">
@@ -58,7 +58,7 @@ useSeo({
             </RouterLink>
 
             <div class="min-w-0">
-              <p class="text-xs font-bold uppercase tracking-wide text-slate-500">{{ item.product.category || 'Product' }}</p>
+              <p class="text-xs font-bold uppercase tracking-wide text-slate-500">{{ item.product.category || 'Produkt' }}</p>
               <RouterLink :to="`/products/${item.product.slug}`" class="mt-1 block text-lg font-black leading-6 text-ink hover:underline">
                 {{ item.product.name }}
               </RouterLink>
@@ -66,7 +66,7 @@ useSeo({
                 {{ item.product.short_description }}
               </p>
               <p v-if="!cartStore.isProductInStock(item.product)" class="mt-2 inline-flex rounded-full bg-slate-950 px-3 py-1 text-xs font-black uppercase tracking-wide text-white">
-                Out of stock
+                Nuk është në stok
               </p>
               <div v-if="optionEntries(item.selected_options).length" class="mt-3 flex flex-wrap gap-2">
                 <span
@@ -82,7 +82,7 @@ useSeo({
             <div class="grid gap-3 sm:min-w-40 sm:justify-items-end">
               <p class="text-lg font-black">{{ money(Number(item.product.price || 0) * item.quantity) }}</p>
               <label class="grid gap-1">
-                <span class="text-xs font-bold uppercase text-slate-500">Quantity</span>
+                <span class="text-xs font-bold uppercase text-slate-500">Sasia</span>
                 <input
                   class="input-field w-24"
                   type="number"
@@ -93,38 +93,38 @@ useSeo({
                 >
               </label>
               <button class="text-sm font-bold text-red-600 hover:underline" type="button" @click="cartStore.remove(item.key)">
-                Remove
+                Largo
               </button>
             </div>
           </article>
         </div>
 
         <aside class="h-fit rounded-lg border border-line bg-white p-5 shadow-sm">
-          <h2 class="text-lg font-black">Cart summary</h2>
+          <h2 class="text-lg font-black">Përmbledhja e shportës</h2>
           <div class="mt-4 grid gap-3 text-sm">
             <div class="flex items-center justify-between gap-4">
-              <span class="text-slate-600">Items</span>
+              <span class="text-slate-600">Produkte</span>
               <span class="font-bold">{{ cartStore.count }}</span>
             </div>
             <div class="flex items-center justify-between gap-4 border-t border-line pt-3">
-              <span class="font-bold">Subtotal</span>
+              <span class="font-bold">Nëntotali</span>
               <span class="text-xl font-black">{{ money(cartStore.subtotal) }}</span>
             </div>
           </div>
           <p v-if="hasUnavailableItems" class="mt-5 rounded-md border border-amber-200 bg-amber-50 p-3 text-sm font-semibold text-amber-900">
-            Remove out-of-stock products before checkout.
+            Largoni produktet që nuk janë në stok para checkout-it.
           </p>
           <RouterLink
             v-if="!hasUnavailableItems"
             to="/checkout"
             class="btn-primary mt-5 w-full"
           >
-            Proceed to Checkout
+            Vazhdo ne checkout
           </RouterLink>
           <button v-else class="btn-primary mt-3 w-full cursor-not-allowed opacity-50" type="button" disabled>
-            Proceed to Checkout
+            Vazhdo ne checkout
           </button>
-          <RouterLink to="/products" class="btn-secondary mt-3 w-full">Continue Shopping</RouterLink>
+          <RouterLink to="/products" class="btn-secondary mt-3 w-full">Vazhdo blerjen</RouterLink>
         </aside>
       </div>
     </section>

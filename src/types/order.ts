@@ -11,10 +11,14 @@ export interface CheckoutPayload {
   customer_name: string;
   customer_phone: string;
   customer_email?: string;
+  country: string;
+  municipality: string;
   delivery_address: string;
   city: string;
+  postal_code?: string;
   delivery_details?: string;
   customer_note?: string;
+  policy_accepted: boolean;
   items: Array<{
     product_id: number;
     quantity: number;

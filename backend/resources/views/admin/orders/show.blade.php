@@ -44,7 +44,10 @@
                     <div><dt class="font-bold text-slate-500">Name</dt><dd>{{ $order->customer_name }}</dd></div>
                     <div><dt class="font-bold text-slate-500">Phone</dt><dd>{{ $order->customer_phone }}</dd></div>
                     <div><dt class="font-bold text-slate-500">Email</dt><dd>{{ $order->customer_email ?: '-' }}</dd></div>
-                    <div><dt class="font-bold text-slate-500">City</dt><dd>{{ $order->city }}</dd></div>
+                    <div><dt class="font-bold text-slate-500">Country</dt><dd>{{ $order->country ?: '-' }}</dd></div>
+                    <div><dt class="font-bold text-slate-500">Municipality / City</dt><dd>{{ $order->municipality ?: $order->city }}</dd></div>
+                    <div><dt class="font-bold text-slate-500">Postal code</dt><dd>{{ $order->postal_code ?: '-' }}</dd></div>
+                    <div><dt class="font-bold text-slate-500">Policy accepted</dt><dd>{{ $order->policy_accepted_at?->format('d M Y H:i') ?: '-' }}</dd></div>
                     <div class="sm:col-span-2"><dt class="font-bold text-slate-500">Address</dt><dd>{{ $order->delivery_address }}</dd></div>
                     <div class="sm:col-span-2"><dt class="font-bold text-slate-500">Delivery details</dt><dd>{{ $order->delivery_details ?: '-' }}</dd></div>
                     <div class="sm:col-span-2"><dt class="font-bold text-slate-500">Customer note</dt><dd>{{ $order->customer_note ?: '-' }}</dd></div>

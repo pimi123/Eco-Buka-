@@ -15,6 +15,7 @@
                     @foreach ([
                         'homepage-content-display' => ['label' => 'Homepage Content Display', 'route' => route('admin.homepage-content.index')],
                         'orders' => ['label' => 'Orders', 'route' => route('admin.orders.index')],
+                        'contact-messages' => ['label' => 'Contact Messages', 'route' => route('admin.contact-messages.index')],
                         'categories' => 'Categories',
                         'collections' => 'Collections',
                         'products' => 'Products',

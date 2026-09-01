@@ -27,10 +27,14 @@ class Order extends Model
         'customer_name',
         'customer_phone',
         'customer_email',
+        'country',
+        'municipality',
         'delivery_address',
         'city',
+        'postal_code',
         'delivery_details',
         'customer_note',
+        'policy_accepted_at',
         'status',
         'subtotal',
         'delivery_fee',
@@ -51,6 +55,7 @@ class Order extends Model
         'processing_at' => 'datetime',
         'completed_at' => 'datetime',
         'cancelled_at' => 'datetime',
+        'policy_accepted_at' => 'datetime',
     ];
 
     public function items(): HasMany

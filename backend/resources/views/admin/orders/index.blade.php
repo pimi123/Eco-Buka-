@@ -24,7 +24,7 @@
                         <th class="px-4 py-3">Order</th>
                         <th class="px-4 py-3">Customer</th>
                         <th class="px-4 py-3">Phone</th>
-                        <th class="px-4 py-3">City</th>
+                        <th class="px-4 py-3">Location</th>
                         <th class="px-4 py-3">Items</th>
                         <th class="px-4 py-3">Total</th>
                         <th class="px-4 py-3">Status</th>
@@ -38,7 +38,10 @@
                             <td class="px-4 py-3 font-black">{{ $order->order_number }}</td>
                             <td class="px-4 py-3 font-semibold">{{ $order->customer_name }}</td>
                             <td class="px-4 py-3">{{ $order->customer_phone }}</td>
-                            <td class="px-4 py-3">{{ $order->city }}</td>
+                            <td class="px-4 py-3">
+                                <span class="block font-semibold">{{ $order->municipality ?: $order->city }}</span>
+                                <span class="block text-xs text-slate-500">{{ $order->country ?: '-' }}</span>
+                            </td>
                             <td class="px-4 py-3">{{ $order->items_count }}</td>
                             <td class="px-4 py-3 font-semibold">€{{ number_format((float) $order->total, 2) }}</td>
                             <td class="px-4 py-3"><span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold">{{ str($order->status)->headline() }}</span></td>
