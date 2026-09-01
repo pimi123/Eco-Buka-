@@ -25,6 +25,8 @@
           <RouterLink to="/about" class="py-1.5">About Eco Buka</RouterLink>
           <RouterLink to="/company-information" class="py-1.5">Company Information</RouterLink>
           <RouterLink to="/politika-e-kthimit" class="py-1.5">Politika e kthimit</RouterLink>
+          <RouterLink to="/politika-e-privatesise" class="py-1.5">Politika e privatësisë</RouterLink>
+          <RouterLink to="/politika-e-cookies" class="py-1.5">Politika e cookies</RouterLink>
           <RouterLink to="/contact" class="py-1.5">Contact</RouterLink>
         </div>
       </div>

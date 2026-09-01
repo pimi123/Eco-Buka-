@@ -113,6 +113,9 @@ useSeo({
           <p class="mt-5 max-w-2xl text-base font-semibold leading-7 text-white/90 sm:text-xl sm:leading-8">
             Sistem i zgjerueshëm për ruajtje solare dhe energji rezervë për shtëpi, zyra dhe biznese që kërkojnë më shumë pavarësi energjetike.
           </p>
+          <div class="mt-5 inline-flex max-w-xl items-center rounded-full border border-orange-300/40 bg-orange-500/90 px-5 py-3 text-sm font-black text-white shadow-lg backdrop-blur">
+            Produktet PowerOcean janë të disponueshme vetëm me pre-order dhe ofertë të personalizuar.
+          </div>
           <div class="mt-8 flex flex-col gap-3 sm:flex-row">
             <a class="inline-flex min-h-12 items-center justify-center rounded-full bg-white px-7 text-sm font-black text-ink transition hover:scale-[1.02] hover:bg-slate-100" :href="phoneHref">
               Merr Ofertë
