@@ -41,11 +41,11 @@ const sectionDescription = computed(
     apiSection.value?.subtitle ||
     props.description ||
     selectedCategory.value?.description ||
-    'Explore reliable portable power solutions for home, outdoor, and backup energy.',
+    'Shfletoni zgjidhje të besueshme portative për shtëpi, përdorim në natyrë dhe energji rezervë.',
 );
 const bannerTitle = computed(() => apiSection.value?.banner_title || sectionTitle.value);
 const bannerDescription = computed(() => apiSection.value?.banner_subtitle || sectionDescription.value);
-const eyebrow = computed(() => apiSection.value?.eyebrow || 'Featured series');
+const eyebrow = computed(() => apiSection.value?.eyebrow || 'Seri e veçuar');
 const sectionLimit = computed(() => apiSection.value?.display_limit || props.limit);
 
 const products = computed(() => {
@@ -73,10 +73,10 @@ const listingLink = computed(() => {
 });
 
 const bannerLink = computed(() => apiSection.value?.button_link || listingLink.value);
-const buttonText = computed(() => apiSection.value?.button_text || 'Learn More');
+const buttonText = computed(() => apiSection.value?.button_text || 'Mëso më shumë');
 
 const money = (value?: number | null) =>
-  value ? new Intl.NumberFormat('en-EU', { style: 'currency', currency: 'EUR' }).format(value) : 'Request price';
+  value ? new Intl.NumberFormat('sq-XK', { style: 'currency', currency: 'EUR' }).format(value) : 'Çmimi sipas kërkesës';
 
 function mapApiProduct(product: Product): Product {
   return {
@@ -114,7 +114,7 @@ onMounted(async () => {
     <div class="container-shell">
       <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div class="min-w-0">
-          <p class="label">Featured category</p>
+          <p class="label">Kategori e veçuar</p>
           <h2 class="mt-2 text-2xl font-black capitalize leading-tight text-ink sm:text-3xl">{{ sectionTitle }}</h2>
           <p class="mt-3 max-w-2xl text-sm leading-6 text-slate-600 sm:text-base">{{ sectionDescription }}</p>
         </div>
@@ -122,7 +122,7 @@ onMounted(async () => {
           :to="listingLink"
           class="btn-secondary w-full sm:w-auto"
         >
-          View All
+          Shiko të gjitha
         </RouterLink>
       </div>
 
@@ -171,7 +171,7 @@ onMounted(async () => {
                 {{ buttonText }}
               </RouterLink>
               <p v-if="featuredProduct" class="text-sm font-black text-white sm:text-base">
-                From {{ money(featuredProduct.price) }}
+                Nga {{ money(featuredProduct.price) }}
               </p>
             </div>
           </div>
@@ -188,7 +188,7 @@ onMounted(async () => {
           :key="product.id"
           :to="`/products/${product.slug}`"
           class="group flex min-w-0 cursor-pointer flex-col overflow-hidden rounded-xl border border-line bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-panel focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-energy/25"
-          :aria-label="`View ${product.name}`"
+          :aria-label="`Shiko ${product.name}`"
         >
           <div class="relative block aspect-square overflow-hidden bg-white sm:aspect-[4/3]">
             <img
@@ -227,7 +227,7 @@ onMounted(async () => {
       </div>
 
       <div v-else class="mt-6 rounded-lg border border-line bg-mist p-8 text-center text-sm font-semibold text-slate-600 sm:mt-8">
-        {{ apiError ? 'This section could not load products right now.' : 'No products found in this category.' }}
+        {{ apiError ? 'Ky seksion nuk mund të ngarkojë produktet për momentin.' : 'Nuk u gjet asnjë produkt në këtë kategori.' }}
       </div>
     </div>
   </section>

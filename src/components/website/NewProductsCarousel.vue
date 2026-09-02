@@ -14,7 +14,7 @@ const props = withDefaults(
   }>(),
   {
     sectionKey: 'new_products',
-    title: 'New Products',
+    title: 'Produktet e reja',
     subtitle: '',
   },
 );
@@ -32,7 +32,7 @@ const activeCards = computed(() =>
     .slice(0, Number(loadedSection.value?.display_limit || 24)),
 );
 
-const sectionTitle = computed(() => props.title || loadedSection.value?.title || 'New Products');
+const sectionTitle = computed(() => props.title || loadedSection.value?.title || 'Produktet e reja');
 const sectionSubtitle = computed(() => props.subtitle || loadedSection.value?.subtitle || '');
 
 function scrollCards(direction: -1 | 1) {
@@ -76,7 +76,7 @@ onMounted(async () => {
       loading.value = false;
       return;
     } catch (requestError) {
-      error.value = requestError instanceof Error ? requestError.message : 'Promo cards could not be loaded.';
+      error.value = requestError instanceof Error ? requestError.message : 'Kartelat promovuese nuk mund të ngarkohen.';
     }
   }
 
@@ -102,7 +102,7 @@ onMounted(async () => {
           <button
             type="button"
             class="grid h-10 w-10 place-items-center rounded-full border border-line bg-white text-ink shadow-sm transition hover:border-ink"
-            aria-label="Scroll promotions left"
+            aria-label="Lëviz promovimet majtas"
             @click="scrollCards(-1)"
           >
             <ChevronLeft class="h-5 w-5" />
@@ -110,7 +110,7 @@ onMounted(async () => {
           <button
             type="button"
             class="grid h-10 w-10 place-items-center rounded-full border border-line bg-white text-ink shadow-sm transition hover:border-ink"
-            aria-label="Scroll promotions right"
+            aria-label="Lëviz promovimet djathtas"
             @click="scrollCards(1)"
           >
             <ChevronRight class="h-5 w-5" />
@@ -181,14 +181,14 @@ onMounted(async () => {
                 target="_blank"
                 rel="noreferrer"
               >
-                {{ card.button_text || 'Learn More' }}
+                {{ card.button_text || 'Mëso më shumë' }}
               </a>
               <RouterLink
                 v-else
                 :to="cardLink(card)"
                 class="inline-flex min-h-11 items-center justify-center rounded-full bg-white px-6 py-3 text-sm font-bold text-ink shadow-sm transition hover:bg-mist sm:px-7"
               >
-                {{ card.button_text || 'Learn More' }}
+                {{ card.button_text || 'Mëso më shumë' }}
               </RouterLink>
             </div>
           </div>

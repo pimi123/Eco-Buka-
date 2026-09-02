@@ -22,7 +22,7 @@ const fallbackUrl = '/promo/optimized/summer-sale-1280.jpg';
     <div class="p-4 sm:p-5">
       <h3 class="text-base font-bold leading-6 sm:text-lg">{{ category.name }}</h3>
       <p class="mt-2 text-sm leading-6 text-slate-600 sm:min-h-12">{{ category.description }}</p>
-      <span class="mt-4 inline-flex items-center gap-2 text-sm font-bold text-energy">View Products <ArrowRight class="h-4 w-4" /></span>
+      <span class="mt-4 inline-flex items-center gap-2 text-sm font-bold text-energy">Shiko produktet <ArrowRight class="h-4 w-4" /></span>
     </div>
   </RouterLink>
 </template>

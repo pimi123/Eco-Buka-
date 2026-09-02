@@ -119,10 +119,10 @@ useSeo({
             to="/checkout"
             class="btn-primary mt-5 w-full"
           >
-            Vazhdo ne checkout
+            Vazhdo në checkout
           </RouterLink>
           <button v-else class="btn-primary mt-3 w-full cursor-not-allowed opacity-50" type="button" disabled>
-            Vazhdo ne checkout
+            Vazhdo në checkout
           </button>
           <RouterLink to="/products" class="btn-secondary mt-3 w-full">Vazhdo blerjen</RouterLink>
         </aside>

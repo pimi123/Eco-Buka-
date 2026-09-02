@@ -11,7 +11,7 @@ const route = useRoute();
 const productStore = useProductStore();
 const cartStore = useCartStore();
 const product = computed(() => productStore.activeProducts.find((item) => item.slug === route.params.slug));
-const money = (value?: number | null) => (value ? new Intl.NumberFormat('en-EU', { style: 'currency', currency: 'EUR' }).format(value) : 'Request price');
+const money = (value?: number | null) => (value ? new Intl.NumberFormat('sq-XK', { style: 'currency', currency: 'EUR' }).format(value) : 'Çmimi sipas kërkesës');
 const quantity = ref(1);
 const addedMessage = ref('');
 const isInStock = computed(() => {
@@ -42,7 +42,7 @@ function addToCart() {
   const safeQuantity = Math.min(99, Math.max(1, Number(quantity.value) || 1));
   quantity.value = safeQuantity;
   cartStore.add(product.value, safeQuantity);
-  addedMessage.value = `${safeQuantity} ${safeQuantity === 1 ? 'item' : 'items'} added to cart.`;
+  addedMessage.value = `${safeQuantity} ${safeQuantity === 1 ? 'produkt u shtua' : 'produkte u shtuan'} në shportë.`;
 }
 
 const specEntries = computed(() => detailEntries(product.value?.specs));
@@ -50,8 +50,8 @@ const includedEntries = computed(() => detailEntries(product.value?.included_ite
 const downloadEntries = computed(() => detailEntries(product.value?.downloads));
 
 useSeo({
-  title: computed(() => product.value?.name || 'Product'),
-  description: computed(() => product.value?.short_description || product.value?.description || 'View Eco Buka product details, specs, pricing, and request-offer options.'),
+  title: computed(() => product.value?.name || 'Produkt'),
+  description: computed(() => product.value?.short_description || product.value?.description || 'Shiko detajet, specifikat, çmimin dhe opsionet për ofertë të produktit Eco Buka.'),
   canonicalPath: computed(() => `/products/${String(route.params.slug || '')}`),
 });
 
@@ -69,7 +69,7 @@ onMounted(() => productStore.fetchProducts());
           class="mt-4 inline-flex rounded-full px-3 py-1 text-xs font-black uppercase tracking-wide"
           :class="isInStock ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-950 text-white'"
         >
-          {{ isInStock ? 'In stock' : 'Out of stock' }}
+          {{ isInStock ? 'Në stok' : 'Nuk është në stok' }}
         </p>
         <p class="mt-4 text-base leading-7 text-slate-600 sm:text-lg sm:leading-8">{{ product.short_description }}</p>
         <div class="mt-6 flex flex-wrap items-end gap-3">
@@ -78,7 +78,7 @@ onMounted(() => productStore.fetchProducts());
         </div>
         <div class="mt-7 flex flex-col gap-3 min-[420px]:flex-row min-[420px]:flex-wrap sm:mt-8">
           <label class="grid gap-1">
-            <span class="text-xs font-bold uppercase text-slate-500">Quantity</span>
+            <span class="text-xs font-bold uppercase text-slate-500">Sasia</span>
             <input v-model.number="quantity" class="input-field w-28" type="number" min="1" max="99">
           </label>
           <button
@@ -88,17 +88,17 @@ onMounted(() => productStore.fetchProducts());
             :class="!isInStock ? 'cursor-not-allowed opacity-50 hover:translate-y-0' : ''"
             @click="addToCart"
           >
-            {{ isInStock ? 'Add to Cart' : 'Out of Stock' }}
+            {{ isInStock ? 'Shto në shportë' : 'Nuk është në stok' }}
           </button>
-          <RouterLink to="/cart" class="btn-secondary w-full min-[420px]:w-auto">View Cart</RouterLink>
-          <RouterLink to="/contact" class="btn-secondary w-full min-[420px]:w-auto">Contact Us</RouterLink>
+          <RouterLink to="/cart" class="btn-secondary w-full min-[420px]:w-auto">Shiko shportën</RouterLink>
+          <RouterLink to="/contact" class="btn-secondary w-full min-[420px]:w-auto">Na kontaktoni</RouterLink>
         </div>
         <div v-if="addedMessage" class="mt-4 rounded-md border border-emerald-200 bg-emerald-50 p-3 text-sm font-semibold text-emerald-800" role="status">
           {{ addedMessage }}
-          <RouterLink to="/cart" class="ml-2 underline underline-offset-4">Review cart</RouterLink>
+          <RouterLink to="/cart" class="ml-2 underline underline-offset-4">Kontrollo shportën</RouterLink>
         </div>
         <div v-if="!isInStock" class="mt-4 rounded-md border border-slate-200 bg-slate-50 p-3 text-sm font-semibold text-slate-700" role="status">
-          This product is currently out of stock. Contact us and we can confirm availability or alternatives.
+          Ky produkt për momentin nuk është në stok. Na kontaktoni dhe ne do t'ju konfirmojmë disponueshmërinë ose alternativat.
         </div>
         <div v-if="specEntries.length" class="mt-7 grid gap-3 sm:mt-8 sm:grid-cols-2">
           <div v-for="entry in specEntries" :key="`${entry.label}-${entry.value}`" class="min-w-0 rounded-lg border border-line p-4">
@@ -111,34 +111,34 @@ onMounted(() => productStore.fetchProducts());
     <section v-if="product" class="container-shell pb-8 sm:pb-14">
       <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 lg:gap-5">
         <div class="rounded-lg border border-line bg-white p-4 sm:p-5">
-          <h2 class="font-black">Overview</h2>
+          <h2 class="font-black">Përmbledhje</h2>
           <p class="mt-3 text-sm leading-6 text-slate-600">{{ product.description || product.short_description }}</p>
         </div>
 
         <div class="rounded-lg border border-line bg-white p-4 sm:p-5">
-          <h2 class="font-black">Specifications</h2>
+          <h2 class="font-black">Specifikimet</h2>
           <dl v-if="specEntries.length" class="mt-3 grid gap-2 text-sm leading-6 text-slate-600">
             <div v-for="entry in specEntries" :key="`detail-${entry.label}-${entry.value}`">
               <dt v-if="entry.label" class="inline font-bold text-ink">{{ entry.label }}: </dt>
               <dd class="inline">{{ entry.value }}</dd>
             </div>
           </dl>
-          <p v-else class="mt-3 text-sm leading-6 text-slate-600">Product specifications will be added soon.</p>
+          <p v-else class="mt-3 text-sm leading-6 text-slate-600">Specifikimet e produktit do të shtohen së shpejti.</p>
         </div>
 
         <div class="rounded-lg border border-line bg-white p-4 sm:p-5">
-          <h2 class="font-black">What is included</h2>
+          <h2 class="font-black">Çfarë përfshihet</h2>
           <ul v-if="includedEntries.length" class="mt-3 grid gap-2 text-sm leading-6 text-slate-600">
             <li v-for="entry in includedEntries" :key="`included-${entry.label}-${entry.value}`">
               <span v-if="entry.label" class="font-bold text-ink">{{ entry.label }}: </span>{{ entry.value }}
             </li>
           </ul>
-          <p v-else class="mt-3 text-sm leading-6 text-slate-600">Included items will be confirmed with your offer.</p>
+          <p v-else class="mt-3 text-sm leading-6 text-slate-600">Përmbajtja e paketës do të konfirmohet bashkë me ofertën tuaj.</p>
         </div>
 
-        <!-- Downloads are paused until manuals/datasheets are ready to upload.
+        <!-- Shkarkimet janë pauzuar derisa manualet dhe datasheet-et të jenë gati për ngarkim.
         <div class="rounded-lg border border-line bg-white p-4 sm:p-5">
-          <h2 class="font-black">Downloads</h2>
+          <h2 class="font-black">Shkarkime</h2>
           <ul v-if="downloadEntries.length" class="mt-3 grid gap-2 text-sm leading-6 text-slate-600">
             <li v-for="entry in downloadEntries" :key="`download-${entry.label}-${entry.value}`">
               <a v-if="isUrl(entry.value)" class="font-bold text-ink underline-offset-4 hover:underline" :href="entry.value" target="_blank" rel="noreferrer">
@@ -147,7 +147,7 @@ onMounted(() => productStore.fetchProducts());
               <span v-else><span v-if="entry.label" class="font-bold text-ink">{{ entry.label }}: </span>{{ entry.value }}</span>
             </li>
           </ul>
-          <p v-else class="mt-3 text-sm leading-6 text-slate-600">Manuals and datasheets will be added soon.</p>
+          <p v-else class="mt-3 text-sm leading-6 text-slate-600">Manualet dhe datasheet-et do të shtohen së shpejti.</p>
         </div>
         -->
       </div>

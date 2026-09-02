@@ -29,45 +29,45 @@ interface HeroSlide {
 const fallbackSlides: HeroSlide[] = [
   {
     id: 'delta-max',
-    eyebrow: 'New Release',
-    title: 'DELTA 3 Max Series Available Now!',
-    subtitle: '2kWh Capacity | 3000W Max Output',
-    primaryButtonText: 'Learn More',
+    eyebrow: 'Lansim i ri',
+    title: 'Seria DELTA 3 Max është në dispozicion!',
+    subtitle: 'Kapacitet 2kWh | Fuqi maksimale 3000W',
+    primaryButtonText: 'Mëso më shumë',
     primaryButtonLink: '/products',
-    secondaryButtonText: 'Shop Now',
+    secondaryButtonText: 'Bli tani',
     secondaryButtonLink: '/products',
     image: deltaHeroUrl,
-    imageAlt: 'Premium portable power station for Eco Buka DELTA style hero banner',
+    imageAlt: 'Stacion premium portativ energjie për banerin Eco Buka DELTA',
     overlayStyle: 'bg-gradient-to-r from-black/78 via-black/40 to-black/10',
     textColor: 'text-white',
     alignment: 'left',
   },
   {
     id: 'smart-solar',
-    eyebrow: 'Smart Solar Solutions',
-    title: 'Power Your Home with Clean Energy',
-    subtitle: 'Reliable backup, solar charging, and energy independence.',
-    primaryButtonText: 'Explore Solutions',
+    eyebrow: 'Zgjidhje solare inteligjente',
+    title: 'Fuqizo shtëpinë me energji të pastër',
+    subtitle: 'Rezervë e besueshme, karikim solar dhe pavarësi energjetike.',
+    primaryButtonText: 'Shiko zgjidhjet',
     primaryButtonLink: '/about',
-    secondaryButtonText: 'View Products',
+    secondaryButtonText: 'Shiko produktet',
     secondaryButtonLink: '/products',
     image: solarHeroUrl,
-    imageAlt: 'Modern home solar energy system for Eco Buka hero banner',
+    imageAlt: 'Sistem modern solar për shtëpi në banerin Eco Buka',
     overlayStyle: 'bg-gradient-to-r from-ink/82 via-ink/45 to-ink/5',
     textColor: 'text-white',
     alignment: 'left',
   },
   {
     id: 'portable-energy',
-    eyebrow: 'Portable Energy',
-    title: 'Power Anywhere You Go',
-    subtitle: 'Compact, powerful, and ready for home, travel, and outdoor use.',
-    primaryButtonText: 'Discover More',
+    eyebrow: 'Energji portative',
+    title: 'Energji kudo që shkoni',
+    subtitle: 'Kompakte, e fuqishme dhe gati për shtëpi, udhëtime dhe natyrë.',
+    primaryButtonText: 'Zbulo më shumë',
     primaryButtonLink: '/category/power-stations',
-    secondaryButtonText: 'Browse Products',
+    secondaryButtonText: 'Shfleto produktet',
     secondaryButtonLink: '/products',
     image: portableHeroUrl,
-    imageAlt: 'Portable power and solar kit for Eco Buka outdoor energy banner',
+    imageAlt: 'Set portativ energjie dhe panelesh solare për banerin Eco Buka',
     overlayStyle: 'bg-gradient-to-r from-black/72 via-black/38 to-black/5',
     textColor: 'text-white',
     alignment: 'left',
@@ -99,9 +99,9 @@ function mapBannerToSlide(banner: HomepageBanner): HeroSlide {
     eyebrow: banner.eyebrow || '',
     title: banner.title,
     subtitle: banner.subtitle || '',
-    primaryButtonText: banner.button_text || 'Learn More',
+    primaryButtonText: banner.button_text || 'Mëso më shumë',
     primaryButtonLink: banner.button_link || '/products',
-    secondaryButtonText: banner.second_button_text || 'View Products',
+    secondaryButtonText: banner.second_button_text || 'Shiko produktet',
     secondaryButtonLink: banner.second_button_link || '/products',
     image: optimizedImageUrl(banner.background_image_url, 'desktop') || fallbackSlides[0].image,
     mobileImage: optimizedImageUrl(banner.mobile_background_image_url || banner.background_image_url, 'mobile') || fallbackSlides[0].image,
@@ -208,7 +208,7 @@ onBeforeUnmount(() => {
 <template>
   <section
     class="relative isolate w-full overflow-hidden bg-ink"
-    aria-label="Featured Eco Buka promotions"
+    aria-label="Promovimet kryesore Eco Buka"
     @mouseenter="isPaused = true"
     @mouseleave="isPaused = false"
     @touchstart.passive="handleTouchStart"
@@ -260,7 +260,7 @@ onBeforeUnmount(() => {
       <button
         class="absolute left-3 top-1/2 z-20 hidden h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full bg-white/18 text-white backdrop-blur transition hover:bg-white/28 md:flex"
         type="button"
-        aria-label="Previous hero slide"
+        aria-label="Baneri paraprak"
         @click="previousSlide"
       >
         <ChevronLeft class="h-6 w-6" />
@@ -268,7 +268,7 @@ onBeforeUnmount(() => {
       <button
         class="absolute right-3 top-1/2 z-20 hidden h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full bg-white/22 text-white backdrop-blur transition hover:bg-white/32 md:flex"
         type="button"
-        aria-label="Next hero slide"
+        aria-label="Baneri tjetër"
         @click="nextSlide"
       >
         <ChevronRight class="h-6 w-6" />
@@ -280,7 +280,7 @@ onBeforeUnmount(() => {
           :key="slide.id"
           class="group grid h-8 place-items-center rounded-full px-0.5"
           type="button"
-          :aria-label="`Go to hero slide ${index + 1}`"
+          :aria-label="`Shko te baneri ${index + 1}`"
           :aria-current="index === activeIndex ? 'true' : undefined"
           @click="goToSlide(index)"
         >

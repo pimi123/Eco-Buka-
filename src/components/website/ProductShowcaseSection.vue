@@ -46,7 +46,7 @@ onMounted(async () => {
       </div>
 
       <div v-if="homepageStore.loading" class="rounded-lg bg-white p-8 text-sm font-semibold text-slate-500 shadow-sm">
-        Loading homepage showcase...
+        Duke ngarkuar prezantimin e ballinës...
       </div>
 
       <template v-else>
@@ -67,7 +67,7 @@ onMounted(async () => {
           </div>
 
           <div v-else class="rounded-lg bg-white p-8 text-sm font-semibold text-slate-500 shadow-sm xl:col-span-2">
-            No showcase products selected yet.
+            Ende nuk është zgjedhur asnjë produkt për këtë seksion.
           </div>
 
           <div v-if="displayCards.length" class="flex snap-x gap-4 overflow-x-auto pb-2 [-ms-overflow-style:none] [scrollbar-width:none] sm:grid sm:grid-cols-2 sm:overflow-visible sm:pb-0 xl:grid-cols-1 [&::-webkit-scrollbar]:hidden">

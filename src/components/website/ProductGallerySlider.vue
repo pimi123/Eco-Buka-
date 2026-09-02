@@ -94,7 +94,7 @@ watch(images, () => {
       class="group relative overflow-hidden rounded-lg border border-line bg-mist outline-none focus-visible:ring-2 focus-visible:ring-slate-300/70"
       tabindex="0"
       role="region"
-      :aria-label="`${title} image gallery`"
+      :aria-label="`Galeria e imazheve për ${title}`"
       @keydown="handleKeydown"
     >
       <div
@@ -110,7 +110,7 @@ watch(images, () => {
         >
           <img
             :src="image"
-            :alt="`${title} image ${index + 1}`"
+            :alt="`${title} imazhi ${index + 1}`"
             class="h-full w-full object-contain p-3"
             :loading="index === 0 ? 'eager' : 'lazy'"
             :fetchpriority="index === 0 ? 'high' : 'auto'"
@@ -140,7 +140,7 @@ watch(images, () => {
         v-if="hasMultipleImages"
         type="button"
         class="absolute left-2 top-1/2 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-full bg-white/90 text-ink shadow-sm transition hover:bg-white sm:left-3 sm:h-11 sm:w-11"
-        aria-label="Previous product image"
+        aria-label="Imazhi i mëparshëm i produktit"
         @click="showPrevious"
       >
         <ChevronLeft class="h-5 w-5" />
@@ -150,7 +150,7 @@ watch(images, () => {
         v-if="hasMultipleImages"
         type="button"
         class="absolute right-2 top-1/2 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-full bg-white/90 text-ink shadow-sm transition hover:bg-white sm:right-3 sm:h-11 sm:w-11"
-        aria-label="Next product image"
+        aria-label="Imazhi tjetër i produktit"
         @click="showNext"
       >
         <ChevronRight class="h-5 w-5" />
@@ -171,7 +171,7 @@ watch(images, () => {
           type="button"
           class="h-2 rounded-full transition"
           :class="index === activeIndex ? 'w-5 bg-ink' : 'w-2 bg-white/80'"
-          :aria-label="`Show product image ${index + 1}`"
+          :aria-label="`Shfaq imazhin ${index + 1} të produktit`"
           :aria-current="index === activeIndex ? 'true' : undefined"
           @click="selectImage(index)"
         />
@@ -188,13 +188,13 @@ watch(images, () => {
         type="button"
         class="h-16 w-20 shrink-0 overflow-hidden rounded-md border bg-mist transition sm:h-24 sm:w-28"
         :class="index === activeIndex ? 'border-ink ring-2 ring-ink/10' : 'border-line hover:border-slate-400'"
-        :aria-label="`Show product image ${index + 1}`"
+        :aria-label="`Shfaq imazhin ${index + 1} të produktit`"
         :aria-current="index === activeIndex ? 'true' : undefined"
         @click="selectImage(index)"
       >
         <img
           :src="image"
-          :alt="`${title} image ${index + 1}`"
+          :alt="`${title} imazhi ${index + 1}`"
           class="h-full w-full object-contain p-2"
           loading="lazy"
           decoding="async"

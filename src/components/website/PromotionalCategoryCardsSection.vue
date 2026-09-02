@@ -77,7 +77,7 @@ function isExternal(link: string) {
 }
 
 function ariaLabel(card: HomepagePromoCard) {
-  return card.category_slug ? `View products in ${card.title} category` : `View ${card.title}`;
+  return card.category_slug ? `Shiko produktet në kategorinë ${card.title}` : `Shiko ${card.title}`;
 }
 
 function wrapperClass() {
@@ -124,7 +124,7 @@ onMounted(async () => {
     section.value = data.section;
     loadedCards.value = data.cards;
   } catch (requestError) {
-    error.value = requestError instanceof Error ? requestError.message : 'Promotional cards could not be loaded.';
+    error.value = requestError instanceof Error ? requestError.message : 'Kartelat promovuese nuk mund të ngarkohen.';
     loadedCards.value = demoPromotionalCategoryCards;
   } finally {
     loading.value = false;
@@ -137,7 +137,7 @@ onMounted(async () => {
     v-if="loading || cardsToRender.length"
     class="py-8 sm:py-11 lg:py-12"
     :class="isCarousel ? 'bg-mist' : 'bg-white'"
-    :aria-label="sectionTitle || 'Promotional cards'"
+    :aria-label="sectionTitle || 'Kartela promovuese'"
   >
     <div class="container-shell">
       <div v-if="sectionTitle || sectionSubtitle || canScroll" class="mb-5 flex items-end justify-between gap-4 sm:mb-6">
@@ -154,7 +154,7 @@ onMounted(async () => {
           <button
             type="button"
             class="grid h-10 w-10 place-items-center rounded-full border border-line bg-white text-ink shadow-sm transition hover:border-ink"
-            aria-label="Scroll promo cards left"
+            aria-label="Lëviz kartelat majtas"
             @click="scrollCards(-1)"
           >
             <ChevronLeft class="h-5 w-5" />
@@ -162,7 +162,7 @@ onMounted(async () => {
           <button
             type="button"
             class="grid h-10 w-10 place-items-center rounded-full border border-line bg-white text-ink shadow-sm transition hover:border-ink"
-            aria-label="Scroll promo cards right"
+            aria-label="Lëviz kartelat djathtas"
             @click="scrollCards(1)"
           >
             <ChevronRight class="h-5 w-5" />
@@ -213,7 +213,7 @@ onMounted(async () => {
             <h2 v-if="card.title" class="text-xl font-black leading-tight sm:text-2xl">{{ card.title }}</h2>
             <p v-if="card.subtitle" class="mt-3 text-sm font-bold leading-6 text-white/95 sm:text-base">{{ card.subtitle }}</p>
             <span class="mt-5 inline-flex min-h-11 items-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-black text-ink shadow-sm transition duration-300 group-hover:gap-3 group-hover:bg-white/90">
-              {{ card.button_text || 'View Products' }}
+              {{ card.button_text || 'Shiko produktet' }}
               <ArrowRight class="h-4 w-4" />
             </span>
           </div>

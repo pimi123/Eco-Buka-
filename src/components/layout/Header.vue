@@ -11,17 +11,17 @@ const cartStore = useCartStore();
 const collectionStore = useCollectionStore();
 
 const fallbackNav = [
-  ['Power Stations', '/category/power-stations'],
-  ['Solar Panels', '/category/solar-panels'],
-  ['Solar Generators', '/category/solar-generators'],
-  ['Smart Devices', '/category/smart-devices'],
-  ['Accessories', '/category/accessories'],
-  ['Solutions', '/category/solutions'],
+  ['Stacione energjie', '/category/power-stations'],
+  ['Panele solare', '/category/solar-panels'],
+  ['Gjeneratorë solarë', '/category/solar-generators'],
+  ['Pajisje inteligjente', '/category/smart-devices'],
+  ['Aksesorë', '/category/accessories'],
+  ['Zgjidhje', '/category/solutions'],
 ];
 
 const nav = computed(() => {
   const solutions = collectionStore.solutionCollections.slice(0, 4).map((collection) => [collection.name, `/collections/${collection.slug}`]);
-  return solutions.length ? [...solutions, ['Power Stations', '/category/power-stations'], ['Accessories', '/category/accessories']] : fallbackNav;
+  return solutions.length ? [...solutions, ['Stacione energjie', '/category/power-stations'], ['Aksesorë', '/category/accessories']] : fallbackNav;
 });
 
 const closeMenu = () => {
@@ -63,10 +63,10 @@ onBeforeUnmount(() => {
 <template>
   <header ref="headerRef" class="sticky top-0 z-40 border-b border-line bg-white/95 backdrop-blur">
     <div class="bg-ink px-4 py-1.5 text-center text-[11px] font-medium leading-4 text-white sm:py-2 sm:text-xs">
-      Official energy solutions for homes, businesses and outdoor power
+      Zgjidhje zyrtare energjie për shtëpi, biznese dhe përdorim në natyrë
     </div>
     <div class="container-shell flex min-h-14 items-center justify-between gap-2 py-2.5 sm:min-h-16 sm:gap-4 sm:py-3">
-      <RouterLink to="/" class="flex min-h-10 shrink-0 items-center" aria-label="Eco Buka home" @click="open = false">
+      <RouterLink to="/" class="flex min-h-10 shrink-0 items-center" aria-label="Ballina Eco Buka" @click="open = false">
         <img :src="logoUrl" alt="Eco Buka" class="h-8 w-auto max-w-[170px] object-contain sm:h-9 sm:max-w-[210px]" />
       </RouterLink>
       <nav class="hidden items-center gap-5 text-sm font-semibold xl:flex 2xl:gap-6">
@@ -75,7 +75,7 @@ onBeforeUnmount(() => {
           to="/solutions/powerocean"
           class="inline-flex min-h-10 items-center justify-center rounded-full bg-ink px-5 text-sm font-black text-white shadow-sm transition hover:bg-slate-800"
         >
-          PowerOcean Pre-Order
+          PowerOcean me porosi
         </RouterLink>
       </nav>
       <div class="hidden min-w-0 flex-1 justify-end lg:flex">
@@ -84,11 +84,11 @@ onBeforeUnmount(() => {
         </RouterLink>
       </div>
       <div class="flex items-center gap-2">
-        <RouterLink to="/cart" class="relative grid h-10 w-10 place-items-center rounded-md hover:bg-mist" aria-label="Cart">
+        <RouterLink to="/cart" class="relative grid h-10 w-10 place-items-center rounded-md hover:bg-mist" aria-label="Shporta">
           <ShoppingBag class="h-5 w-5" />
           <span v-if="cartStore.count" class="absolute right-0 top-0 grid h-5 min-w-5 place-items-center rounded-full bg-energy px-1 text-[11px] font-black leading-none text-white">{{ cartStore.count }}</span>
         </RouterLink>
-        <button class="grid h-10 w-10 place-items-center rounded-md hover:bg-mist xl:hidden" aria-label="Menu" @click="open = !open">
+        <button class="grid h-10 w-10 place-items-center rounded-md hover:bg-mist xl:hidden" aria-label="Menuja" @click="open = !open">
           <X v-if="open" class="h-5 w-5" /><Menu v-else class="h-5 w-5" />
         </button>
       </div>
@@ -104,7 +104,7 @@ onBeforeUnmount(() => {
           class="mt-2 inline-flex min-h-12 items-center justify-center rounded-full bg-ink px-5 text-sm font-black text-white shadow-sm transition hover:bg-slate-800"
           @click="open = false"
         >
-          PowerOcean Pre-Order
+          PowerOcean me porosi
         </RouterLink>
       </div>
     </div>

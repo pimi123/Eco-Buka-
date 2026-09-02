@@ -4,6 +4,9 @@ export default {
   content: ['./index.html', './src/**/*.{vue,ts}'],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ['"Eco Helvetica"', 'ui-sans-serif', 'system-ui', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'sans-serif'],
+      },
       colors: {
         ink: '#0c111d',
         mist: '#f4f7f8',

@@ -31,8 +31,8 @@ const hasUnavailableItems = computed(() => cartStore.items.some((item) => !cartS
 const municipalityOptions = computed(() => municipalitiesForCountry(form.country));
 
 useSeo({
-  title: 'Checkout',
-  description: 'Dërgo porosinë Eco Buka dhe ekipi ynë do tju kontaktojë për konfirmim, disponueshmëri dhe dërgesë.',
+  title: 'Përfundimi i porosisë',
+  description: "Dërgo porosinë Eco Buka dhe ekipi ynë do t'ju kontaktojë për konfirmim, disponueshmëri dhe dërgesë.",
   canonicalPath: '/checkout',
 });
 
@@ -70,7 +70,7 @@ async function submitOrder() {
     await router.push({ name: 'order-success', query: { order: response.order_number } });
   } catch (error) {
     const response = (error as Error & { response?: { errors?: Record<string, string[]>; message?: string } }).response;
-    errors.value = response?.errors || { general: [response?.message || 'Porosia nuk mund te dergohet. Ju lutemi kontrolloni fushat dhe provoni perseri.'] };
+    errors.value = response?.errors || { general: [response?.message || 'Porosia nuk mund të dërgohet. Ju lutemi kontrolloni fushat dhe provoni përsëri.'] };
   } finally {
     loading.value = false;
   }
@@ -84,7 +84,7 @@ async function submitOrder() {
         <p class="label">Pa pagesë online</p>
         <h1 class="mt-2 text-3xl font-black sm:text-4xl">Përfundimi i porosisë</h1>
         <p class="mt-3 max-w-2xl text-sm leading-6 text-slate-600 sm:text-base">
-          Dërgo kërkesën për porosi dhe ekipi ynë do tju kontaktojë për të konfirmuar disponueshmërinë, dërgesën dhe detajet finale.
+          Dërgo kërkesën për porosi dhe ekipi ynë do t'ju kontaktojë për të konfirmuar disponueshmërinë, dërgesën dhe detajet finale.
         </p>
       </div>
 
@@ -126,7 +126,7 @@ async function submitOrder() {
 
           <section class="grid gap-4 border-t border-line pt-5">
             <div>
-              <h2 class="text-lg font-black">Adresa e dergeses</h2>
+              <h2 class="text-lg font-black">Adresa e dërgesës</h2>
               <p class="mt-1 text-sm leading-6 text-slate-600">Zgjedh shtetin dhe qytetin/komunën, pastaj shkruaj adresën sa më saktë.</p>
             </div>
             <div class="grid gap-4 sm:grid-cols-2">
@@ -169,7 +169,7 @@ async function submitOrder() {
           <section class="grid gap-4 border-t border-line pt-5">
             <label class="grid gap-2">
               <span class="text-xs font-bold uppercase text-slate-500">Shënim për porosinë opsional</span>
-              <textarea v-model="form.customer_note" class="input-field min-h-24" placeholder="Pyetje ose kerkesa shtese per ekipin tone" />
+              <textarea v-model="form.customer_note" class="input-field min-h-24" placeholder="Pyetje ose kërkesa shtesë për ekipin tonë" />
             </label>
             <label class="flex items-start gap-3 rounded-lg border border-line bg-mist p-4 text-sm leading-6 text-slate-700">
               <input v-model="form.policy_accepted" class="mt-1 h-4 w-4 rounded border-line" type="checkbox">

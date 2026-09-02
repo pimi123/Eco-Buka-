@@ -24,8 +24,8 @@ useSeo({
         </p>
         <p v-if="orderNumber" class="mt-6 rounded-lg bg-mist p-4 text-lg font-black">Numri i porosisë: {{ orderNumber }}</p>
         <div class="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
-          <RouterLink to="/products" class="btn-primary">Shiko produkte te tjera</RouterLink>
-          <RouterLink to="/" class="btn-secondary">Kthehu ne balline</RouterLink>
+          <RouterLink to="/products" class="btn-primary">Shiko produkte të tjera</RouterLink>
+          <RouterLink to="/" class="btn-secondary">Kthehu në ballinë</RouterLink>
         </div>
       </div>
     </section>

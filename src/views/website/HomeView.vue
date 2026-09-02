@@ -26,7 +26,7 @@ const fallbackSections: HomepageSection[] = [
   {
     id: 'fallback-stream-showcase',
     section_key: 'solar_system_showcase',
-    title: 'STREAM Solar Plant',
+    title: 'Impiant solar STREAM',
     section_type: 'mixed_showcase',
     active: true,
     sort_order: 1,
@@ -34,8 +34,8 @@ const fallbackSections: HomepageSection[] = [
   {
     id: 'fallback-new-products',
     section_key: 'new_products',
-    title: 'New Products',
-    subtitle: 'Fresh energy launches, seasonal offers, and smart power picks for Eco Buka customers.',
+    title: 'Produktet e reja',
+    subtitle: 'Produkte të reja energjie, oferta sezonale dhe zgjidhje inteligjente për klientët Eco Buka.',
     section_type: 'promo_cards',
     active: true,
     sort_order: 2,
@@ -43,8 +43,8 @@ const fallbackSections: HomepageSection[] = [
   {
     id: 'fallback-power-stations',
     section_key: 'power_stations_featured',
-    title: 'Power Stations',
-    subtitle: 'Explore reliable portable power solutions for home, outdoor, and backup energy.',
+    title: 'Stacione energjie',
+    subtitle: 'Shfletoni zgjidhje të besueshme portative për shtëpi, përdorim në natyrë dhe energji rezervë.',
     section_type: 'featured_category',
     source_type: 'category',
     source_slug: 'power-stations',
@@ -54,7 +54,7 @@ const fallbackSections: HomepageSection[] = [
   {
     id: 'fallback-popular',
     section_key: 'popular_eco_buka',
-    title: 'Popular Eco Buka solutions',
+    title: 'Zgjidhjet më të kërkuara Eco Buka',
     section_type: 'product_grid',
     active: true,
     sort_order: 6,
@@ -62,7 +62,7 @@ const fallbackSections: HomepageSection[] = [
   {
     id: 'fallback-promotional-cards',
     section_key: 'promotional_category_cards',
-    title: 'Promotional Category Cards',
+    title: 'Kartela promovuese',
     section_type: 'promo_cards',
     active: true,
     sort_order: 7,
@@ -70,7 +70,7 @@ const fallbackSections: HomepageSection[] = [
   {
     id: 'fallback-video',
     section_key: 'featured_video_promo',
-    title: 'Featured Video Promo',
+    title: 'Promovim i veçuar me video',
     section_type: 'video_banner',
     active: true,
     sort_order: 8,
@@ -84,8 +84,8 @@ const orderedSections = computed(() =>
 );
 
 useSeo({
-  title: 'Portable Power and Solar Energy Solutions',
-  description: 'Shop Eco Buka portable power stations, solar panels, solar generator kits, home battery storage, and clean backup energy solutions.',
+  title: 'Zgjidhje portative energjie dhe energji solare',
+  description: 'Shfletoni stacione portative energjie, panele solare, sete gjeneratorësh solarë, bateri për shtëpi dhe zgjidhje rezervë energjie nga Eco Buka.',
   canonicalPath: '/',
 });
 
@@ -144,6 +144,6 @@ async function fetchHomepageSections() {
       />
     </template>
 
-    <PromoBanner />
+    <!-- <PromoBanner /> -->
   </WebsiteLayout>
 </template>

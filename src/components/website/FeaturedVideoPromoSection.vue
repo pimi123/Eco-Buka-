@@ -47,7 +47,7 @@ const content = computed(() => ({
   heading: props.heading || activeBanner.value?.title || '',
   description: props.description || activeBanner.value?.subtitle || '',
   priceText: props.priceText || activeBanner.value?.price_text || '',
-  buttonText: props.buttonText || activeBanner.value?.button_text || 'Buy Now',
+  buttonText: props.buttonText || activeBanner.value?.button_text || 'Bli tani',
   buttonUrl: props.buttonUrl || activeBanner.value?.button_link || '/products',
   backgroundVideoUrl: props.backgroundVideoUrl || activeBanner.value?.background_video_url || '',
   fallbackImageUrl: optimizedImageUrl(props.fallbackImageUrl || activeBanner.value?.background_image_url || activeBanner.value?.mobile_background_image_url, 'desktop') || fallbackUrl,
@@ -71,7 +71,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <section v-if="sectionVisible" class="bg-white py-8 sm:py-12 lg:py-14" aria-label="Featured video promotion">
+  <section v-if="sectionVisible" class="bg-white py-8 sm:py-12 lg:py-14" aria-label="Promovim me video të veçuar">
     <div class="container-shell">
       <h2 v-if="content.title" class="mb-5 text-2xl font-black leading-tight text-ink sm:text-3xl">
         {{ content.title }}

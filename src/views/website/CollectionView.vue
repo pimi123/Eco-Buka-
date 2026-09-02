@@ -24,7 +24,7 @@ const collection = computed(() => collectionStore.collections.find((item) => ite
 
 useSeo({
   title: computed(() => collection.value?.name || 'Eco Buka Collection'),
-  description: computed(() => collection.value?.description || `Browse Eco Buka products selected for ${currentSlug.value.replace(/-/g, ' ')}.`),
+  description: computed(() => collection.value?.description || `Shfletoni produktet Eco Buka të zgjedhura për ${currentSlug.value.replace(/-/g, ' ')}.`),
   canonicalPath: computed(() => `/collections/${currentSlug.value}`),
 });
 
@@ -47,7 +47,7 @@ async function loadCollection(slug: string) {
     products.value = result.products;
     hasMore.value = result.hasMore;
   } catch {
-    error.value = 'We could not load this collection right now.';
+    error.value = 'Ky koleksion nuk mund të ngarkohet për momentin.';
   } finally {
     loading.value = false;
   }
@@ -65,7 +65,7 @@ async function loadMoreProducts() {
     page.value = result.currentPage;
     hasMore.value = result.hasMore;
   } catch {
-    error.value = 'We could not load more products right now.';
+    error.value = 'Produktet e tjera nuk mund të ngarkohen për momentin.';
   } finally {
     loadingMore.value = false;
   }
@@ -79,30 +79,30 @@ watch(currentSlug, (slug) => loadCollection(slug));
   <WebsiteLayout>
     <section class="bg-mist py-10 sm:py-12 lg:py-14">
       <div class="container-shell">
-        <p class="label">{{ collection?.type || 'Collection' }}</p>
-        <h1 class="mt-2 text-3xl font-black capitalize sm:text-4xl">{{ collection?.name || (loading ? 'Loading collection' : 'Collection not found') }}</h1>
+        <p class="label">{{ collection?.type || 'Koleksion' }}</p>
+        <h1 class="mt-2 text-3xl font-black capitalize sm:text-4xl">{{ collection?.name || (loading ? 'Duke ngarkuar koleksionin' : 'Koleksioni nuk u gjet') }}</h1>
         <p v-if="collection?.description" class="mt-4 max-w-2xl text-sm leading-6 text-slate-600 sm:text-base">{{ collection.description }}</p>
       </div>
     </section>
 
     <section class="container-shell py-10 sm:py-12">
       <div v-if="loading" class="rounded-lg border border-line bg-white p-6 text-sm font-semibold text-slate-600">
-        Loading products...
+        Duke ngarkuar produktet...
       </div>
       <div v-else-if="error" class="rounded-lg border border-red-100 bg-red-50 p-6 text-sm font-semibold text-red-700">
         {{ error }}
       </div>
       <div v-else-if="!collection" class="rounded-lg border border-line bg-white p-6 text-sm font-semibold text-slate-600">
-        Collection not found.
+        Koleksioni nuk u gjet.
       </div>
       <div v-else-if="!products.length" class="rounded-lg border border-line bg-white p-6 text-sm font-semibold text-slate-600">
-        No products found in this collection.
+        Nuk u gjet asnjë produkt në këtë koleksion.
       </div>
       <template v-else>
         <ProductGrid :products="products" />
         <div v-if="hasMore" class="mt-8 flex justify-center">
           <button class="rounded-full border border-line bg-white px-6 py-3 text-sm font-bold shadow-sm transition hover:bg-slate-50 disabled:cursor-wait disabled:opacity-60" type="button" :disabled="loadingMore" @click="loadMoreProducts">
-            {{ loadingMore ? 'Loading...' : 'Load more products' }}
+            {{ loadingMore ? 'Duke ngarkuar...' : 'Ngarko më shumë produkte' }}
           </button>
         </div>
       </template>

@@ -14,8 +14,8 @@ const results = computed(() => {
 });
 
 useSeo({
-  title: 'Search Products',
-  description: 'Search Eco Buka portable power stations, solar panels, batteries, smart devices, and clean energy accessories.',
+  title: 'Kërko produkte',
+  description: 'Kërko stacione portative energjie, panele solare, bateri, pajisje inteligjente dhe aksesorë të energjisë së pastër nga Eco Buka.',
   canonicalPath: '/search',
 });
 
@@ -25,8 +25,8 @@ onMounted(() => productStore.fetchProducts());
 <template>
   <WebsiteLayout>
     <section class="container-shell py-10 sm:py-12">
-      <h1 class="text-3xl font-black sm:text-4xl">Search products</h1>
-      <input v-model="query" class="input-field mt-6 max-w-xl" placeholder="Search by name, capacity, category..." />
+      <h1 class="text-3xl font-black sm:text-4xl">Kërko produkte</h1>
+      <input v-model="query" class="input-field mt-6 max-w-xl" placeholder="Kërko sipas emrit, kapacitetit ose kategorisë..." />
       <div class="mt-6 sm:mt-8">
         <ProductGrid :products="results" />
       </div>

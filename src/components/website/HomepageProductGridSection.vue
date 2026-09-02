@@ -11,7 +11,7 @@ const props = withDefaults(
     label?: string;
   }>(),
   {
-    label: 'Featured catalogue',
+    label: 'Katalog i veçuar',
   },
 );
 
@@ -38,7 +38,7 @@ onMounted(async () => {
       category: typeof (product as any).category === 'object' ? (product as any).category.name : (product as any).category,
     }));
   } catch {
-    error.value = 'This homepage section could not be loaded.';
+    error.value = 'Ky seksion i ballinës nuk mund të ngarkohet për momentin.';
   } finally {
     loading.value = false;
   }
@@ -49,12 +49,12 @@ onMounted(async () => {
   <section v-if="loading || error || visibleProducts.length" class="container-shell py-10 sm:py-12 lg:py-14">
     <div>
       <p class="label">{{ label }}</p>
-      <h2 class="mt-2 text-2xl font-black sm:text-3xl">{{ section?.title || 'Homepage Products' }}</h2>
+      <h2 class="mt-2 text-2xl font-black sm:text-3xl">{{ section?.title || 'Produktet e ballinës' }}</h2>
       <p v-if="section?.subtitle" class="mt-3 max-w-3xl text-sm leading-6 text-slate-600 sm:text-base">{{ section.subtitle }}</p>
     </div>
 
     <div v-if="loading" class="mt-6 rounded-lg border border-line bg-white p-6 text-sm font-semibold text-slate-600">
-      Loading section products...
+      Duke ngarkuar produktet e seksionit...
     </div>
     <div v-else-if="error" class="mt-6 rounded-lg border border-red-100 bg-red-50 p-6 text-sm font-semibold text-red-700">
       {{ error }}

@@ -23,8 +23,8 @@ const currentSlug = computed(() => String(route.params.slug || ''));
 const category = computed(() => categoryStore.categories.find((item) => item.slug === currentSlug.value));
 
 useSeo({
-  title: computed(() => category.value?.name || 'Product Category'),
-  description: computed(() => category.value?.description || `Browse Eco Buka products in the ${currentSlug.value.replace(/-/g, ' ')} category.`),
+  title: computed(() => category.value?.name || 'Kategori produktesh'),
+  description: computed(() => category.value?.description || `Shfletoni produktet Eco Buka në kategorinë ${currentSlug.value.replace(/-/g, ' ')}.`),
   canonicalPath: computed(() => `/category/${currentSlug.value}`),
 });
 
@@ -47,7 +47,7 @@ async function loadCategory(slug: string) {
     products.value = result.products;
     hasMore.value = result.hasMore;
   } catch {
-    error.value = 'We could not load this category right now.';
+    error.value = 'Kjo kategori nuk mund të ngarkohet për momentin.';
   } finally {
     loading.value = false;
   }
@@ -65,7 +65,7 @@ async function loadMoreProducts() {
     page.value = result.currentPage;
     hasMore.value = result.hasMore;
   } catch {
-    error.value = 'We could not load more products right now.';
+    error.value = 'Produktet e tjera nuk mund të ngarkohen për momentin.';
   } finally {
     loadingMore.value = false;
   }
@@ -79,29 +79,29 @@ watch(currentSlug, (slug) => loadCategory(slug));
   <WebsiteLayout>
     <section class="bg-mist py-10 sm:py-12 lg:py-14">
       <div class="container-shell">
-        <p class="label">Category</p>
-        <h1 class="mt-2 text-3xl font-black sm:text-4xl">{{ category?.name || (loading ? 'Loading category' : 'Category not found') }}</h1>
+        <p class="label">Kategoria</p>
+        <h1 class="mt-2 text-3xl font-black sm:text-4xl">{{ category?.name || (loading ? 'Duke ngarkuar kategorinë' : 'Kategoria nuk u gjet') }}</h1>
         <p v-if="category?.description" class="mt-4 max-w-2xl text-sm leading-6 text-slate-600 sm:text-base">{{ category.description }}</p>
       </div>
     </section>
     <section class="container-shell py-10 sm:py-12">
       <div v-if="loading" class="rounded-lg border border-line bg-white p-6 text-sm font-semibold text-slate-600">
-        Loading products...
+        Duke ngarkuar produktet...
       </div>
       <div v-else-if="error" class="rounded-lg border border-red-100 bg-red-50 p-6 text-sm font-semibold text-red-700">
         {{ error }}
       </div>
       <div v-else-if="!category" class="rounded-lg border border-line bg-white p-6 text-sm font-semibold text-slate-600">
-        Category not found.
+        Kategoria nuk u gjet.
       </div>
       <div v-else-if="!products.length" class="rounded-lg border border-line bg-white p-6 text-sm font-semibold text-slate-600">
-        No products found in this category.
+        Nuk u gjet asnjë produkt në këtë kategori.
       </div>
       <template v-else>
         <ProductGrid :products="products" />
         <div v-if="hasMore" class="mt-8 flex justify-center">
           <button class="rounded-full border border-line bg-white px-6 py-3 text-sm font-bold shadow-sm transition hover:bg-slate-50 disabled:cursor-wait disabled:opacity-60" type="button" :disabled="loadingMore" @click="loadMoreProducts">
-            {{ loadingMore ? 'Loading...' : 'Load more products' }}
+            {{ loadingMore ? 'Duke ngarkuar...' : 'Ngarko më shumë produkte' }}
           </button>
         </div>
       </template>

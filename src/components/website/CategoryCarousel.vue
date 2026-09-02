@@ -31,7 +31,7 @@ function scrollByDirection(direction: 'left' | 'right') {
       <button
         class="absolute left-2 top-1/2 z-10 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-[#f2f2f2] text-slate-400 transition hover:bg-slate-200 hover:text-slate-600 sm:left-3 sm:h-12 sm:w-12"
         type="button"
-        aria-label="Scroll categories left"
+        aria-label="Lëviz kategoritë majtas"
         @click="scrollByDirection('left')"
       >
         <ChevronLeft class="h-5 w-5" />
@@ -61,14 +61,14 @@ function scrollByDirection(direction: 'left' | 'right') {
           <p class="mt-2 max-w-[108px] text-[11px] font-semibold leading-4 text-slate-800 transition group-hover:text-black sm:max-w-[145px] sm:text-[13px] sm:leading-[17px]">
             {{ category.title }}
           </p>
-          <p v-if="category.isNew" class="mt-1 text-xs font-bold leading-none text-red-600">New</p>
+          <p v-if="category.isNew" class="mt-1 text-xs font-bold leading-none text-red-600">E re</p>
         </RouterLink>
       </div>
 
       <button
         class="absolute right-2 top-1/2 z-10 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-[#d1d1d1] text-slate-700 transition hover:bg-slate-400 hover:text-white sm:right-3 sm:h-12 sm:w-12"
         type="button"
-        aria-label="Scroll categories right"
+        aria-label="Lëviz kategoritë djathtas"
         @click="scrollByDirection('right')"
       >
         <ChevronRight class="h-5 w-5" />
