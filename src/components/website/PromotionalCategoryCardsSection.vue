@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-vue-next';
-import { computed, onMounted, ref } from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import { apiGet, hasLaravelApiConfig } from '../../lib/api';
 import { optimizedImageUrl } from '../../lib/responsiveImages';
 import { demoPromotionalCategoryCards } from '../../lib/demoData';
@@ -28,6 +28,7 @@ const loadedCards = ref<HomepagePromoCard[]>([]);
 const section = ref<HomepageSection | null>(null);
 const loading = ref(false);
 const error = ref<string | null>(null);
+const viewportWidth = ref(typeof window === 'undefined' ? 1280 : window.innerWidth);
 
 const activeLoadedCards = computed(() =>
   loadedCards.value
@@ -43,13 +44,22 @@ const cardsToRender = computed(() =>
 const sectionTitle = computed(() => props.title || section.value?.title || '');
 const sectionSubtitle = computed(() => props.subtitle || section.value?.subtitle || '');
 const layoutVariant = computed(() => {
-  const variant = section.value?.layout_variant || (cardsToRender.value.length === 1 ? 'single_banner' : cardsToRender.value.length > 2 ? 'carousel' : 'two_cards');
+  const variant = section.value?.layout_variant || (cardsToRender.value.length === 1 ? 'single_banner' : 'grid');
   return ['single_banner', 'two_cards', 'grid', 'carousel'].includes(variant) ? variant : 'two_cards';
 });
+const visibleCardCapacity = computed(() => {
+  if (viewportWidth.value >= 1280) return 4;
+  if (viewportWidth.value >= 1024) return 3;
+  if (viewportWidth.value >= 640) return 2;
+  return 1;
+});
+const hasOverflowingCards = computed(() => cardsToRender.value.length > visibleCardCapacity.value);
 const effectiveLayout = computed(() => {
   if (cardsToRender.value.length <= 1 || layoutVariant.value === 'single_banner') return 'single_banner';
-  if (layoutVariant.value === 'grid') return 'grid';
-  if (layoutVariant.value === 'carousel' || cardsToRender.value.length > 2) return 'carousel';
+  if (layoutVariant.value === 'grid' && !hasOverflowingCards.value) return 'grid';
+  if (layoutVariant.value === 'two_cards' && cardsToRender.value.length <= 2) return 'two_cards';
+  if (layoutVariant.value === 'carousel' && hasOverflowingCards.value) return 'carousel';
+  if (hasOverflowingCards.value) return 'carousel';
   return 'two_cards';
 });
 const isSingleBanner = computed(() => effectiveLayout.value === 'single_banner');
@@ -80,20 +90,34 @@ function ariaLabel(card: HomepagePromoCard) {
   return card.category_slug ? `Shiko produktet në kategorinë ${card.title}` : `Shiko ${card.title}`;
 }
 
+function syncViewportWidth() {
+  viewportWidth.value = window.innerWidth;
+}
+
 function wrapperClass() {
   if (isCarousel.value) {
     return 'flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2 [-ms-overflow-style:none] [scrollbar-width:none] sm:gap-5 lg:gap-6 [&::-webkit-scrollbar]:hidden';
   }
 
   if (isGrid.value) {
-    return 'grid gap-4 sm:grid-cols-2 lg:grid-cols-3';
+    return 'grid gap-4 lg:gap-6';
   }
 
   if (isSingleBanner.value) {
     return 'grid gap-5';
   }
 
-  return 'grid gap-5 md:grid-cols-2 lg:gap-6';
+  return 'grid gap-4 lg:gap-6';
+}
+
+function trackStyle() {
+  if (isCarousel.value || isSingleBanner.value) return undefined;
+
+  const columnCount = Math.min(cardsToRender.value.length || 1, visibleCardCapacity.value);
+
+  return {
+    gridTemplateColumns: `repeat(${columnCount}, minmax(0, 1fr))`,
+  };
 }
 
 function cardClass() {
@@ -115,6 +139,8 @@ function cardImageSizes() {
 }
 
 onMounted(async () => {
+  window.addEventListener('resize', syncViewportWidth, { passive: true });
+
   if (props.cards?.length || !hasLaravelApiConfig) return;
 
   loading.value = true;
@@ -129,6 +155,10 @@ onMounted(async () => {
   } finally {
     loading.value = false;
   }
+});
+
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', syncViewportWidth);
 });
 </script>
 
@@ -170,11 +200,11 @@ onMounted(async () => {
         </div>
       </div>
 
-      <div v-if="loading" :class="wrapperClass()">
+      <div v-if="loading" :class="wrapperClass()" :style="trackStyle()">
         <div v-for="index in 2" :key="index" class="h-[320px] animate-pulse rounded-lg bg-mist sm:h-[360px]" />
       </div>
 
-      <div v-else ref="cardTrack" :class="wrapperClass()">
+      <div v-else ref="cardTrack" :class="wrapperClass()" :style="trackStyle()">
         <component
           :is="isExternal(cardLink(card)) ? 'a' : 'RouterLink'"
           v-for="card in cardsToRender"

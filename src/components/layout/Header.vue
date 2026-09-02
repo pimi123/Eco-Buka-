@@ -71,12 +71,7 @@ onBeforeUnmount(() => {
       </RouterLink>
       <nav class="hidden items-center gap-5 text-sm font-semibold xl:flex 2xl:gap-6">
         <RouterLink v-for="[label, to] in nav" :key="label" :to="to" class="hover:text-energy">{{ label }}</RouterLink>
-        <RouterLink
-          to="/solutions/powerocean"
-          class="inline-flex min-h-10 items-center justify-center rounded-full bg-ink px-5 text-sm font-black text-white shadow-sm transition hover:bg-slate-800"
-        >
-          PowerOcean me porosi
-        </RouterLink>
+        <RouterLink to="/solutions/powerocean" class="hover:text-energy">PowerOcean</RouterLink>
       </nav>
       <div class="hidden min-w-0 flex-1 justify-end lg:flex">
         <RouterLink to="/search">
@@ -101,10 +96,10 @@ onBeforeUnmount(() => {
         <RouterLink v-for="[label, to] in nav" :key="label" :to="to" class="rounded-md px-3 py-3 text-base font-semibold hover:bg-mist sm:text-sm" @click="open = false">{{ label }}</RouterLink>
         <RouterLink
           to="/solutions/powerocean"
-          class="mt-2 inline-flex min-h-12 items-center justify-center rounded-full bg-ink px-5 text-sm font-black text-white shadow-sm transition hover:bg-slate-800"
+          class="rounded-md px-3 py-3 text-base font-semibold hover:bg-mist sm:text-sm"
           @click="open = false"
         >
-          PowerOcean me porosi
+          PowerOcean
         </RouterLink>
       </div>
     </div>
