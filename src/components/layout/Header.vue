@@ -66,8 +66,8 @@ onBeforeUnmount(() => {
       Zgjidhje zyrtare energjie për shtëpi, biznese dhe përdorim në natyrë
     </div>
     <div class="container-shell flex min-h-14 items-center justify-between gap-2 py-2.5 sm:min-h-16 sm:gap-4 sm:py-3">
-      <RouterLink to="/" class="flex min-h-10 shrink-0 items-center" aria-label="Ballina Eco Buka" @click="open = false">
-        <img :src="logoUrl" alt="Eco Buka" class="h-8 w-auto max-w-[170px] object-contain sm:h-9 sm:max-w-[210px]" />
+      <RouterLink to="/" class="flex min-h-8 shrink-0 items-center" aria-label="Ballina Eco Buka" @click="open = false">
+        <img :src="logoUrl" alt="Eco Buka" class="h-8 w-auto max-w-[100px] object-contain sm:h-9 sm:max-w-[150px] mr-32" />
       </RouterLink>
       <nav class="hidden items-center gap-5 text-sm font-semibold xl:flex 2xl:gap-6">
         <RouterLink v-for="[label, to] in nav" :key="label" :to="to" class="hover:text-energy">{{ label }}</RouterLink>
