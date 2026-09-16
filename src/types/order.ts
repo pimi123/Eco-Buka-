@@ -28,8 +28,15 @@ export interface CheckoutPayload {
 
 export interface OrderResponse {
   message: string;
+  id: number;
   order_number: string;
   status: string;
   total: string | number;
   currency: string;
+}
+
+export interface NestPayInitiationResponse {
+  gatewayUrl?: string;
+  gateway_url?: string;
+  parameters: Record<string, string | number | boolean | null | undefined>;
 }

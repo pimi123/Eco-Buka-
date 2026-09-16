@@ -36,7 +36,7 @@ Route::get('/home/navigation-cards/{sectionKey}', [HomeController::class, 'navig
 Route::get('/home/feature-banners/{sectionKey}', [HomeController::class, 'featureBanners']);
 Route::get('/homepage', [HomeController::class, 'homepage']);
 
-Route::match(['get', 'post'], '/nestpay-test/success', function (Request $request) {
+Route::match(['get', 'post'], ' ', function (Request $request) {
     return response('NestPay SUCCESS endpoint reached.', 200)
         ->header('Content-Type', 'text/plain');
 });

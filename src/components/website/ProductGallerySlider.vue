@@ -99,7 +99,7 @@ watch(images, () => {
     >
       <div
         ref="mobileTrack"
-        class="flex aspect-[4/3] snap-x snap-mandatory overflow-x-auto scroll-smooth [-ms-overflow-style:none] [overscroll-behavior-x:contain] [scrollbar-width:none] sm:hidden [&::-webkit-scrollbar]:hidden"
+        class="flex aspect-[4/3] touch-pan-x snap-x snap-mandatory overflow-x-auto scroll-smooth [-ms-overflow-style:none] [overscroll-behavior-x:contain] [scrollbar-width:none] sm:hidden [&::-webkit-scrollbar]:hidden"
         @scroll.passive="syncActiveFromScroll"
       >
         <div
@@ -111,7 +111,8 @@ watch(images, () => {
           <img
             :src="image"
             :alt="`${title} imazhi ${index + 1}`"
-            class="h-full w-full object-contain p-3"
+            class="h-full w-full select-none object-contain p-3"
+            draggable="false"
             :loading="index === 0 ? 'eager' : 'lazy'"
             :fetchpriority="index === 0 ? 'high' : 'auto'"
             decoding="async"
@@ -124,7 +125,8 @@ watch(images, () => {
       <img
         :src="activeImage"
         :alt="title"
-        class="hidden aspect-[4/3] w-full object-contain p-3 sm:block sm:p-6"
+        class="hidden aspect-[4/3] w-full select-none object-contain p-3 sm:block sm:p-6"
+        draggable="false"
         loading="eager"
         fetchpriority="high"
         decoding="async"
@@ -195,7 +197,8 @@ watch(images, () => {
         <img
           :src="image"
           :alt="`${title} imazhi ${index + 1}`"
-          class="h-full w-full object-contain p-2"
+          class="h-full w-full select-none object-contain p-2"
+          draggable="false"
           loading="lazy"
           decoding="async"
           sizes="112px"

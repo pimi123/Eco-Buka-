@@ -1,16 +1,15 @@
 <script setup lang="ts">
 import { computed, reactive, ref, watch } from 'vue';
-import { useRouter } from 'vue-router';
 import WebsiteLayout from '../../components/layout/WebsiteLayout.vue';
 import { apiPost } from '../../lib/api';
 import { deliveryCountries, municipalitiesForCountry } from '../../lib/locations';
 import { useSeo } from '../../lib/seo';
 import { useCartStore } from '../../stores/cartStore';
-import type { CheckoutPayload, OrderResponse } from '../../types/order';
+import type { CheckoutPayload, NestPayInitiationResponse, OrderResponse } from '../../types/order';
 
-const router = useRouter();
 const cartStore = useCartStore();
 const loading = ref(false);
+const paymentSubmitting = ref(false);
 const errors = ref<Record<string, string[]>>({});
 const form = reactive({
   customer_name: '',
@@ -48,10 +47,41 @@ function optionEntries(options?: Record<string, string>) {
   return Object.entries(options || {}).filter(([, value]) => Boolean(value));
 }
 
+function submitHostedPayment(response: NestPayInitiationResponse) {
+  const gatewayUrl = response.gatewayUrl || response.gateway_url;
+
+  if (!gatewayUrl || !response.parameters) {
+    throw new Error('Missing NestPay gateway data.');
+  }
+
+  const form = document.createElement('form');
+  form.method = 'POST';
+  form.action = gatewayUrl;
+  form.style.display = 'none';
+
+  Object.entries(response.parameters).forEach(([name, value]) => {
+    if (value === undefined || value === null) return;
+
+    const input = document.createElement('input');
+    input.type = 'hidden';
+    input.name = name;
+    input.value = String(value);
+    form.appendChild(input);
+  });
+
+  document.body.appendChild(form);
+  form.submit();
+
+  window.setTimeout(() => {
+    form.remove();
+  }, 1000);
+}
+
 async function submitOrder() {
-  if (loading.value || !hasItems.value || hasUnavailableItems.value) return;
+  if (loading.value || paymentSubmitting.value || !hasItems.value || hasUnavailableItems.value) return;
 
   loading.value = true;
+  paymentSubmitting.value = true;
   errors.value = {};
 
   const payload: CheckoutPayload = {
@@ -66,11 +96,16 @@ async function submitOrder() {
 
   try {
     const response = await apiPost<OrderResponse>('/orders', payload);
+    const payment = await apiPost<NestPayInitiationResponse>(`/orders/${response.id}/payments/nestpay`, {
+      shopurl: window.location.origin + '/checkout',
+    });
+
     cartStore.clear();
-    await router.push({ name: 'order-success', query: { order: response.order_number } });
+    submitHostedPayment(payment);
   } catch (error) {
     const response = (error as Error & { response?: { errors?: Record<string, string[]>; message?: string } }).response;
-    errors.value = response?.errors || { general: [response?.message || 'Porosia nuk mund të dërgohet. Ju lutemi kontrolloni fushat dhe provoni përsëri.'] };
+    errors.value = response?.errors || { general: [response?.message || 'Pagesa nuk mund të iniciohet. Ju lutemi kontrolloni fushat dhe provoni përsëri.'] };
+    paymentSubmitting.value = false;
   } finally {
     loading.value = false;
   }
@@ -179,8 +214,8 @@ async function submitOrder() {
               </span>
             </label>
             <span v-if="fieldError('policy_accepted')" class="text-xs font-semibold text-red-600">{{ fieldError('policy_accepted') }}</span>
-            <button class="btn-primary min-h-12 w-full disabled:cursor-not-allowed disabled:opacity-50 sm:w-fit" :disabled="loading || hasUnavailableItems">
-              {{ loading ? 'Duke dërguar porosinë...' : 'Dërgo porosinë' }}
+            <button class="btn-primary min-h-12 w-full disabled:cursor-not-allowed disabled:opacity-50 sm:w-fit" :disabled="loading || paymentSubmitting || hasUnavailableItems">
+              {{ loading ? 'Duke hapur faqen e pagesës...' : 'Vazhdo te pagesa' }}
             </button>
           </section>
         </form>
