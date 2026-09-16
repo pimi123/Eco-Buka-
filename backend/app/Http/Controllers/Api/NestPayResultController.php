@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Services\Payments\NestPay\PaymentResult;
 use App\Services\Payments\NestPay\ProcessNestPayResultService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -13,18 +14,23 @@ class NestPayResultController extends Controller
     {
         $result = $payments->process($request->all(), 'success');
 
-        return redirect()->away($this->frontendUrl($result->approved ? '/order-success' : '/checkout', $result->code));
+        return redirect()->away($this->frontendUrl($result->approved ? '/order-success' : '/payment-failed', $result));
     }
 
     public function failure(Request $request, ProcessNestPayResultService $payments): RedirectResponse
     {
         $result = $payments->process($request->all(), 'failure');
 
-        return redirect()->away($this->frontendUrl('/checkout', $result->code));
+        return redirect()->away($this->frontendUrl('/payment-failed', $result));
     }
 
-    private function frontendUrl(string $path, string $paymentStatus): string
+    private function frontendUrl(string $path, PaymentResult $result): string
     {
-        return rtrim((string) config('nestpay.frontend_url'), '/').$path.'?payment='.$paymentStatus;
+        $query = http_build_query(array_filter([
+            'payment' => $result->code,
+            'order' => $result->payment?->order?->order_number,
+        ]));
+
+        return rtrim((string) config('nestpay.frontend_url'), '/').$path.($query ? '?'.$query : '');
     }
 }

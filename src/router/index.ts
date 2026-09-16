@@ -16,6 +16,7 @@ const PowerOceanView = () => import('../views/website/PowerOceanView.vue');
 const CartView = () => import('../views/website/CartView.vue');
 const CheckoutView = () => import('../views/website/CheckoutView.vue');
 const OrderSuccessView = () => import('../views/website/OrderSuccessView.vue');
+const PaymentFailedView = () => import('../views/website/PaymentFailedView.vue');
 
 const router = createRouter({
   history: createWebHistory(),
@@ -32,6 +33,7 @@ const router = createRouter({
     { path: '/cart', name: 'cart', component: CartView },
     { path: '/checkout', name: 'checkout', component: CheckoutView },
     { path: '/order-success', name: 'order-success', component: OrderSuccessView },
+    { path: '/payment-failed', name: 'payment-failed', component: PaymentFailedView },
     { path: '/about', name: 'about', component: AboutView },
     { path: '/company-information', name: 'company-information', component: CompanyInformationView },
     { path: '/politika-e-kthimit', name: 'return-policy', component: ReturnPolicyView },
