@@ -5,6 +5,7 @@ namespace App\Services\Orders;
 use App\Models\Order;
 use App\Models\Product;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 class CreateOrderService
@@ -14,6 +15,7 @@ class CreateOrderService
         return DB::transaction(function () use ($data): Order {
             $order = Order::create([
                 'order_number' => $this->nextOrderNumber(),
+                'tracking_token' => $this->trackingToken(),
                 'customer_name' => $data['customer_name'],
                 'customer_phone' => $data['customer_phone'],
                 'customer_email' => $data['customer_email'] ?? null,
@@ -99,5 +101,14 @@ class CreateOrderService
         } while (Order::query()->where('order_number', $orderNumber)->exists());
 
         return $orderNumber;
+    }
+
+    private function trackingToken(): string
+    {
+        do {
+            $token = 'ord_'.Str::lower(Str::random(48));
+        } while (Order::query()->where('tracking_token', $token)->exists());
+
+        return $token;
     }
 }
