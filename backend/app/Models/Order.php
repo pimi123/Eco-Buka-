@@ -25,6 +25,7 @@ class Order extends Model
 
     protected $fillable = [
         'order_number',
+        'tracking_token',
         'customer_name',
         'customer_phone',
         'customer_email',

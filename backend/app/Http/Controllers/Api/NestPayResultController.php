@@ -29,6 +29,7 @@ class NestPayResultController extends Controller
         $query = http_build_query(array_filter([
             'payment' => $result->code,
             'order' => $result->payment?->order?->order_number,
+            'token' => $result->payment?->order?->tracking_token,
         ]));
 
         return rtrim((string) config('nestpay.frontend_url'), '/').$path.($query ? '?'.$query : '');

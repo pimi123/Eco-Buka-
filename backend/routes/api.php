@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\NestPayPaymentController;
 use App\Http\Controllers\Api\NestPayResultController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\ProductController;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/categories', [CategoryController::class, 'index']);
@@ -36,12 +37,22 @@ Route::get('/home/navigation-cards/{sectionKey}', [HomeController::class, 'navig
 Route::get('/home/feature-banners/{sectionKey}', [HomeController::class, 'featureBanners']);
 Route::get('/homepage', [HomeController::class, 'homepage']);
 
-Route::match(['get', 'post'], ' ', function (Request $request) {
-    return response('NestPay SUCCESS endpoint reached.', 200)
-        ->header('Content-Type', 'text/plain');
+Route::match(['get', 'post'], '/nestpay-test/success', function (Request $request) {
+    $query = http_build_query(array_filter([
+        'payment' => 'approved',
+        'order' => $request->input('order') ?: $request->input('ReturnOid') ?: $request->input('oid'),
+        'token' => $request->input('token'),
+    ]));
+
+    return redirect()->away(rtrim((string) config('nestpay.frontend_url'), '/').'/order-success'.($query ? '?'.$query : ''));
 });
 
 Route::match(['get', 'post'], '/nestpay-test/failure', function (Request $request) {
-    return response('NestPay FAILURE endpoint reached.', 200)
-        ->header('Content-Type', 'text/plain');
+    $query = http_build_query(array_filter([
+        'payment' => 'failed',
+        'order' => $request->input('order') ?: $request->input('ReturnOid') ?: $request->input('oid'),
+        'token' => $request->input('token'),
+    ]));
+
+    return redirect()->away(rtrim((string) config('nestpay.frontend_url'), '/').'/payment-failed'.($query ? '?'.$query : ''));
 });
