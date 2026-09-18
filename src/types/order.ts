@@ -40,3 +40,27 @@ export interface NestPayInitiationResponse {
   gateway_url?: string;
   parameters: Record<string, string | number | boolean | null | undefined>;
 }
+
+export interface PublicOrderItem {
+  name: string;
+  quantity: number;
+  unit_price: string | number;
+  line_total: string | number;
+  image_url?: string | null;
+  category?: string | null;
+  selected_options?: Record<string, string> | null;
+}
+
+export interface PublicOrder {
+  order_number: string;
+  status: string;
+  status_label: string;
+  payment_status?: string | null;
+  payment_status_label: string;
+  total: string | number;
+  currency: string;
+  created_at?: string | null;
+  customer_name?: string | null;
+  delivery_area?: string | null;
+  items: PublicOrderItem[];
+}

@@ -1,12 +1,14 @@
 <script setup lang="ts">
-import { Menu, Search, ShoppingBag, X } from 'lucide-vue-next';
+import { Menu, Search, ShoppingBag, UserRound, X } from 'lucide-vue-next';
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
+import { useAuthStore } from '../../stores/authStore';
 import { useCartStore } from '../../stores/cartStore';
 import { useCollectionStore } from '../../stores/collectionStore';
 import logoUrl from '../../assets/eco-buka-logo.svg';
 
 const open = ref(false);
 const headerRef = ref<HTMLElement | null>(null);
+const authStore = useAuthStore();
 const cartStore = useCartStore();
 const collectionStore = useCollectionStore();
 
@@ -79,6 +81,14 @@ onBeforeUnmount(() => {
         </RouterLink>
       </div>
       <div class="flex items-center gap-2">
+        <RouterLink
+          :to="authStore.isAuthenticated ? '/account' : '/login'"
+          class="relative grid h-10 w-10 place-items-center rounded-md hover:bg-mist"
+          :aria-label="authStore.isAuthenticated ? 'Llogaria ime' : 'Kyçu'"
+        >
+          <UserRound class="h-5 w-5" />
+          <span v-if="authStore.isAuthenticated && !authStore.isEmailVerified" class="absolute right-1 top-1 h-2 w-2 rounded-full bg-amber-500" />
+        </RouterLink>
         <RouterLink to="/cart" class="relative grid h-10 w-10 place-items-center rounded-md hover:bg-mist" aria-label="Shporta">
           <ShoppingBag class="h-5 w-5" />
           <span v-if="cartStore.count" class="absolute right-0 top-0 grid h-5 min-w-5 place-items-center rounded-full bg-energy px-1 text-[11px] font-black leading-none text-white">{{ cartStore.count }}</span>
@@ -92,6 +102,13 @@ onBeforeUnmount(() => {
       <div class="container-shell grid max-h-[calc(100vh-6.25rem)] gap-1 overflow-y-auto py-4">
         <RouterLink to="/search" class="mb-2 px-3 flex min-h-11 items-center gap-2 rounded-md text-slate-500" @click="open = false">
           <Search class="h-4 w-4" />
+        </RouterLink>
+        <RouterLink
+          :to="authStore.isAuthenticated ? '/account' : '/login'"
+          class="rounded-md px-3 py-3 text-base font-semibold hover:bg-mist sm:text-sm"
+          @click="open = false"
+        >
+          {{ authStore.isAuthenticated ? 'Llogaria ime' : 'Kyçu / Regjistrohu' }}
         </RouterLink>
         <RouterLink v-for="[label, to] in nav" :key="label" :to="to" class="rounded-md px-3 py-3 text-base font-semibold hover:bg-mist sm:text-sm" @click="open = false">{{ label }}</RouterLink>
         <RouterLink

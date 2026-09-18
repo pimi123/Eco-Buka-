@@ -61,6 +61,7 @@ useSeo({
         <div class="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
           <RouterLink to="/checkout" class="btn-primary">Provo përsëri</RouterLink>
           <RouterLink to="/cart" class="btn-secondary">Kthehu te shporta</RouterLink>
+          <RouterLink to="/track-order" class="btn-secondary">Kontrollo porosinë</RouterLink>
           <RouterLink to="/contact" class="btn-secondary">Kontakto Eco Buka</RouterLink>
         </div>
       </div>

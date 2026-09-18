@@ -1,16 +1,39 @@
 <script setup lang="ts">
+import { onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
 import WebsiteLayout from '../../components/layout/WebsiteLayout.vue';
+import OrderSummaryCard from '../../components/orders/OrderSummaryCard.vue';
+import { apiGet } from '../../lib/api';
 import { useSeo } from '../../lib/seo';
+import type { PublicOrder } from '../../types/order';
 
 const route = useRoute();
 const orderNumber = String(route.query.order || '');
+const trackingToken = String(route.query.token || '');
 const paymentStatus = String(route.query.payment || '');
+const order = ref<PublicOrder | null>(null);
+const loadingOrder = ref(false);
+const orderError = ref('');
 
 useSeo({
   title: 'Pagesa u aprovua',
   description: 'Pagesa juaj në Eco Buka u aprovua dhe porosia u pranua me sukses.',
   canonicalPath: '/order-success',
+});
+
+onMounted(async () => {
+  if (!orderNumber || !trackingToken) return;
+
+  loadingOrder.value = true;
+  orderError.value = '';
+
+  try {
+    order.value = await apiGet<PublicOrder>(`/orders/public/${encodeURIComponent(orderNumber)}?token=${encodeURIComponent(trackingToken)}`);
+  } catch {
+    orderError.value = 'Detajet e porosisë nuk mund të shfaqen për momentin. Ruajeni numrin e porosisë dhe kontaktoni ekipin tonë nëse ju duhet ndihmë.';
+  } finally {
+    loadingOrder.value = false;
+  }
 });
 </script>
 
@@ -37,9 +60,17 @@ useSeo({
           </p>
         </div>
         <p class="mt-4 rounded-lg border border-line bg-white p-4 text-sm leading-6 text-slate-600">
-          Ruajeni numrin e porosisë. Për momentin porositë nuk kanë ende llogari klienti, prandaj ky numër përdoret për komunikim me ekipin tonë.
+          Ruajeni numrin e porosisë. Mund ta kontrolloni statusin më vonë me numrin e porosisë dhe emailin ose telefonin tuaj.
         </p>
+        <div v-if="loadingOrder" class="mt-6 rounded-lg border border-line bg-white p-4 text-sm font-semibold text-slate-600">
+          Duke ngarkuar detajet e porosisë...
+        </div>
+        <p v-if="orderError" class="mt-6 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm font-semibold text-amber-900">
+          {{ orderError }}
+        </p>
+        <OrderSummaryCard v-if="order" class="mt-6" :order="order" />
         <div class="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
+          <RouterLink to="/track-order" class="btn-secondary">Kontrollo statusin</RouterLink>
           <RouterLink to="/products" class="btn-primary">Shiko produkte të tjera</RouterLink>
           <RouterLink to="/" class="btn-secondary">Kthehu në ballinë</RouterLink>
         </div>

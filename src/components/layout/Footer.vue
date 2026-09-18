@@ -26,6 +26,7 @@
         <div class="mt-3 grid gap-1 text-sm text-slate-300">
           <RouterLink to="/about" class="py-1.5">Rreth Eco Buka</RouterLink>
           <RouterLink to="/company-information" class="py-1.5">Informata për kompaninë</RouterLink>
+          <RouterLink to="/track-order" class="py-1.5">Kontrollo porosinë</RouterLink>
           <RouterLink to="/politika-e-kthimit" class="py-1.5">Politika e kthimit</RouterLink>
           <RouterLink to="/politika-e-privatesise" class="py-1.5">Politika e privatësisë</RouterLink>
           <RouterLink to="/politika-e-cookies" class="py-1.5">Politika e cookies</RouterLink>

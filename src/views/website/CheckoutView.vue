@@ -1,12 +1,14 @@
 <script setup lang="ts">
-import { computed, reactive, ref, watch } from 'vue';
+import { computed, onMounted, reactive, ref, watch } from 'vue';
 import WebsiteLayout from '../../components/layout/WebsiteLayout.vue';
 import { apiPost } from '../../lib/api';
 import { deliveryCountries, municipalitiesForCountry } from '../../lib/locations';
 import { useSeo } from '../../lib/seo';
+import { useAuthStore } from '../../stores/authStore';
 import { useCartStore } from '../../stores/cartStore';
 import type { CheckoutPayload, NestPayInitiationResponse, OrderResponse } from '../../types/order';
 
+const authStore = useAuthStore();
 const cartStore = useCartStore();
 const loading = ref(false);
 const paymentSubmitting = ref(false);
@@ -38,6 +40,15 @@ useSeo({
 watch(() => form.country, () => {
   form.municipality = '';
 });
+
+// onMounted(() => {
+//   const user = authStore.user;
+//   if (!user) return;
+
+//   form.customer_name = form.customer_name || user.name;
+//   form.customer_email = form.customer_email || user.email;
+//   form.customer_phone = form.customer_phone || user.phone || '';
+// });
 
 function fieldError(field: string) {
   return errors.value[field]?.[0] || '';
@@ -116,10 +127,13 @@ async function submitOrder() {
   <WebsiteLayout>
     <section class="container-shell py-8 sm:py-12">
       <div>
-        <p class="label">Pa pagesë online</p>
+        <p class="label">Pagesë e sigurt online</p>
         <h1 class="mt-2 text-3xl font-black sm:text-4xl">Përfundimi i porosisë</h1>
         <p class="mt-3 max-w-2xl text-sm leading-6 text-slate-600 sm:text-base">
           Dërgo kërkesën për porosi dhe ekipi ynë do t'ju kontaktojë për të konfirmuar disponueshmërinë, dërgesën dhe detajet finale.
+        </p>
+        <p class="mt-3 rounded-md border border-emerald-200 bg-emerald-50 p-3 text-sm font-semibold text-emerald-800">
+          Checkout-i është i lidhur me llogarinë: {{ authStore.user?.email }}.
         </p>
       </div>
 

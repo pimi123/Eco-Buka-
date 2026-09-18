@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import HomeView from '../views/website/HomeView.vue';
+import { useAuthStore } from '../stores/authStore';
 
 const ProductsView = () => import('../views/website/ProductsView.vue');
 const CategoryView = () => import('../views/website/CategoryView.vue');
@@ -17,6 +18,12 @@ const CartView = () => import('../views/website/CartView.vue');
 const CheckoutView = () => import('../views/website/CheckoutView.vue');
 const OrderSuccessView = () => import('../views/website/OrderSuccessView.vue');
 const PaymentFailedView = () => import('../views/website/PaymentFailedView.vue');
+const TrackOrderView = () => import('../views/website/TrackOrderView.vue');
+const LoginView = () => import('../views/website/LoginView.vue');
+const RegisterView = () => import('../views/website/RegisterView.vue');
+const ForgotPasswordView = () => import('../views/website/ForgotPasswordView.vue');
+const ResetPasswordView = () => import('../views/website/ResetPasswordView.vue');
+const AccountView = () => import('../views/website/AccountView.vue');
 
 const router = createRouter({
   history: createWebHistory(),
@@ -31,9 +38,15 @@ const router = createRouter({
     { path: '/products/:slug', name: 'product-detail', component: ProductDetailView },
     { path: '/search', name: 'search', component: SearchView },
     { path: '/cart', name: 'cart', component: CartView },
-    { path: '/checkout', name: 'checkout', component: CheckoutView },
+    { path: '/checkout', name: 'checkout', component: CheckoutView, meta: { requiresAuth: true, requiresVerifiedEmail: true } },
     { path: '/order-success', name: 'order-success', component: OrderSuccessView },
     { path: '/payment-failed', name: 'payment-failed', component: PaymentFailedView },
+    { path: '/track-order', name: 'track-order', component: TrackOrderView },
+    { path: '/login', name: 'login', component: LoginView },
+    { path: '/register', name: 'register', component: RegisterView },
+    { path: '/forgot-password', name: 'forgot-password', component: ForgotPasswordView },
+    { path: '/reset-password', name: 'reset-password', component: ResetPasswordView },
+    { path: '/account', name: 'account', component: AccountView, meta: { requiresAuth: true } },
     { path: '/about', name: 'about', component: AboutView },
     { path: '/company-information', name: 'company-information', component: CompanyInformationView },
     { path: '/politika-e-kthimit', name: 'return-policy', component: ReturnPolicyView },
@@ -46,6 +59,34 @@ const router = createRouter({
     { path: '/contact', name: 'contact', component: ContactView },
     { path: '/:pathMatch(.*)*', redirect: '/' },
   ],
+});
+
+router.beforeEach(async (to) => {
+  const authStore = useAuthStore();
+
+  if (authStore.token && !authStore.user) {
+    await authStore.fetchUser().catch(() => null);
+  }
+
+  if ((to.name === 'login' || to.name === 'register') && authStore.isAuthenticated) {
+    return '/account';
+  }
+
+  if (to.meta.requiresAuth && !authStore.isAuthenticated) {
+    return {
+      path: '/login',
+      query: { redirect: to.fullPath },
+    };
+  }
+
+  if (to.meta.requiresVerifiedEmail && authStore.isAuthenticated && !authStore.isEmailVerified) {
+    return {
+      path: '/account',
+      query: { verify_email: '1', redirect: to.fullPath },
+    };
+  }
+
+  return true;
 });
 
 export default router;
