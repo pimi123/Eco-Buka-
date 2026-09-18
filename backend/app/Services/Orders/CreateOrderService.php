@@ -14,6 +14,7 @@ class CreateOrderService
     {
         return DB::transaction(function () use ($data): Order {
             $order = Order::create([
+                'user_id' => $data['user_id'] ?? null,
                 'order_number' => $this->nextOrderNumber(),
                 'tracking_token' => $this->trackingToken(),
                 'customer_name' => $data['customer_name'],

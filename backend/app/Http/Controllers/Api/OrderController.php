@@ -10,7 +10,10 @@ class OrderController extends Controller
 {
     public function store(StoreOrderRequest $request, CreateOrderService $orders)
     {
-        $order = $orders->create($request->validated());
+        $data = $request->validated();
+        $data['user_id'] = $request->user()->id;
+
+        $order = $orders->create($data);
 
         return response()->json([
             'message' => 'Your order has been placed successfully. Our team will contact you shortly to confirm the details.',

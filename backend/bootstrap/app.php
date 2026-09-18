@@ -13,11 +13,14 @@ return Application::configure(basePath: dirname(__DIR__))
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
     )
-    ->withMiddleware(function (Middleware $middleware): void {
-        $middleware->alias([
-            'admin' => \App\Http\Middleware\EnsureAdmin::class,
-        ]);
-    })
+->withMiddleware(function (Middleware $middleware): void {
+    // Enable Laravel Sanctum session/cookie authentication for the SPA
+    $middleware->statefulApi();
+
+    $middleware->alias([
+        'admin' => \App\Http\Middleware\EnsureAdmin::class,
+    ]);
+})
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(
             fn (Request $request) => $request->is('api/*'),
