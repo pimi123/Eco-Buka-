@@ -24,7 +24,7 @@ class StoreOrderRequest extends FormRequest
         return [
             'customer_name' => ['required', 'string', 'max:255'],
             'customer_phone' => ['required', 'string', 'max:50'],
-            'customer_email' => ['nullable', 'email', 'max:255'],
+            'customer_email' => ['required', 'email', 'max:255'],
             'country' => ['required', 'string', 'max:120', 'in:Kosove,Shqiperi,Maqedoni e Veriut'],
             'municipality' => ['required', 'string', 'max:120'],
             'delivery_address' => ['required', 'string', 'max:255'],
@@ -45,12 +45,13 @@ class StoreOrderRequest extends FormRequest
         return [
             'customer_name.required' => 'Ju lutemi shkruani emrin dhe mbiemrin.',
             'customer_phone.required' => 'Ju lutemi shkruani numrin e telefonit.',
+            'customer_email.required' => 'Ju lutemi shkruani email-in ku do ta pranoni konfirmimin e porosisë.',
             'customer_email.email' => 'Ju lutemi shkruani një email valid.',
             'country.required' => 'Ju lutemi zgjedhni shtetin.',
             'country.in' => 'Shteti i zgjedhur nuk është valid.',
             'municipality.required' => 'Ju lutemi zgjedhni qytetin ose komunën.',
             'delivery_address.required' => 'Ju lutemi shkruani adresën e dërgesës.',
-            'policy_accepted.accepted' => 'Duhet të pranoni politikat para se të dërgoni porosinë.',
+            'policy_accepted.accepted' => 'Duhet të pranoni Termat dhe Kushtet dhe Politikën e Kthimit para se të vazhdoni me pagesë.',
             'items.required' => 'Shporta nuk mund të jetë e zbrazët.',
             'items.min' => 'Shporta nuk mund të jetë e zbrazët.',
         ];

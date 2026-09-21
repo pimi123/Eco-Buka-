@@ -10,7 +10,7 @@ export interface CartItem {
 export interface CheckoutPayload {
   customer_name: string;
   customer_phone: string;
-  customer_email?: string;
+  customer_email: string;
   country: string;
   municipality: string;
   delivery_address: string;

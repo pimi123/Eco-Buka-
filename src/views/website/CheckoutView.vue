@@ -152,7 +152,7 @@ async function submitOrder() {
                 <span v-if="fieldError('customer_phone')" class="text-xs font-semibold text-red-600">{{ fieldError('customer_phone') }}</span>
               </label>
               <label class="grid gap-2 sm:col-span-2">
-                <span class="text-xs font-bold uppercase text-slate-500">Email opsional</span>
+                <span class="text-xs font-bold uppercase text-slate-500">Email për konfirmim të porosisë</span>
                 <input v-model="form.customer_email" class="input-field" type="email" autocomplete="email" placeholder="email@example.com">
                 <span v-if="fieldError('customer_email')" class="text-xs font-semibold text-red-600">{{ fieldError('customer_email') }}</span>
               </label>
@@ -209,8 +209,11 @@ async function submitOrder() {
             <label class="flex items-start gap-3 rounded-lg border border-line bg-mist p-4 text-sm leading-6 text-slate-700">
               <input v-model="form.policy_accepted" class="mt-1 h-4 w-4 rounded border-line" type="checkbox">
               <span>
-                Pajtohem që Eco Buka të më kontaktojë për këtë porosi dhe pranoj
-                <RouterLink class="font-bold text-ink underline underline-offset-4" to="/politika-e-kthimit">Politikën e Kthimit</RouterLink>.
+                Pajtohem me
+                <RouterLink class="font-bold text-ink underline underline-offset-4" to="/termat-dhe-kushtet" target="_blank">Termat dhe Kushtet</RouterLink>
+                dhe
+                <RouterLink class="font-bold text-ink underline underline-offset-4" to="/politika-e-kthimit" target="_blank">Politikën e Kthimit</RouterLink>.
+                Pranoj që Eco Buka të më dërgojë email konfirmimi me produktet e porositura, totalin, adresën dhe detajet e dërgesës.
               </span>
             </label>
             <span v-if="fieldError('policy_accepted')" class="text-xs font-semibold text-red-600">{{ fieldError('policy_accepted') }}</span>
