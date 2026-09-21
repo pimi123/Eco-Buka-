@@ -33,7 +33,7 @@ class ProcessNestPayResultService
             return new PaymentResult(false, 'invalid_hash', null, 'Payment verification failed.');
         }
 
-        return DB::transaction(function () use ($payload): PaymentResult {
+        return DB::transaction(function () use ($payload, $endpoint): PaymentResult {
             $returnOid = $this->value($payload, 'ReturnOid') ?: $this->value($payload, 'oid');
 
             if (! $returnOid) {
@@ -91,6 +91,7 @@ class ProcessNestPayResultService
                 'md_status' => $this->value($payload, 'mdStatus') ?: $this->value($payload, 'mdstatus'),
                 'masked_pan' => $this->value($payload, 'MaskedPan'),
                 'payment_method' => $this->value($payload, 'PaymentMethod') ?: $this->value($payload, 'EXTRA.CARDBRAND'),
+                // 'installment_count' => $this->installmentCount($payment, $payload),
                 'error_message' => $this->value($payload, 'ErrMsg'),
                 'response_metadata' => array_merge(
                     $this->safeMetadata($payload),
@@ -145,6 +146,16 @@ class ProcessNestPayResultService
 
         return Payment::STATUS_DECLINED;
     }
+
+    // private function installmentCount(Payment $payment, array $payload): ?int
+    // {
+    //     $returned = $this->value($payload, 'Instalment') ?: $this->value($payload, 'instalment');
+    //     if ($returned !== null && $returned !== '') {
+    //         return max(1, (int) $returned);
+    //     }
+
+    //     return $payment->installment_count;
+    // }
 
     private function safeMetadata(array $payload): array
     {
