@@ -89,7 +89,12 @@ class ProcessNestPayResultService
                 'masked_pan' => $this->value($payload, 'MaskedPan'),
                 'payment_method' => $this->value($payload, 'PaymentMethod') ?: $this->value($payload, 'EXTRA.CARDBRAND'),
                 'error_message' => $this->value($payload, 'ErrMsg'),
-                'response_metadata' => $this->safeMetadata($payload),
+                'response_metadata' => array_merge(
+                    $this->safeMetadata($payload),
+                    [
+                        'callback_endpoint' => $endpoint,
+                    ]
+                ),
                 'paid_at' => $approved ? now() : null,
                 'processed_at' => now(),
             ]);

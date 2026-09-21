@@ -119,6 +119,7 @@ class InitiateNestPayPaymentService
             'lang' => $this->config('language'),
             'rnd' => $rnd,
             'hashAlgorithm' => $this->config('hash_algorithm'),
+            'refreshtime' => $this->config('refresh_time'),
             'encoding' => 'utf-8',
         ];
 

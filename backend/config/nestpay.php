@@ -55,6 +55,7 @@ return [
     'currency' => env('NESTPAY_CURRENCY', '978'),
     'language' => env('NESTPAY_LANGUAGE', 'en'),
     'hash_algorithm' => env('NESTPAY_HASH_ALGORITHM', 'ver3'),
+    'refresh_time' => env('NESTPAY_REFRESH_TIME', '5'),
 
     /*
     |--------------------------------------------------------------------------

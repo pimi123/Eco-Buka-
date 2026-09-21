@@ -10,6 +10,7 @@ const AboutView = () => import('../views/website/AboutView.vue');
 const ContactView = () => import('../views/website/ContactView.vue');
 const CompanyInformationView = () => import('../views/website/CompanyInformationView.vue');
 const ReturnPolicyView = () => import('../views/website/ReturnPolicyView.vue');
+const TermsAndConditionsView = () => import('../views/website/TermsAndConditionsView.vue');
 const PrivacyPolicyView = () => import('../views/website/PrivacyPolicyView.vue');
 const CookiePolicyView = () => import('../views/website/CookiePolicyView.vue');
 const PowerOceanView = () => import('../views/website/PowerOceanView.vue');
@@ -38,6 +39,8 @@ const router = createRouter({
     { path: '/company-information', name: 'company-information', component: CompanyInformationView },
     { path: '/politika-e-kthimit', name: 'return-policy', component: ReturnPolicyView },
     { path: '/return-policy', redirect: '/politika-e-kthimit' },
+    { path: '/termat-dhe-kushtet', name: 'terms-and-conditions', component: TermsAndConditionsView },
+    { path: '/terms-and-conditions', redirect: '/termat-dhe-kushtet' },
     { path: '/politika-e-privatesise', name: 'privacy-policy', component: PrivacyPolicyView },
     { path: '/privacy-policy', redirect: '/politika-e-privatesise' },
     { path: '/politika-e-cookies', name: 'cookie-policy', component: CookiePolicyView },
