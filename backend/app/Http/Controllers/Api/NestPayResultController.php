@@ -15,7 +15,9 @@ class NestPayResultController extends Controller
         $result = $payments->process($request->all(), 'success');
 
         return redirect()->away($this->frontendUrl($result->approved ? '/order-success' : '/payment-failed', $result));
+
     }
+    
 
     public function failure(Request $request, ProcessNestPayResultService $payments): RedirectResponse
     {
