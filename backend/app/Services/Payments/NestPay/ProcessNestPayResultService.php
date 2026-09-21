@@ -2,12 +2,15 @@
 
 namespace App\Services\Payments\NestPay;
 
+use App\Mail\OrderConfirmationMail;
 use App\Models\Order;
 use App\Models\Payment;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
+use Throwable;
 
 class ProcessNestPayResultService
 {
@@ -100,9 +103,13 @@ class ProcessNestPayResultService
             ]);
             $payment->save();
 
-            if ($approved && $payment->order && $payment->order->status === Order::STATUS_PENDING) {
-                $payment->order->setStatus(Order::STATUS_CONFIRMED);
-                $payment->order->save();
+            if ($approved && $payment->order) {
+                if ($payment->order->status === Order::STATUS_PENDING) {
+                    $payment->order->setStatus(Order::STATUS_CONFIRMED);
+                    $payment->order->save();
+                }
+
+                $this->sendOrderConfirmationAfterCommit($payment->order);
             }
 
             return new PaymentResult($approved, $approved ? 'approved' : 'declined', $payment, $approved ? 'Payment approved.' : 'Payment declined.');
@@ -142,6 +149,26 @@ class ProcessNestPayResultService
     private function safeMetadata(array $payload): array
     {
         return Arr::except($payload, ['HASH', 'hash', 'storekey', 'StoreKey', 'password', 'Password', 'cvv', 'CVV']);
+    }
+
+    private function sendOrderConfirmationAfterCommit(Order $order): void
+    {
+        if (! $order->customer_email) {
+            return;
+        }
+
+        DB::afterCommit(function () use ($order): void {
+            try {
+                $order->loadMissing('items.product', 'latestPayment');
+                Mail::to($order->customer_email)->send(new OrderConfirmationMail($order));
+            } catch (Throwable $exception) {
+                Log::warning('Order confirmation email could not be sent after NestPay approval.', [
+                    'order_id' => $order->id,
+                    'order_number' => $order->order_number,
+                    'error' => $exception->getMessage(),
+                ]);
+            }
+        });
     }
 
     private function value(array $payload, string $key): ?string
