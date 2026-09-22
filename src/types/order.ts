@@ -40,3 +40,9 @@ export interface NestPayInitiationResponse {
   gateway_url?: string;
   parameters: Record<string, string | number | boolean | null | undefined>;
 }
+
+export interface NestPayPaymentOptions {
+  installments_enabled: boolean;
+  allowed_installments: number[];
+  minimum_installment_amount: number;
+}

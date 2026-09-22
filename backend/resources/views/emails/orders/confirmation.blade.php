@@ -23,7 +23,7 @@
                                     <td style="font-size:14px;line-height:1.7;color:#475569;">
                                         <strong style="color:#0b1220;">Numri i porosisë:</strong> {{ $order->order_number }}<br>
                                         <strong style="color:#0b1220;">Statusi:</strong> {{ ucfirst($order->status) }}<br>
-                                        <strong style="color:#0b1220;">Data:</strong> {{ optional($order->created_at)->format('d.m.Y H:i') }}<br>
+                                        <strong style="color:#0b1220;">Data:</strong> {{ optional($confirmationTimestamp)->format('d.m.Y H:i') }}<br>
                                         <strong style="color:#0b1220;">Totali:</strong> {{ number_format((float) $order->total, 2) }} {{ $order->currency }}
                                     </td>
                                 </tr>

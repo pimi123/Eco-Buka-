@@ -59,6 +59,22 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Installment Payments
+    |--------------------------------------------------------------------------
+    |
+    | Installments are optional and must be enabled by the merchant/bank before
+    | being shown to customers. The backend remains authoritative and validates
+    | any selected installment count before sending it to NestPay.
+    |
+    */
+
+    'installments_enabled' => env('NESTPAY_INSTALLMENTS_ENABLED', false),
+    'allowed_installments' => env('NESTPAY_ALLOWED_INSTALLMENTS', ''),
+    'minimum_installment_amount' => env('NESTPAY_MIN_INSTALLMENT_AMOUNT', '0'),
+    'installment_parameter' => env('NESTPAY_INSTALLMENT_PARAMETER', 'Instalment'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Frontend Return URLs
     |--------------------------------------------------------------------------
     |
