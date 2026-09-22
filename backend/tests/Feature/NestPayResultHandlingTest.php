@@ -37,6 +37,7 @@ class NestPayResultHandlingTest extends TestCase
             'MaskedPan' => '545616******1234',
             'PaymentMethod' => 'MASTERCARD',
             'EXTRA.CARDBRAND' => 'MASTERCARD',
+            'Instalment' => '6',
             'amount' => '549.90',
             'currency' => '978',
         ]));
@@ -49,6 +50,7 @@ class NestPayResultHandlingTest extends TestCase
         $this->assertSame('00', $payment->proc_return_code);
         $this->assertSame('1', $payment->md_status);
         $this->assertSame('MASTERCARD', $payment->payment_method);
+        $this->assertSame(6, $payment->installment_count);
         $this->assertNotNull($payment->paid_at);
         $this->assertNotNull($payment->processed_at);
         $this->assertSame(Order::STATUS_CONFIRMED, $order->fresh()->status);
@@ -90,11 +92,13 @@ class NestPayResultHandlingTest extends TestCase
         $this->assertSame('Declined by issuer', $payment->error_message);
         $this->assertNotNull($payment->processed_at);
         $this->assertNull($payment->paid_at);
+        $this->assertSame(Order::STATUS_PAYMENT_FAILED, $order->fresh()->status);
+        $this->assertNotNull($order->fresh()->payment_failed_at);
     }
 
     public function test_it_processes_gateway_error_proc_return_code_99(): void
     {
-        [, $payment] = $this->pendingPayment();
+        [$order, $payment] = $this->pendingPayment();
 
         $this->post('/api/payments/nestpay/failure', $this->signedPayload([
             'ReturnOid' => $payment->provider_order_id,
@@ -109,6 +113,7 @@ class NestPayResultHandlingTest extends TestCase
         $this->assertSame(Payment::STATUS_ERROR, $payment->status);
         $this->assertSame('99', $payment->proc_return_code);
         $this->assertSame('Gateway error', $payment->error_message);
+        $this->assertSame(Order::STATUS_PAYMENT_FAILED, $order->fresh()->status);
     }
 
     public function test_it_rejects_incorrect_return_oid(): void

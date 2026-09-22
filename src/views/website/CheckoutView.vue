@@ -1,16 +1,23 @@
 <script setup lang="ts">
-import { computed, reactive, ref, watch } from 'vue';
+import { computed, onMounted, reactive, ref, watch } from 'vue';
 import WebsiteLayout from '../../components/layout/WebsiteLayout.vue';
-import { apiPost } from '../../lib/api';
+import { apiGet, apiPost } from '../../lib/api';
 import { deliveryCountries, municipalitiesForCountry } from '../../lib/locations';
 import { useSeo } from '../../lib/seo';
 import { useCartStore } from '../../stores/cartStore';
-import type { CheckoutPayload, NestPayInitiationResponse, OrderResponse } from '../../types/order';
+import type { CheckoutPayload, NestPayInitiationResponse, NestPayPaymentOptions } from '../../types/order';
 
 const cartStore = useCartStore();
 const loading = ref(false);
 const paymentSubmitting = ref(false);
+const paymentOptionsLoading = ref(false);
 const errors = ref<Record<string, string[]>>({});
+const nestPayOptions = ref<NestPayPaymentOptions>({
+  installments_enabled: false,
+  allowed_installments: [],
+  minimum_installment_amount: 0,
+});
+const selectedInstallmentCount = ref<number | null>(null);
 const form = reactive({
   customer_name: '',
   customer_phone: '',
@@ -28,6 +35,13 @@ const money = (value: number) => new Intl.NumberFormat('sq-XK', { style: 'curren
 const hasItems = computed(() => cartStore.items.length > 0);
 const hasUnavailableItems = computed(() => cartStore.items.some((item) => !cartStore.isProductInStock(item.product)));
 const municipalityOptions = computed(() => municipalitiesForCountry(form.country));
+const installmentOptions = computed(() => nestPayOptions.value.allowed_installments.filter((count) => count >= 2));
+const installmentMinimum = computed(() => Number(nestPayOptions.value.minimum_installment_amount || 0));
+const installmentsAvailable = computed(() => (
+  nestPayOptions.value.installments_enabled
+  && installmentOptions.value.length > 0
+  && cartStore.subtotal >= installmentMinimum.value
+));
 
 useSeo({
   title: 'Përfundimi i porosisë',
@@ -37,6 +51,27 @@ useSeo({
 
 watch(() => form.country, () => {
   form.municipality = '';
+});
+
+watch(installmentsAvailable, (available) => {
+  if (!available) {
+    selectedInstallmentCount.value = null;
+  }
+});
+
+onMounted(async () => {
+  paymentOptionsLoading.value = true;
+  try {
+    nestPayOptions.value = await apiGet<NestPayPaymentOptions>('/payments/nestpay/options');
+  } catch {
+    nestPayOptions.value = {
+      installments_enabled: false,
+      allowed_installments: [],
+      minimum_installment_amount: 0,
+    };
+  } finally {
+    paymentOptionsLoading.value = false;
+  }
 });
 
 function fieldError(field: string) {
@@ -95,9 +130,10 @@ async function submitOrder() {
   };
 
   try {
-    const response = await apiPost<OrderResponse>('/orders', payload);
-    const payment = await apiPost<NestPayInitiationResponse>(`/orders/${response.id}/payments/nestpay`, {
+    const payment = await apiPost<NestPayInitiationResponse>('/checkout/nestpay', {
+      ...payload,
       shopurl: window.location.origin + '/checkout',
+      installment_count: selectedInstallmentCount.value,
     });
 
     cartStore.clear();
@@ -199,6 +235,51 @@ async function submitOrder() {
               <span class="text-xs font-bold uppercase text-slate-500">Detaje shtesë për dërgesë opsionale</span>
               <textarea v-model="form.delivery_details" class="input-field min-h-24" placeholder="Kati, hyrja, pika referuese ose orari i preferuar" />
             </label>
+          </section>
+
+          <section class="grid gap-4 border-t border-line pt-5">
+            <div>
+              <h2 class="text-lg font-black">Mënyra e pagesës</h2>
+              <p class="mt-1 text-sm leading-6 text-slate-600">
+                Zgjidh pagesën e plotë ose pagesën me këste nëse është e disponueshme për shumën e porosisë.
+              </p>
+            </div>
+
+            <div class="grid gap-3 sm:grid-cols-2">
+              <button
+                type="button"
+                class="rounded-lg border p-4 text-left transition hover:border-ink hover:bg-mist"
+                :class="selectedInstallmentCount === null ? 'border-ink bg-mist shadow-sm' : 'border-line bg-white'"
+                @click="selectedInstallmentCount = null"
+              >
+                <span class="block text-sm font-black">Pagesë e plotë</span>
+                <span class="mt-1 block text-xs font-semibold leading-5 text-slate-600">Paguaj shumën e plotë përmes NestPay.</span>
+              </button>
+
+              <button
+                v-for="count in installmentOptions"
+                :key="count"
+                type="button"
+                class="rounded-lg border p-4 text-left transition hover:border-ink hover:bg-mist disabled:cursor-not-allowed disabled:opacity-50"
+                :class="selectedInstallmentCount === count ? 'border-ink bg-mist shadow-sm' : 'border-line bg-white'"
+                :disabled="!installmentsAvailable"
+                @click="selectedInstallmentCount = count"
+              >
+                <span class="block text-sm font-black">{{ count }} këste</span>
+                <span class="mt-1 block text-xs font-semibold leading-5 text-slate-600">
+                  Afërsisht {{ money(cartStore.subtotal / count) }} në muaj.
+                </span>
+              </button>
+            </div>
+
+            <p v-if="paymentOptionsLoading" class="text-xs font-semibold text-slate-500">Duke kontrolluar opsionet e pagesës...</p>
+            <p v-else-if="nestPayOptions.installments_enabled && !installmentsAvailable" class="rounded-md bg-amber-50 p-3 text-sm font-semibold text-amber-900">
+              Pagesa me këste është e disponueshme vetëm për porosi mbi {{ money(installmentMinimum) }}.
+            </p>
+            <p v-else-if="installmentsAvailable" class="text-xs font-semibold leading-5 text-slate-500">
+              Disponueshmëria finale e kësteve konfirmohet nga banka dhe faqja e sigurt NestPay.
+            </p>
+            <span v-if="fieldError('installment_count')" class="text-xs font-semibold text-red-600">{{ fieldError('installment_count') }}</span>
           </section>
 
           <section class="grid gap-4 border-t border-line pt-5">

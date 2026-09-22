@@ -24,6 +24,11 @@ class NestPayPaymentInitiationTest extends TestCase
             'nestpay.currency' => '978',
             'nestpay.language' => 'en',
             'nestpay.hash_algorithm' => 'ver3',
+            'nestpay.refresh_time' => '5',
+            'nestpay.installments_enabled' => false,
+            'nestpay.allowed_installments' => '',
+            'nestpay.minimum_installment_amount' => '0',
+            'nestpay.installment_parameter' => 'Instalment',
             'nestpay.frontend_url' => 'https://shop.example.test',
             'nestpay.ok_url' => null,
             'nestpay.fail_url' => null,
@@ -48,10 +53,12 @@ class NestPayPaymentInitiationTest extends TestCase
             ->assertJsonPath('parameters.currency', '978')
             ->assertJsonPath('parameters.lang', 'en')
             ->assertJsonPath('parameters.hashAlgorithm', 'ver3')
+            ->assertJsonPath('parameters.refreshtime', '5')
             ->assertJsonPath('parameters.encoding', 'utf-8');
 
         $parameters = $response->json('parameters');
 
+        $this->assertArrayNotHasKey('Instalment', $parameters);
         $this->assertArrayHasKey('hash', $parameters);
         $this->assertArrayHasKey('oid', $parameters);
         $this->assertArrayHasKey('rnd', $parameters);
@@ -69,6 +76,91 @@ class NestPayPaymentInitiationTest extends TestCase
             'currency_code' => '978',
             'status' => Payment::STATUS_PENDING,
         ]);
+    }
+
+    public function test_it_exposes_safe_installment_options(): void
+    {
+        config([
+            'nestpay.installments_enabled' => true,
+            'nestpay.allowed_installments' => '3,6,12',
+            'nestpay.minimum_installment_amount' => '100',
+        ]);
+
+        $this->getJson('/api/payments/nestpay/options')
+            ->assertOk()
+            ->assertJson([
+                'installments_enabled' => true,
+                'allowed_installments' => [3, 6, 12],
+                'minimum_installment_amount' => 100,
+            ])
+            ->assertJsonMissing(['store_key' => 'test-store-key']);
+    }
+
+    public function test_it_initiates_nestpay_payment_with_allowed_installment_count(): void
+    {
+        config([
+            'nestpay.installments_enabled' => true,
+            'nestpay.allowed_installments' => '3,6,12',
+            'nestpay.minimum_installment_amount' => '100',
+        ]);
+
+        $order = $this->order(['total' => 549.90]);
+
+        $response = $this->postJson("/api/orders/{$order->id}/payments/nestpay", [
+            'installment_count' => 6,
+        ]);
+
+        $response->assertOk()
+            ->assertJsonPath('parameters.Instalment', '6');
+
+        $payment = $order->payments()->first();
+        $this->assertSame(6, $payment->installment_count);
+        $this->assertSame(6, $payment->request_metadata['installment_count']);
+    }
+
+    public function test_it_rejects_installment_count_when_installments_are_disabled(): void
+    {
+        $order = $this->order(['total' => 549.90]);
+
+        $this->postJson("/api/orders/{$order->id}/payments/nestpay", [
+            'installment_count' => 6,
+        ])
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors(['installment_count']);
+    }
+
+    public function test_it_rejects_installment_count_that_is_not_allowed(): void
+    {
+        config([
+            'nestpay.installments_enabled' => true,
+            'nestpay.allowed_installments' => '3,6',
+            'nestpay.minimum_installment_amount' => '100',
+        ]);
+
+        $order = $this->order(['total' => 549.90]);
+
+        $this->postJson("/api/orders/{$order->id}/payments/nestpay", [
+            'installment_count' => 12,
+        ])
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors(['installment_count']);
+    }
+
+    public function test_it_rejects_installments_below_minimum_order_total(): void
+    {
+        config([
+            'nestpay.installments_enabled' => true,
+            'nestpay.allowed_installments' => '3,6',
+            'nestpay.minimum_installment_amount' => '100',
+        ]);
+
+        $order = $this->order(['subtotal' => 80.00, 'total' => 80.00]);
+
+        $this->postJson("/api/orders/{$order->id}/payments/nestpay", [
+            'installment_count' => 3,
+        ])
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors(['installment_count']);
     }
 
     public function test_it_updates_existing_pending_nestpay_payment_for_the_order(): void

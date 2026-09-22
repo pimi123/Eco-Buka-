@@ -107,6 +107,7 @@ class PublicOrderController extends Controller
             Order::STATUS_PROCESSING => 'Në përgatitje',
             Order::STATUS_COMPLETED => 'E përfunduar',
             Order::STATUS_CANCELLED => 'E anuluar',
+            Order::STATUS_PAYMENT_FAILED => 'Pagesa dështoi',
         ][$status] ?? $status;
     }
 

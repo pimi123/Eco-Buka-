@@ -2,67 +2,49 @@
 
 namespace App\Services\Payments\NestPay;
 
-use App\Models\Order;
+use App\Models\NestPayCheckoutSession;
 use App\Models\Payment;
+use App\Models\Product;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use RuntimeException;
 
-class InitiateNestPayPaymentService
+class InitiateNestPayCheckoutSessionService
 {
     public function __construct(
         private readonly NestPayHashService $hashes,
     ) {
     }
 
-    public function initiate(Order $order, array $options = []): array
+    public function initiate(array $checkoutData): array
     {
-        return DB::transaction(function () use ($order, $options): array {
-            $order = Order::query()
-                ->whereKey($order->getKey())
-                ->lockForUpdate()
-                ->firstOrFail();
-
-            $this->assertOrderCanBePaid($order);
-
-            $amount = $this->formatAmount($order->total);
-            $installmentCount = $this->validatedInstallmentCount($order, $options);
-            $oid = $this->generateOid($order);
+        return DB::transaction(function () use ($checkoutData): array {
+            [$amount, $itemsSnapshot] = $this->checkoutTotal($checkoutData);
+            $installmentCount = $this->validatedInstallmentCount($amount, $checkoutData);
+            $oid = $this->generateOid();
             $rnd = Str::random(20);
 
-            $payment = $this->pendingPayment($order);
-            $payment->fill([
+            $session = NestPayCheckoutSession::create([
                 'provider' => Payment::PROVIDER_NESTPAY,
                 'provider_order_id' => $oid,
-                'idempotency_key' => Payment::PROVIDER_NESTPAY.':'.$oid,
+                'idempotency_key' => Payment::PROVIDER_NESTPAY.':checkout:'.$oid,
                 'amount' => $amount,
-                'currency' => $order->currency ?: 'EUR',
+                'currency' => 'EUR',
                 'currency_code' => $this->config('currency'),
-                'status' => Payment::STATUS_PENDING,
+                'status' => NestPayCheckoutSession::STATUS_PENDING,
+                'order_payload' => $checkoutData,
+                'items_snapshot' => $itemsSnapshot,
+                'installment_count' => $installmentCount,
                 'request_metadata' => [
                     'oid' => $oid,
                     'rnd' => $rnd,
                     'installment_count' => $installmentCount,
                     'initiated_at' => now()->toISOString(),
                 ],
-                'response_metadata' => null,
-                'response' => null,
-                'proc_return_code' => null,
-                'auth_code' => null,
-                'host_ref_num' => null,
-                'trans_id' => null,
-                'md_status' => null,
-                'masked_pan' => null,
-                'payment_method' => null,
-                'installment_count' => $installmentCount,
-                'error_message' => null,
-                'paid_at' => null,
-                'processed_at' => null,
             ]);
-            $payment->save();
 
-            $parameters = $this->parameters($order, $amount, $oid, $rnd, $options);
+            $parameters = $this->parameters($session, $rnd, $checkoutData);
             $parameters['hash'] = $this->hashes->generateRequestHash($parameters);
 
             return [
@@ -72,54 +54,65 @@ class InitiateNestPayPaymentService
         });
     }
 
-    private function assertOrderCanBePaid(Order $order): void
+    private function checkoutTotal(array $checkoutData): array
     {
-        if (in_array($order->status, [Order::STATUS_COMPLETED, Order::STATUS_CANCELLED], true)) {
+        $subtotalCents = 0;
+        $itemsSnapshot = [];
+        $productIds = collect($checkoutData['items'])->pluck('product_id')->unique()->values();
+        $products = Product::query()
+            ->whereIn('id', $productIds)
+            ->where('active', true)
+            ->where('in_stock', true)
+            ->with('category:id,name,slug')
+            ->lockForUpdate()
+            ->get()
+            ->keyBy('id');
+
+        foreach ($checkoutData['items'] as $index => $item) {
+            $product = $products->get((int) $item['product_id']);
+            if (! $product) {
+                throw ValidationException::withMessages([
+                    "items.{$index}.product_id" => 'This product is currently out of stock.',
+                ]);
+            }
+
+            $quantity = (int) $item['quantity'];
+            $unitCents = (int) round(((float) ($product->price ?? 0)) * 100);
+            $lineCents = $unitCents * $quantity;
+            $subtotalCents += $lineCents;
+
+            $itemsSnapshot[] = [
+                'product_id' => $product->id,
+                'name' => $product->name,
+                'slug' => $product->slug,
+                'quantity' => $quantity,
+                'unit_price' => $unitCents / 100,
+                'line_total' => $lineCents / 100,
+                'category' => $product->category?->name,
+            ];
+        }
+
+        $amount = $subtotalCents / 100;
+        if ($amount <= 0) {
             throw ValidationException::withMessages([
-                'order' => 'This order cannot be paid.',
+                'items' => 'This checkout does not have a payable total.',
             ]);
         }
 
-        if ((float) $order->total <= 0) {
-            throw ValidationException::withMessages([
-                'order' => 'This order does not have a payable total.',
-            ]);
-        }
-
-        if (($order->currency ?: 'EUR') !== 'EUR') {
-            throw ValidationException::withMessages([
-                'order' => 'This order currency is not supported for NestPay.',
-            ]);
-        }
-
-        if ($order->payments()->where('provider', Payment::PROVIDER_NESTPAY)->where('status', Payment::STATUS_APPROVED)->exists()) {
-            throw ValidationException::withMessages([
-                'order' => 'This order has already been paid.',
-            ]);
-        }
+        return [$amount, $itemsSnapshot];
     }
 
-    private function pendingPayment(Order $order): Payment
+    private function parameters(NestPayCheckoutSession $session, string $rnd, array $options): array
     {
-        return $order->payments()
-            ->where('provider', Payment::PROVIDER_NESTPAY)
-            ->where('status', Payment::STATUS_PENDING)
-            ->latest('id')
-            ->first() ?? new Payment(['order_id' => $order->id]);
-    }
-
-    private function parameters(Order $order, string $amount, string $oid, string $rnd, array $options): array
-    {
-        $installmentCount = $this->validatedInstallmentCount($order, $options);
         $parameters = [
             'clientid' => $this->config('client_id'),
             'storetype' => $this->config('store_type'),
             'trantype' => $this->config('transaction_type'),
-            'amount' => $amount,
+            'amount' => $this->formatAmount($session->amount),
             'currency' => $this->config('currency'),
-            'oid' => $oid,
-            'okUrl' => $this->url('ok_url', '/order-success?payment=approved&order='.$order->order_number),
-            'failUrl' => $this->url('fail_url', '/checkout?payment=failed&order='.$order->order_number),
+            'oid' => $session->provider_order_id,
+            'okUrl' => $this->url('ok_url', '/order-success?payment=approved'),
+            'failUrl' => $this->url('fail_url', '/payment-failed?payment=failed'),
             'lang' => $this->config('language'),
             'rnd' => $rnd,
             'hashAlgorithm' => $this->config('hash_algorithm'),
@@ -132,14 +125,14 @@ class InitiateNestPayPaymentService
             $parameters['shopurl'] = $shopUrl;
         }
 
-        if ($installmentCount !== null) {
-            $parameters[$this->installmentParameterName()] = (string) $installmentCount;
+        if ($session->installment_count !== null) {
+            $parameters[$this->installmentParameterName()] = (string) $session->installment_count;
         }
 
         return $parameters;
     }
 
-    private function validatedInstallmentCount(Order $order, array $options): ?int
+    private function validatedInstallmentCount(float $amount, array $options): ?int
     {
         $requested = $options['installment_count'] ?? null;
         if ($requested === null || $requested === '') {
@@ -159,13 +152,27 @@ class InitiateNestPayPaymentService
             ]);
         }
 
-        if ((float) $order->total < $this->minimumInstallmentAmount()) {
+        if ($amount < $this->minimumInstallmentAmount()) {
             throw ValidationException::withMessages([
                 'installment_count' => 'This order total is below the minimum amount for installment payments.',
             ]);
         }
 
         return $requested;
+    }
+
+    private function generateOid(): string
+    {
+        return Str::limit(
+            'EBC-'.now()->format('YmdHis').'-'.Str::upper(Str::random(16)),
+            64,
+            ''
+        );
+    }
+
+    private function formatAmount(mixed $amount): string
+    {
+        return number_format((float) $amount, 2, '.', '');
     }
 
     private function installmentsEnabled(): bool
@@ -196,20 +203,6 @@ class InitiateNestPayPaymentService
         $name = config('nestpay.installment_parameter', 'Instalment');
 
         return is_string($name) && trim($name) !== '' ? trim($name) : 'Instalment';
-    }
-
-    private function generateOid(Order $order): string
-    {
-        return Str::limit(
-            'EB-'.$order->id.'-'.now()->format('YmdHis').'-'.Str::upper(Str::random(12)),
-            64,
-            ''
-        );
-    }
-
-    private function formatAmount(mixed $amount): string
-    {
-        return number_format((float) $amount, 2, '.', '');
     }
 
     private function url(string $configKey, string $fallbackPath): string
