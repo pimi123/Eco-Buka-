@@ -5,7 +5,7 @@ import { apiGet, apiPost } from '../../lib/api';
 import { deliveryCountries, municipalitiesForCountry } from '../../lib/locations';
 import { useSeo } from '../../lib/seo';
 import { useCartStore } from '../../stores/cartStore';
-import type { CheckoutPayload, NestPayInitiationResponse, NestPayPaymentOptions } from '../../types/order';
+import type { CheckoutPayload, NestPayInitiationResponse, NestPayPaymentOptions, OrderResponse } from '../../types/order';
 
 const cartStore = useCartStore();
 const loading = ref(false);
@@ -130,8 +130,8 @@ async function submitOrder() {
   };
 
   try {
-    const payment = await apiPost<NestPayInitiationResponse>('/checkout/nestpay', {
-      ...payload,
+    const response = await apiPost<OrderResponse>('/orders', payload);
+    const payment = await apiPost<NestPayInitiationResponse>(`/orders/${response.id}/payments/nestpay`, {
       shopurl: window.location.origin + '/checkout',
       installment_count: selectedInstallmentCount.value,
     });
@@ -237,7 +237,7 @@ async function submitOrder() {
             </label>
           </section>
 
-          <section class="grid gap-4 border-t border-line pt-5">
+          <!-- <section class="grid gap-4 border-t border-line pt-5">
             <div>
               <h2 class="text-lg font-black">Mënyra e pagesës</h2>
               <p class="mt-1 text-sm leading-6 text-slate-600">
@@ -280,7 +280,7 @@ async function submitOrder() {
               Disponueshmëria finale e kësteve konfirmohet nga banka dhe faqja e sigurt NestPay.
             </p>
             <span v-if="fieldError('installment_count')" class="text-xs font-semibold text-red-600">{{ fieldError('installment_count') }}</span>
-          </section>
+          </section> -->
 
           <section class="grid gap-4 border-t border-line pt-5">
             <label class="grid gap-2">
