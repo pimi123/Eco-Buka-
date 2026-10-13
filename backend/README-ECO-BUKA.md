@@ -1,6 +1,6 @@
-# Eco Buka Laravel Backend
+# EcoBuka Laravel Backend
 
-This backend is a simple Laravel CMS/API for the Vue Eco Buka frontend.
+This backend is a simple Laravel CMS/API for the Vue EcoBuka frontend.
 
 ## What It Provides
 
@@ -40,7 +40,7 @@ composer install --no-dev --prefer-dist
 Copy `.env.example` to `.env`, then set MySQL:
 
 ```env
-APP_NAME="Eco Buka CMS"
+APP_NAME="EcoBuka CMS"
 APP_URL=http://127.0.0.1:8000
 FRONTEND_URL=http://127.0.0.1:5173
 

@@ -10,7 +10,7 @@ return new class extends Migration
     {
         $popularCollection = Collection::query()
             ->where('slug', 'popular-eco-buka-solutions')
-            ->orWhere('name', 'Popular Eco Buka Solutions')
+            ->orWhere('name', 'Popular EcoBuka Solutions')
             ->first();
 
         $sections = [
@@ -37,8 +37,8 @@ return new class extends Migration
                 'sort_order' => 5,
             ],
             'popular_eco_buka' => [
-                'title' => 'Popular Eco Buka solutions',
-                'subtitle' => 'Selected Eco Buka products and solution bundles for everyday power needs.',
+                'title' => 'Popular EcoBuka solutions',
+                'subtitle' => 'Selected EcoBuka products and solution bundles for everyday power needs.',
                 'section_type' => 'product_grid',
                 'source_type' => $popularCollection ? 'collection' : 'manual_products',
                 'source_id' => $popularCollection?->id,

@@ -3,13 +3,13 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ $title ?? 'Eco Buka Admin' }}</title>
+    <title>{{ $title ?? 'EcoBuka Admin' }}</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-slate-100 text-slate-950">
     <div class="min-h-screen lg:grid lg:grid-cols-[260px_minmax(0,1fr)]">
         <aside class="border-b border-slate-200 bg-white p-4 lg:border-b-0 lg:border-r">
-            <a href="{{ route('admin.dashboard') }}" class="text-xl font-black">Eco Buka CMS</a>
+            <a href="{{ route('admin.dashboard') }}" class="text-xl font-black">EcoBuka CMS</a>
             @auth
                 <nav class="mt-6 flex gap-2 overflow-x-auto lg:grid">
                     @foreach ([

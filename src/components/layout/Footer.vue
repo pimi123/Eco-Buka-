@@ -2,8 +2,8 @@
   <footer class="border-t border-line bg-ink text-white">
     <div class="container-shell grid gap-8 py-8 sm:py-10 md:grid-cols-[1.4fr_1fr_1fr]">
       <div>
-        <RouterLink to="/" class="inline-flex rounded-md bg-white px-3 py-2" aria-label="Ballina Eco Buka">
-          <img :src="logoUrl" alt="Eco Buka" class="h-9 w-auto max-w-[220px] object-contain" />
+        <RouterLink to="/" class="inline-flex rounded-md bg-white px-3 py-2" aria-label="Ballina EcoBuka">
+          <img :src="logoUrl" alt="EcoBuka" class="h-9 w-auto max-w-[220px] object-contain" />
         </RouterLink>
         <p class="mt-3 max-w-md text-sm leading-6 text-slate-300">
           Zgjidhje premium për energji portative, karikim solar dhe rezervë energjie për Kosovë, Shqipëri, shtëpi, biznese dhe aktivitete në natyrë.
@@ -24,7 +24,7 @@
       <div>
         <p class="font-semibold">Mbështetje</p>
         <div class="mt-3 grid gap-1 text-sm text-slate-300">
-          <RouterLink to="/about" class="py-1.5">Rreth Eco Buka</RouterLink>
+          <RouterLink to="/about" class="py-1.5">Rreth EcoBuka</RouterLink>
           <RouterLink to="/company-information" class="py-1.5">Informata për kompaninë</RouterLink>
           <RouterLink to="/termat-dhe-kushtet" class="py-1.5">Termat dhe Kushtet</RouterLink>
           <RouterLink to="/politika-e-kthimit" class="py-1.5">Politika e kthimit</RouterLink>

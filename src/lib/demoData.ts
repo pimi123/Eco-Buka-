@@ -23,7 +23,7 @@ export const demoCategories: Category[] = [
   { id: 'solar-panels', name: 'Panele solare', slug: 'solar-panels', description: 'Panele solare të palosshme dhe fikse për karikim të pastër kudo.', image_url: solarPanelsUrl, is_new: true, active: true },
   { id: 'solar-generators', name: 'Gjeneratorë solarë', slug: 'solar-generators', description: 'Sete gjeneratorësh solarë që kombinojnë karikimin e pastër me energji rezervë të besueshme.', image_url: streamSolarSystemUrl, is_new: false, active: true },
   { id: 'smart-devices', name: 'Pajisje inteligjente', slug: 'smart-devices', description: 'Pajisje të lidhura për monitorim dhe optimizim të energjisë në shtëpi.', image_url: smartDevicesUrl, is_new: true, active: true },
-  { id: 'accessories', name: 'Aksesorë', slug: 'accessories', description: 'Kabllo karikimi, adaptorë, bateri dhe pajisje shtesë për sistemet Eco Buka.', image_url: powerBanksUrl, is_new: false, active: true },
+  { id: 'accessories', name: 'Aksesorë', slug: 'accessories', description: 'Kabllo karikimi, adaptorë, bateri dhe pajisje shtesë për sistemet EcoBuka.', image_url: powerBanksUrl, is_new: false, active: true },
   { id: 'solutions', name: 'Zgjidhje', slug: 'solutions', description: 'Zgjidhje të plota energjie për shtëpi, biznese, udhëtime dhe nevoja rezervë.', image_url: showcaseBannerUrl, is_new: false, active: true },
   { id: 'ocean-2', name: 'OCEAN 2', slug: 'ocean-2', description: 'Pajisje energjie për pishina, ambiente të jashtme dhe sisteme sezonale.', image_url: ocean2Url, is_new: false, active: true },
   { id: 'power-banks', name: 'Power bank', slug: 'power-banks', description: 'Karikim kompakt mobil për përdorim të përditshëm dhe rezervë në udhëtime.', image_url: powerBanksUrl, is_new: true, active: true },
@@ -33,7 +33,7 @@ export const demoCategories: Category[] = [
 export const demoProducts: Product[] = [
   {
     id: 'eb-500',
-    name: 'Eco Buka Station 500',
+    name: 'EcoBuka Station 500',
     slug: 'eco-buka-station-500',
     category_id: 'power-stations',
     category: 'Stacione energjie',
@@ -50,7 +50,7 @@ export const demoProducts: Product[] = [
   },
   {
     id: 'eb-1200',
-    name: 'Eco Buka Station 1200',
+    name: 'EcoBuka Station 1200',
     slug: 'eco-buka-station-1200',
     category_id: 'power-stations',
     category: 'Stacione energjie',
@@ -67,7 +67,7 @@ export const demoProducts: Product[] = [
   },
   {
     id: 'solar-220',
-    name: 'Eco Buka Solar Panel 220W',
+    name: 'EcoBuka Solar Panel 220W',
     slug: 'eco-buka-solar-panel-220w',
     category_id: 'solar-panels',
     category: 'Panele solare',
@@ -83,7 +83,7 @@ export const demoProducts: Product[] = [
   },
   {
     id: 'river-mini',
-    name: 'Eco Buka River Mini',
+    name: 'EcoBuka River Mini',
     slug: 'eco-buka-river-mini',
     category_id: 'river-series',
     category: 'Seria RIVER',
@@ -100,7 +100,7 @@ export const demoProducts: Product[] = [
   },
   {
     id: 'solar-generator-kit',
-    name: 'Eco Buka Solar Generator Kit',
+    name: 'EcoBuka Solar Generator Kit',
     slug: 'eco-buka-solar-generator-kit',
     category_id: 'solar-generators',
     category: 'Gjeneratorë solarë',
@@ -117,12 +117,12 @@ export const demoProducts: Product[] = [
   },
   {
     id: 'smart-monitor',
-    name: 'Eco Buka Smart Energy Monitor',
+    name: 'EcoBuka Smart Energy Monitor',
     slug: 'eco-buka-smart-energy-monitor',
     category_id: 'smart-devices',
     category: 'Pajisje inteligjente',
     short_description: 'Monitoroni karikimin, statusin e rezervës dhe përdorimin e energjisë nga një pajisje inteligjente.',
-    description: 'Monitorim i lidhur i energjisë për instalime moderne Eco Buka.',
+    description: 'Monitorim i lidhur i energjisë për instalime moderne EcoBuka.',
     price: 129,
     image_url: smartDevicesUrl,
     specs: { Aplikacioni: 'Po', Njoftimet: 'Në kohë reale', Instalimi: 'I thjeshtë' },
@@ -133,7 +133,7 @@ export const demoProducts: Product[] = [
   },
   {
     id: 'accessory-cable-kit',
-    name: 'Eco Buka Charging Accessory Kit',
+    name: 'EcoBuka Charging Accessory Kit',
     slug: 'eco-buka-charging-accessory-kit',
     category_id: 'accessories',
     category: 'Aksesorë',
@@ -149,7 +149,7 @@ export const demoProducts: Product[] = [
   },
   {
     id: 'home-backup-solution',
-    name: 'Eco Buka Home Backup Solution',
+    name: 'EcoBuka Home Backup Solution',
     slug: 'eco-buka-home-backup-solution',
     category_id: 'solutions',
     category: 'Zgjidhje',
@@ -207,9 +207,9 @@ export const demoHomepageShowcase = {
     {
       id: 'showcase-banner-delta',
       section_id: 'homepage-showcase',
-      section_heading: 'Stacioni energjetik Eco Buka DELTA Pro Ultra',
+      section_heading: 'Stacioni energjetik EcoBuka DELTA Pro Ultra',
       eyebrow: 'E re',
-      title: 'Stacioni energjetik Eco Buka DELTA Pro Ultra',
+      title: 'Stacioni energjetik EcoBuka DELTA Pro Ultra',
       subtitle: 'Kapacitet 6kWh-30kWh | Fuqi 6900W',
       button_text: 'Bli tani',
       button_link: '/products/eco-buka-station-1200',
@@ -260,9 +260,9 @@ export const demoFeaturedVideoPromoBanners: HomepageBanner[] = [
   {
     id: 'featured-video-promo-default',
     section_id: 'featured-video-promo',
-    section_heading: 'Eco Buka STREAM Series Plug & Play Solar Plant',
+    section_heading: 'EcoBuka STREAM Series Plug & Play Solar Plant',
     eyebrow: 'Ofertë speciale dhe deri në 43% zbritje!',
-    title: 'Eco Buka STREAM Series Plug & Play Solar Plant',
+    title: 'EcoBuka STREAM Series Plug & Play Solar Plant',
     subtitle: 'Furnizoni pajisje me konsum të lartë përmes energjisë së pastër solare.',
     price_text: 'Duke filluar nga 1199 EUR',
     button_text: 'Bli tani',

@@ -17,7 +17,7 @@ function optionEntries(options?: Record<string, string>) {
 
 useSeo({
   title: 'Shporta',
-  description: 'Kontrolloni produktet në shportën Eco Buka para se të vazhdoni me porosinë.',
+  description: 'Kontrolloni produktet në shportën EcoBuka para se të vazhdoni me porosinë.',
   canonicalPath: '/cart',
 });
 </script>

@@ -45,7 +45,7 @@ const installmentsAvailable = computed(() => (
 
 useSeo({
   title: 'Përfundimi i porosisë',
-  description: "Dërgo porosinë Eco Buka dhe ekipi ynë do t'ju kontaktojë për konfirmim, disponueshmëri dhe dërgesë.",
+  description: "Dërgo porosinë EcoBuka dhe ekipi ynë do t'ju kontaktojë për konfirmim, disponueshmëri dhe dërgesë.",
   canonicalPath: '/checkout',
 });
 
@@ -174,7 +174,7 @@ async function submitOrder() {
           <section class="grid gap-4">
             <div>
               <h2 class="text-lg font-black">Të dhënat e klientit</h2>
-              <p class="mt-1 text-sm leading-6 text-slate-600">Këto të dhëna përdoren vetëm për konfirmimin e porosisë dhe kontaktin nga ekipi Eco Buka.</p>
+              <p class="mt-1 text-sm leading-6 text-slate-600">Këto të dhëna përdoren vetëm për konfirmimin e porosisë dhe kontaktin nga ekipi EcoBuka.</p>
             </div>
             <div class="grid gap-4 sm:grid-cols-2">
               <label class="grid gap-2">
@@ -294,7 +294,7 @@ async function submitOrder() {
                 <RouterLink class="font-bold text-ink underline underline-offset-4" to="/termat-dhe-kushtet" target="_blank">Termat dhe Kushtet</RouterLink>
                 dhe
                 <RouterLink class="font-bold text-ink underline underline-offset-4" to="/politika-e-kthimit" target="_blank">Politikën e Kthimit</RouterLink>.
-                Pranoj që Eco Buka të më dërgojë email konfirmimi me produktet e porositura, totalin, adresën dhe detajet e dërgesës.
+                Pranoj që EcoBuka të më dërgojë email konfirmimi me produktet e porositura, totalin, adresën dhe detajet e dërgesës.
               </span>
             </label>
             <span v-if="fieldError('policy_accepted')" class="text-xs font-semibold text-red-600">{{ fieldError('policy_accepted') }}</span>

@@ -51,7 +51,7 @@ const downloadEntries = computed(() => detailEntries(product.value?.downloads));
 
 useSeo({
   title: computed(() => product.value?.name || 'Produkt'),
-  description: computed(() => product.value?.short_description || product.value?.description || 'Shiko detajet, specifikat, çmimin dhe opsionet për ofertë të produktit Eco Buka.'),
+  description: computed(() => product.value?.short_description || product.value?.description || 'Shiko detajet, specifikat, çmimin dhe opsionet për ofertë të produktit EcoBuka.'),
   canonicalPath: computed(() => `/products/${String(route.params.slug || '')}`),
 });
 

@@ -24,7 +24,7 @@ class DatabaseSeeder extends Seeder
         User::query()->updateOrCreate(
             ['email' => 'admin@ecobuka.test'],
             [
-                'name' => 'Eco Buka Admin',
+                'name' => 'EcoBuka Admin',
                 'password' => Hash::make('password'),
                 'is_admin' => true,
             ],
@@ -40,7 +40,7 @@ class DatabaseSeeder extends Seeder
             ['name' => 'Power Banks', 'slug' => 'power-banks', 'description' => 'Compact power banks and USB-C charging solutions for phones, laptops, and travel.', 'image' => '/promo/power-bank.png'],
             ['name' => 'Accessories', 'slug' => 'accessories', 'description' => 'Cables, chargers, extra batteries, cases, mounts, and installation essentials.', 'image' => '/promo/delta-classic.png'],
             ['name' => 'Solutions', 'slug' => 'solutions', 'description' => 'Curated energy solutions for home backup, camping, business, and solar independence.', 'image' => '/promo/delta-max-series.png'],
-            ['name' => 'Refurbished', 'slug' => 'refurbished', 'description' => 'Checked and refreshed Eco Buka products for value-focused buyers.', 'image' => '/promo/summer-sale.png'],
+            ['name' => 'Refurbished', 'slug' => 'refurbished', 'description' => 'Checked and refreshed EcoBuka products for value-focused buyers.', 'image' => '/promo/summer-sale.png'],
         ];
 
         Category::query()
@@ -82,10 +82,10 @@ class DatabaseSeeder extends Seeder
             ['Smart Home Battery Monitor', 'smart-home-battery-monitor', 'smart-devices', 129, null, 'New', 'Real-time monitoring for home energy use, charging, and backup status.', ['Connectivity' => 'Wi-Fi', 'App' => 'Yes', 'Use' => 'Monitoring'], '/promo/power-bank.png', false],
             ['800W Alternator Charger', '800w-alternator-charger', 'smart-devices', 249, 299, 'Travel', 'Charge portable stations while driving and stay powered on the road.', ['Power' => '800W', 'Use' => 'Vehicle', 'Mode' => 'Fast charge'], '/promo/power-bank.png', false],
             ['Smart Generator Adapter', 'smart-generator-adapter', 'smart-devices', 89, 119, null, 'Adapter for hybrid backup setups and smarter energy switching.', ['Use' => 'Backup', 'Type' => 'Adapter', 'Install' => 'Easy'], '/promo/power-bank.png', false],
-            ['Eco Buka Smart Plug', 'eco-buka-smart-plug', 'smart-devices', 39, 49, 'Smart', 'Control appliances, schedules, and energy use from the app.', ['Control' => 'App', 'Use' => 'Appliance', 'Mode' => 'Schedule'], '/promo/power-bank.png', false],
+            ['EcoBuka Smart Plug', 'eco-buka-smart-plug', 'smart-devices', 39, 49, 'Smart', 'Control appliances, schedules, and energy use from the app.', ['Control' => 'App', 'Use' => 'Appliance', 'Mode' => 'Schedule'], '/promo/power-bank.png', false],
 
             ['OCEAN 2 Home Battery', 'ocean-2-home-battery', 'home-battery', 5990, null, 'Home', 'Three-phase home energy storage concept for larger backup scenarios.', ['Capacity' => 'Up to 60kWh', 'Output' => '12kW', 'Phase' => 'Three-phase'], '/promo/delta-max-series.png', true],
-            ['Eco Buka Home Backup Solution', 'eco-buka-home-backup-solution', 'home-battery', 1490, 1790, 'Solution', 'A complete package for backup power, solar charging, and daily resilience.', ['Use' => 'Home', 'Backup' => 'Yes', 'Solar' => 'Ready'], '/promo/delta-max-series.png', false],
+            ['EcoBuka Home Backup Solution', 'eco-buka-home-backup-solution', 'home-battery', 1490, 1790, 'Solution', 'A complete package for backup power, solar charging, and daily resilience.', ['Use' => 'Home', 'Backup' => 'Yes', 'Solar' => 'Ready'], '/promo/delta-max-series.png', false],
             ['Stackable Extra Battery 2kWh', 'stackable-extra-battery-2kwh', 'home-battery', 799, 999, 'Expandable', 'Add-on battery module for longer runtime and larger backup coverage.', ['Capacity' => '2kWh', 'Type' => 'Extra battery', 'Battery' => 'LFP'], '/promo/delta-classic.png', false],
 
             ['RAPID Pro 20k Power Bank', 'rapid-pro-20k-power-bank', 'power-banks', 99, 129, 'New', 'Pocket-friendly high-speed charging for phones, tablets, and laptops.', ['Capacity' => '20,000mAh', 'USB-C' => 'Yes', 'Output' => 'High speed'], '/promo/power-bank.png', true],
@@ -115,7 +115,7 @@ class DatabaseSeeder extends Seeder
                     'category_id' => $category?->id,
                     'name' => $name,
                     'short_description' => $shortDescription,
-                    'description' => $shortDescription.' Eco Buka can prepare this product with local delivery, consultation, and after-sales support for Albania and regional projects.',
+                    'description' => $shortDescription.' EcoBuka can prepare this product with local delivery, consultation, and after-sales support for Albania and regional projects.',
                     'price' => $price,
                     'old_price' => $oldPrice,
                     'badge' => $badge,
@@ -140,7 +140,7 @@ class DatabaseSeeder extends Seeder
 
         $collectionData = [
             ['name' => 'New Products', 'slug' => 'new-products', 'type' => 'merchandising', 'description' => 'Fresh launches and recently promoted products.'],
-            ['name' => 'Popular Eco Buka Solutions', 'slug' => 'popular-eco-buka-solutions', 'type' => 'featured', 'description' => 'Curated products that should be promoted as popular Eco Buka solutions.'],
+            ['name' => 'Popular EcoBuka Solutions', 'slug' => 'popular-eco-buka-solutions', 'type' => 'featured', 'description' => 'Curated products that should be promoted as popular EcoBuka solutions.'],
             ['name' => 'Summer Sale', 'slug' => 'summer-sale', 'type' => 'campaign', 'description' => 'Seasonal campaign products, bundles, and offers.'],
             ['name' => 'Home Backup', 'slug' => 'home-backup', 'type' => 'solution', 'description' => 'Products useful for home backup during outages and daily resilience.'],
             ['name' => 'Solar Solutions', 'slug' => 'solar-solutions', 'type' => 'solution', 'description' => 'Solar panels, solar generators, and clean charging products.'],
@@ -214,7 +214,7 @@ class DatabaseSeeder extends Seeder
             ['section_key' => 'new_products'],
             [
                 'title' => 'New Products',
-                'subtitle' => 'Fresh energy launches, seasonal offers, and smart power picks for Eco Buka customers.',
+                'subtitle' => 'Fresh energy launches, seasonal offers, and smart power picks for EcoBuka customers.',
                 'section_type' => 'promo_cards',
                 'source_type' => 'manual_cards',
                 'layout_variant' => 'carousel',
@@ -243,7 +243,7 @@ class DatabaseSeeder extends Seeder
         foreach ([
             ['New', 'Summer Sale', 'Seasonal bundles for camping, backup, and solar savings.', 'Shop Now', '/products', null, '/promo/summer-sale.png', 'dark'],
             ['New | 1024Wh | 3600W Surge', 'DELTA 3 Classic', 'Best-value 1kWh portable station for everyday backup.', 'Learn More', '/products/delta-3-classic-1024wh', 'power-stations', '/promo/delta-classic.png', 'light'],
-            ['New', 'Eco Buka Power Bank', 'Fast USB-C charging for phones, tablets, and laptops.', 'Buy Now', '/category/power-banks', 'power-banks', '/promo/power-bank.png', 'light'],
+            ['New', 'EcoBuka Power Bank', 'Fast USB-C charging for phones, tablets, and laptops.', 'Buy Now', '/category/power-banks', 'power-banks', '/promo/power-bank.png', 'light'],
             ['New Release', 'DELTA 3 Max Series', '2kWh capacity and 3000W max output for larger appliances.', 'Learn More', '/products/delta-3-max-series', 'power-stations', '/promo/delta-max-series.png', 'light'],
             ['Solar Kit', 'Balcony Solar Starter Kit', 'Plug-and-play solar for apartments and compact homes.', 'Explore', '/products/balcony-solar-starter-kit', 'solar-generators', '/promo/summer-sale.png', 'dark'],
         ] as $index => [$label, $title, $subtitle, $button, $link, $categorySlug, $image, $textColor]) {
@@ -324,9 +324,9 @@ class DatabaseSeeder extends Seeder
         FeatureBanner::query()->update(['active' => false]);
 
         FeatureBanner::query()->updateOrCreate(
-            ['section_key' => 'solar_system_showcase', 'title' => 'Eco Buka STREAM Series Plug & Play Solar Plant'],
+            ['section_key' => 'solar_system_showcase', 'title' => 'EcoBuka STREAM Series Plug & Play Solar Plant'],
             [
-                'section_heading' => 'Eco Buka STREAM Series Plug & Play Solar Plant',
+                'section_heading' => 'EcoBuka STREAM Series Plug & Play Solar Plant',
                 'eyebrow' => 'FLASH SALE & Up to 43% OFF!',
                 'subtitle' => 'Run high-wattage appliances with solar-ready storage.',
                 'price_text' => 'Starting at EUR 1199',
@@ -342,9 +342,9 @@ class DatabaseSeeder extends Seeder
         );
 
         FeatureBanner::query()->updateOrCreate(
-            ['section_key' => 'featured_video_promo', 'title' => 'Eco Buka Home Backup and Solar Storage'],
+            ['section_key' => 'featured_video_promo', 'title' => 'EcoBuka Home Backup and Solar Storage'],
             [
-                'section_heading' => 'Eco Buka Home Backup and Solar Storage',
+                'section_heading' => 'EcoBuka Home Backup and Solar Storage',
                 'eyebrow' => 'Home Energy Solution',
                 'subtitle' => 'A premium backup and solar charging setup for homes, offices, and outdoor teams.',
                 'price_text' => 'Configured from EUR 1490',

@@ -1,10 +1,10 @@
-# Eco Buka Project Status Report
+# EcoBuka Project Status Report
 
 Date: 2026-08-12
 
 ## Executive Summary
 
-Eco Buka is currently a working ecommerce catalogue and manual-order web app with a Vue 3 storefront and a Laravel CMS/API backend. The site is dynamic from the database for the important business content: categories, products, hero banners, promo cards, showcase sections, navigation cards, feature banners, and orders.
+EcoBuka is currently a working ecommerce catalogue and manual-order web app with a Vue 3 storefront and a Laravel CMS/API backend. The site is dynamic from the database for the important business content: categories, products, hero banners, promo cards, showcase sections, navigation cards, feature banners, and orders.
 
 The project is in a strong MVP / pre-launch stage. It is suitable for showing products, managing homepage content, collecting cart-based customer orders, and reviewing those orders in the CMS. It is not yet a full bank-card ecommerce system because Visa/Mastercard payment processing, stock control, invoicing, delivery rules, and production-grade monitoring still need to be added.
 
@@ -203,7 +203,7 @@ The homepage includes:
 - Featured category products
 - Promo banner
 - Product showcase section
-- Popular Eco Buka solutions
+- Popular EcoBuka solutions
 - Promotional category cards
 - Featured video promo section
 - Footer
@@ -238,7 +238,7 @@ Current checkout mode:
 
 - Manual order / no online payment.
 - Customer submits order details.
-- Eco Buka team confirms manually.
+- EcoBuka team confirms manually.
 
 Not implemented yet:
 
@@ -412,6 +412,6 @@ Before production launch:
 
 ## Overall Conclusion
 
-Eco Buka is in a good working MVP state. It has a real CMS, real database-driven storefront content, product management, image/gallery management, cart, manual checkout, and order management.
+EcoBuka is in a good working MVP state. It has a real CMS, real database-driven storefront content, product management, image/gallery management, cart, manual checkout, and order management.
 
 The project can be used as a professional product catalogue and manual-order ecommerce site now. To become a full payment-ready ecommerce platform, the next major phase should focus on payments, inventory, delivery rules, emails, invoices, and production security/monitoring.

@@ -37,7 +37,7 @@ const fallbackSlides: HeroSlide[] = [
     secondaryButtonText: 'Bli tani',
     secondaryButtonLink: '/products',
     image: deltaHeroUrl,
-    imageAlt: 'Stacion premium portativ energjie për banerin Eco Buka DELTA',
+    imageAlt: 'Stacion premium portativ energjie për banerin EcoBuka DELTA',
     overlayStyle: 'bg-gradient-to-r from-black/78 via-black/40 to-black/10',
     textColor: 'text-white',
     alignment: 'left',
@@ -52,7 +52,7 @@ const fallbackSlides: HeroSlide[] = [
     secondaryButtonText: 'Shiko produktet',
     secondaryButtonLink: '/products',
     image: solarHeroUrl,
-    imageAlt: 'Sistem modern solar për shtëpi në banerin Eco Buka',
+    imageAlt: 'Sistem modern solar për shtëpi në banerin EcoBuka',
     overlayStyle: 'bg-gradient-to-r from-ink/82 via-ink/45 to-ink/5',
     textColor: 'text-white',
     alignment: 'left',
@@ -67,7 +67,7 @@ const fallbackSlides: HeroSlide[] = [
     secondaryButtonText: 'Shfleto produktet',
     secondaryButtonLink: '/products',
     image: portableHeroUrl,
-    imageAlt: 'Set portativ energjie dhe panelesh solare për banerin Eco Buka',
+    imageAlt: 'Set portativ energjie dhe panelesh solare për banerin EcoBuka',
     overlayStyle: 'bg-gradient-to-r from-black/72 via-black/38 to-black/5',
     textColor: 'text-white',
     alignment: 'left',
@@ -208,7 +208,7 @@ onBeforeUnmount(() => {
 <template>
   <section
     class="relative isolate w-full overflow-hidden bg-ink"
-    aria-label="Promovimet kryesore Eco Buka"
+    aria-label="Promovimet kryesore EcoBuka"
     @mouseenter="isPaused = true"
     @mouseleave="isPaused = false"
     @touchstart.passive="handleTouchStart"

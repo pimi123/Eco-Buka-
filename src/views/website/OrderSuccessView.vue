@@ -9,7 +9,7 @@ const paymentStatus = String(route.query.payment || '');
 
 useSeo({
   title: 'Pagesa u aprovua',
-  description: 'Pagesa juaj në Eco Buka u aprovua dhe porosia u pranua me sukses.',
+  description: 'Pagesa juaj në EcoBuka u aprovua dhe porosia u pranua me sukses.',
   canonicalPath: '/order-success',
 });
 </script>
@@ -24,7 +24,7 @@ useSeo({
         <p class="label mt-5">Pagesa u aprovua</p>
         <h1 class="mt-2 text-3xl font-black sm:text-4xl">Porosia juaj u pranua me sukses.</h1>
         <p class="mt-4 text-sm leading-6 text-slate-600 sm:text-base">
-          Pagesa u verifikua nga banka dhe porosia është regjistruar në sistemin Eco Buka. Ekipi ynë do t'ju kontaktojë për dërgesën dhe detajet finale.
+          Pagesa u verifikua nga banka dhe porosia është regjistruar në sistemin EcoBuka. Ekipi ynë do t'ju kontaktojë për dërgesën dhe detajet finale.
         </p>
         <div v-if="orderNumber || paymentStatus" class="mt-6 grid gap-3 rounded-lg bg-mist p-4 text-left">
           <p v-if="orderNumber" class="text-sm font-bold text-slate-600">

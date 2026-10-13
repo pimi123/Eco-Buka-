@@ -11,7 +11,7 @@ return new class extends Migration
         $sections = [
             'new_products' => [
                 'title' => 'New Products',
-                'subtitle' => 'Fresh energy launches, seasonal offers, and smart power picks for Eco Buka customers.',
+                'subtitle' => 'Fresh energy launches, seasonal offers, and smart power picks for EcoBuka customers.',
                 'section_type' => 'promo_cards',
                 'source_type' => 'manual_cards',
                 'display_limit' => 6,

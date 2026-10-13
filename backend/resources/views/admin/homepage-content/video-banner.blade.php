@@ -55,7 +55,7 @@
             <div class="grid gap-4 lg:grid-cols-2">
                 <label class="grid gap-2">
                     <span class="text-xs font-bold uppercase text-slate-500">Section Heading Above Banner</span>
-                    <input class="rounded-md border border-slate-300 px-3 py-2" type="text" name="section_heading" value="{{ old('section_heading', $banner?->section_heading) }}" placeholder="Eco Buka Home Backup and Solar Storage">
+                    <input class="rounded-md border border-slate-300 px-3 py-2" type="text" name="section_heading" value="{{ old('section_heading', $banner?->section_heading) }}" placeholder="EcoBuka Home Backup and Solar Storage">
                 </label>
 
                 <label class="grid gap-2">
@@ -65,7 +65,7 @@
 
                 <label class="grid gap-2 lg:col-span-2">
                     <span class="text-xs font-bold uppercase text-slate-500">Main Heading</span>
-                    <input class="rounded-md border border-slate-300 px-3 py-2" type="text" name="title" value="{{ old('title', $banner?->title) }}" placeholder="Eco Buka Home Backup and Solar Storage">
+                    <input class="rounded-md border border-slate-300 px-3 py-2" type="text" name="title" value="{{ old('title', $banner?->title) }}" placeholder="EcoBuka Home Backup and Solar Storage">
                 </label>
 
                 <label class="grid gap-2 lg:col-span-2">
