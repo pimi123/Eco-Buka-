@@ -54,7 +54,7 @@ class NestPayPaymentInitiationTest extends TestCase
             ->assertJsonPath('parameters.lang', 'en')
             ->assertJsonPath('parameters.hashAlgorithm', 'ver3')
             ->assertJsonPath('parameters.refreshtime', '5')
-            ->assertJsonPath('parameters.encoding', 'utf-8');
+            ->assertJsonPath('parameters.encoding', 'UTF-8');
 
         $parameters = $response->json('parameters');
 

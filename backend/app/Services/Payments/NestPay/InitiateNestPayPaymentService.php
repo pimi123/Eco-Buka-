@@ -124,7 +124,7 @@ class InitiateNestPayPaymentService
             'rnd' => $rnd,
             'hashAlgorithm' => $this->config('hash_algorithm'),
             'refreshtime' => $this->config('refresh_time'),
-            'encoding' => 'utf-8',
+            'encoding' => 'UTF-8',
         ];
 
         $shopUrl = $options['shopurl'] ?? $this->url('shop_url', '/checkout');
