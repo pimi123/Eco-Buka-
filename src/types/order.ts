@@ -10,7 +10,7 @@ export interface CartItem {
 export interface CheckoutPayload {
   customer_name: string;
   customer_phone: string;
-  customer_email?: string;
+  customer_email: string;
   country: string;
   municipality: string;
   delivery_address: string;
@@ -28,8 +28,21 @@ export interface CheckoutPayload {
 
 export interface OrderResponse {
   message: string;
+  id: number;
   order_number: string;
   status: string;
   total: string | number;
   currency: string;
+}
+
+export interface NestPayInitiationResponse {
+  gatewayUrl?: string;
+  gateway_url?: string;
+  parameters: Record<string, string | number | boolean | null | undefined>;
+}
+
+export interface NestPayPaymentOptions {
+  installments_enabled: boolean;
+  allowed_installments: number[];
+  minimum_installment_amount: number;
 }

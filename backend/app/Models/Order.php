@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Carbon;
 
 class Order extends Model
@@ -13,6 +14,7 @@ class Order extends Model
     public const STATUS_PROCESSING = 'processing';
     public const STATUS_COMPLETED = 'completed';
     public const STATUS_CANCELLED = 'cancelled';
+    public const STATUS_PAYMENT_FAILED = 'payment_failed';
 
     public const STATUSES = [
         self::STATUS_PENDING,
@@ -20,10 +22,12 @@ class Order extends Model
         self::STATUS_PROCESSING,
         self::STATUS_COMPLETED,
         self::STATUS_CANCELLED,
+        self::STATUS_PAYMENT_FAILED,
     ];
 
     protected $fillable = [
         'order_number',
+        'tracking_token',
         'customer_name',
         'customer_phone',
         'customer_email',
@@ -45,6 +49,7 @@ class Order extends Model
         'processing_at',
         'completed_at',
         'cancelled_at',
+        'payment_failed_at',
     ];
 
     protected $casts = [
@@ -55,12 +60,23 @@ class Order extends Model
         'processing_at' => 'datetime',
         'completed_at' => 'datetime',
         'cancelled_at' => 'datetime',
+        'payment_failed_at' => 'datetime',
         'policy_accepted_at' => 'datetime',
     ];
 
     public function items(): HasMany
     {
         return $this->hasMany(OrderItem::class);
+    }
+
+    public function payments(): HasMany
+    {
+        return $this->hasMany(Payment::class);
+    }
+
+    public function latestPayment(): HasOne
+    {
+        return $this->hasOne(Payment::class)->latestOfMany();
     }
 
     public function setStatus(string $status): void
@@ -76,6 +92,7 @@ class Order extends Model
             self::STATUS_PROCESSING => 'processing_at',
             self::STATUS_COMPLETED => 'completed_at',
             self::STATUS_CANCELLED => 'cancelled_at',
+            self::STATUS_PAYMENT_FAILED => 'payment_failed_at',
             default => null,
         };
 

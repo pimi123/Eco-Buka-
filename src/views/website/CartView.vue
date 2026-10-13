@@ -30,7 +30,7 @@ useSeo({
           <p class="label">Kontrollo porosinë</p>
           <h1 class="mt-2 text-3xl font-black sm:text-4xl">Shporta</h1>
           <p class="mt-3 max-w-2xl text-sm leading-6 text-slate-600 sm:text-base">
-            Kontrolloni produktet e zgjedhura para se ta dërgoni kërkesën për porosi. Pagesa koordinohet pas konfirmimit nga ekipi ynë.
+            Kontrolloni produktet e zgjedhura para se të vazhdoni në checkout dhe pagesë.
           </p>
         </div>
         <RouterLink to="/products" class="btn-secondary w-full sm:w-auto">Vazhdo blerjen</RouterLink>
@@ -121,6 +121,13 @@ useSeo({
           >
             Vazhdo në checkout
           </RouterLink>
+          <p v-if="!hasUnavailableItems" class="mt-3 text-xs leading-5 text-slate-500">
+            Në hapin tjetër duhet të pranoni
+            <RouterLink to="/termat-dhe-kushtet" class="font-bold text-ink underline underline-offset-4">Termat dhe Kushtet</RouterLink>
+            dhe
+            <RouterLink to="/politika-e-kthimit" class="font-bold text-ink underline underline-offset-4">Politikën e Kthimit</RouterLink>
+            para pagesës.
+          </p>
           <button v-else class="btn-primary mt-3 w-full cursor-not-allowed opacity-50" type="button" disabled>
             Vazhdo në checkout
           </button>

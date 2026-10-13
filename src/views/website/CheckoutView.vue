@@ -1,17 +1,23 @@
 <script setup lang="ts">
-import { computed, reactive, ref, watch } from 'vue';
-import { useRouter } from 'vue-router';
+import { computed, onMounted, reactive, ref, watch } from 'vue';
 import WebsiteLayout from '../../components/layout/WebsiteLayout.vue';
-import { apiPost } from '../../lib/api';
+import { apiGet, apiPost } from '../../lib/api';
 import { deliveryCountries, municipalitiesForCountry } from '../../lib/locations';
 import { useSeo } from '../../lib/seo';
 import { useCartStore } from '../../stores/cartStore';
-import type { CheckoutPayload, OrderResponse } from '../../types/order';
+import type { CheckoutPayload, NestPayInitiationResponse, NestPayPaymentOptions, OrderResponse } from '../../types/order';
 
-const router = useRouter();
 const cartStore = useCartStore();
 const loading = ref(false);
+const paymentSubmitting = ref(false);
+const paymentOptionsLoading = ref(false);
 const errors = ref<Record<string, string[]>>({});
+const nestPayOptions = ref<NestPayPaymentOptions>({
+  installments_enabled: false,
+  allowed_installments: [],
+  minimum_installment_amount: 0,
+});
+const selectedInstallmentCount = ref<number | null>(null);
 const form = reactive({
   customer_name: '',
   customer_phone: '',
@@ -29,6 +35,13 @@ const money = (value: number) => new Intl.NumberFormat('sq-XK', { style: 'curren
 const hasItems = computed(() => cartStore.items.length > 0);
 const hasUnavailableItems = computed(() => cartStore.items.some((item) => !cartStore.isProductInStock(item.product)));
 const municipalityOptions = computed(() => municipalitiesForCountry(form.country));
+const installmentOptions = computed(() => nestPayOptions.value.allowed_installments.filter((count) => count >= 2));
+const installmentMinimum = computed(() => Number(nestPayOptions.value.minimum_installment_amount || 0));
+const installmentsAvailable = computed(() => (
+  nestPayOptions.value.installments_enabled
+  && installmentOptions.value.length > 0
+  && cartStore.subtotal >= installmentMinimum.value
+));
 
 useSeo({
   title: 'Përfundimi i porosisë',
@@ -40,6 +53,27 @@ watch(() => form.country, () => {
   form.municipality = '';
 });
 
+watch(installmentsAvailable, (available) => {
+  if (!available) {
+    selectedInstallmentCount.value = null;
+  }
+});
+
+onMounted(async () => {
+  paymentOptionsLoading.value = true;
+  try {
+    nestPayOptions.value = await apiGet<NestPayPaymentOptions>('/payments/nestpay/options');
+  } catch {
+    nestPayOptions.value = {
+      installments_enabled: false,
+      allowed_installments: [],
+      minimum_installment_amount: 0,
+    };
+  } finally {
+    paymentOptionsLoading.value = false;
+  }
+});
+
 function fieldError(field: string) {
   return errors.value[field]?.[0] || '';
 }
@@ -48,10 +82,41 @@ function optionEntries(options?: Record<string, string>) {
   return Object.entries(options || {}).filter(([, value]) => Boolean(value));
 }
 
+function submitHostedPayment(response: NestPayInitiationResponse) {
+  const gatewayUrl = response.gatewayUrl || response.gateway_url;
+
+  if (!gatewayUrl || !response.parameters) {
+    throw new Error('Missing NestPay gateway data.');
+  }
+
+  const form = document.createElement('form');
+  form.method = 'POST';
+  form.action = gatewayUrl;
+  form.style.display = 'none';
+
+  Object.entries(response.parameters).forEach(([name, value]) => {
+    if (value === undefined || value === null) return;
+
+    const input = document.createElement('input');
+    input.type = 'hidden';
+    input.name = name;
+    input.value = String(value);
+    form.appendChild(input);
+  });
+
+  document.body.appendChild(form);
+  form.submit();
+
+  window.setTimeout(() => {
+    form.remove();
+  }, 1000);
+}
+
 async function submitOrder() {
-  if (loading.value || !hasItems.value || hasUnavailableItems.value) return;
+  if (loading.value || paymentSubmitting.value || !hasItems.value || hasUnavailableItems.value) return;
 
   loading.value = true;
+  paymentSubmitting.value = true;
   errors.value = {};
 
   const payload: CheckoutPayload = {
@@ -66,11 +131,17 @@ async function submitOrder() {
 
   try {
     const response = await apiPost<OrderResponse>('/orders', payload);
+    const payment = await apiPost<NestPayInitiationResponse>(`/orders/${response.id}/payments/nestpay`, {
+      shopurl: window.location.origin + '/checkout',
+      installment_count: selectedInstallmentCount.value,
+    });
+
     cartStore.clear();
-    await router.push({ name: 'order-success', query: { order: response.order_number } });
+    submitHostedPayment(payment);
   } catch (error) {
     const response = (error as Error & { response?: { errors?: Record<string, string[]>; message?: string } }).response;
-    errors.value = response?.errors || { general: [response?.message || 'Porosia nuk mund të dërgohet. Ju lutemi kontrolloni fushat dhe provoni përsëri.'] };
+    errors.value = response?.errors || { general: [response?.message || 'Pagesa nuk mund të iniciohet. Ju lutemi kontrolloni fushat dhe provoni përsëri.'] };
+    paymentSubmitting.value = false;
   } finally {
     loading.value = false;
   }
@@ -117,7 +188,7 @@ async function submitOrder() {
                 <span v-if="fieldError('customer_phone')" class="text-xs font-semibold text-red-600">{{ fieldError('customer_phone') }}</span>
               </label>
               <label class="grid gap-2 sm:col-span-2">
-                <span class="text-xs font-bold uppercase text-slate-500">Email opsional</span>
+                <span class="text-xs font-bold uppercase text-slate-500">Email për konfirmim të porosisë</span>
                 <input v-model="form.customer_email" class="input-field" type="email" autocomplete="email" placeholder="email@example.com">
                 <span v-if="fieldError('customer_email')" class="text-xs font-semibold text-red-600">{{ fieldError('customer_email') }}</span>
               </label>
@@ -166,6 +237,51 @@ async function submitOrder() {
             </label>
           </section>
 
+          <!-- <section class="grid gap-4 border-t border-line pt-5">
+            <div>
+              <h2 class="text-lg font-black">Mënyra e pagesës</h2>
+              <p class="mt-1 text-sm leading-6 text-slate-600">
+                Zgjidh pagesën e plotë ose pagesën me këste nëse është e disponueshme për shumën e porosisë.
+              </p>
+            </div>
+
+            <div class="grid gap-3 sm:grid-cols-2">
+              <button
+                type="button"
+                class="rounded-lg border p-4 text-left transition hover:border-ink hover:bg-mist"
+                :class="selectedInstallmentCount === null ? 'border-ink bg-mist shadow-sm' : 'border-line bg-white'"
+                @click="selectedInstallmentCount = null"
+              >
+                <span class="block text-sm font-black">Pagesë e plotë</span>
+                <span class="mt-1 block text-xs font-semibold leading-5 text-slate-600">Paguaj shumën e plotë përmes NestPay.</span>
+              </button>
+
+              <button
+                v-for="count in installmentOptions"
+                :key="count"
+                type="button"
+                class="rounded-lg border p-4 text-left transition hover:border-ink hover:bg-mist disabled:cursor-not-allowed disabled:opacity-50"
+                :class="selectedInstallmentCount === count ? 'border-ink bg-mist shadow-sm' : 'border-line bg-white'"
+                :disabled="!installmentsAvailable"
+                @click="selectedInstallmentCount = count"
+              >
+                <span class="block text-sm font-black">{{ count }} këste</span>
+                <span class="mt-1 block text-xs font-semibold leading-5 text-slate-600">
+                  Afërsisht {{ money(cartStore.subtotal / count) }} në muaj.
+                </span>
+              </button>
+            </div>
+
+            <p v-if="paymentOptionsLoading" class="text-xs font-semibold text-slate-500">Duke kontrolluar opsionet e pagesës...</p>
+            <p v-else-if="nestPayOptions.installments_enabled && !installmentsAvailable" class="rounded-md bg-amber-50 p-3 text-sm font-semibold text-amber-900">
+              Pagesa me këste është e disponueshme vetëm për porosi mbi {{ money(installmentMinimum) }}.
+            </p>
+            <p v-else-if="installmentsAvailable" class="text-xs font-semibold leading-5 text-slate-500">
+              Disponueshmëria finale e kësteve konfirmohet nga banka dhe faqja e sigurt NestPay.
+            </p>
+            <span v-if="fieldError('installment_count')" class="text-xs font-semibold text-red-600">{{ fieldError('installment_count') }}</span>
+          </section> -->
+
           <section class="grid gap-4 border-t border-line pt-5">
             <label class="grid gap-2">
               <span class="text-xs font-bold uppercase text-slate-500">Shënim për porosinë opsional</span>
@@ -174,13 +290,16 @@ async function submitOrder() {
             <label class="flex items-start gap-3 rounded-lg border border-line bg-mist p-4 text-sm leading-6 text-slate-700">
               <input v-model="form.policy_accepted" class="mt-1 h-4 w-4 rounded border-line" type="checkbox">
               <span>
-                Pajtohem që Eco Buka të më kontaktojë për këtë porosi dhe pranoj
-                <RouterLink class="font-bold text-ink underline underline-offset-4" to="/politika-e-kthimit">Politikën e Kthimit</RouterLink>.
+                Pajtohem me
+                <RouterLink class="font-bold text-ink underline underline-offset-4" to="/termat-dhe-kushtet" target="_blank">Termat dhe Kushtet</RouterLink>
+                dhe
+                <RouterLink class="font-bold text-ink underline underline-offset-4" to="/politika-e-kthimit" target="_blank">Politikën e Kthimit</RouterLink>.
+                Pranoj që Eco Buka të më dërgojë email konfirmimi me produktet e porositura, totalin, adresën dhe detajet e dërgesës.
               </span>
             </label>
             <span v-if="fieldError('policy_accepted')" class="text-xs font-semibold text-red-600">{{ fieldError('policy_accepted') }}</span>
-            <button class="btn-primary min-h-12 w-full disabled:cursor-not-allowed disabled:opacity-50 sm:w-fit" :disabled="loading || hasUnavailableItems">
-              {{ loading ? 'Duke dërguar porosinë...' : 'Dërgo porosinë' }}
+            <button class="btn-primary min-h-12 w-full disabled:cursor-not-allowed disabled:opacity-50 sm:w-fit" :disabled="loading || paymentSubmitting || hasUnavailableItems">
+              {{ loading ? 'Duke hapur faqen e pagesës...' : 'Vazhdo te pagesa' }}
             </button>
           </section>
         </form>

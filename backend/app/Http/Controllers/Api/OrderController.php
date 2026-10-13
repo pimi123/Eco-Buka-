@@ -13,7 +13,8 @@ class OrderController extends Controller
         $order = $orders->create($request->validated());
 
         return response()->json([
-            'message' => 'Your order has been placed successfully. Our team will contact you shortly to confirm the details.',
+            'message' => 'Porosia u regjistrua me sukses. Ju lutemi vazhdoni te pagesa.',
+            'id' => $order->id,
             'order_number' => $order->order_number,
             'status' => $order->status,
             'total' => $order->total,
