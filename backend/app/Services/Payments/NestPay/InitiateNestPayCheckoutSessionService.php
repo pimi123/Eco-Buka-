@@ -54,6 +54,32 @@ class InitiateNestPayCheckoutSessionService
         });
     }
 
+    public function resume(string $oid, array $options): array
+    {
+        return DB::transaction(function () use ($oid, $options): array {
+            $session = NestPayCheckoutSession::query()
+                ->where('provider', Payment::PROVIDER_NESTPAY)
+                ->where('provider_order_id', $oid)
+                ->lockForUpdate()->firstOrFail();
+
+            if ($session->processed_at || $session->status !== NestPayCheckoutSession::STATUS_PENDING) {
+                throw ValidationException::withMessages([
+                    'payment' => 'Kjo pagesë është përpunuar. Ju lutemi kontrolloni rezultatin ose kontaktoni mbështetjen.',
+                ]);
+            }
+
+            $session->installment_count = $this->validatedInstallmentCount((float) $session->amount, $options);
+            $session->request_metadata = array_merge($session->request_metadata, [
+                'installment_count' => $session->installment_count,
+            ]);
+            $session->save();
+            $parameters = $this->parameters($session, $session->request_metadata['rnd'], $options);
+            $parameters['hash'] = $this->hashes->generateRequestHash($parameters);
+
+            return ['gateway_url' => $this->config('gateway_url'), 'parameters' => $parameters];
+        });
+    }
+
     private function checkoutTotal(array $checkoutData): array
     {
         $subtotalCents = 0;

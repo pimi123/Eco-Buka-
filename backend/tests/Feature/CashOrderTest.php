@@ -55,8 +55,10 @@ class CashOrderTest extends TestCase
         Mail::fake();
         $payload = $this->payload();
         $payload['payment_method'] = 'card';
-        $this->postJson('/api/orders', $payload)->assertUnprocessable()
-            ->assertJsonValidationErrors('payment_method');
+        config(['nestpay.gateway_url' => 'https://bank.example.test/pay',
+            'nestpay.client_id' => 'test-client', 'nestpay.store_key' => 'test-key']);
+        $this->postJson('/api/orders', $payload)->assertCreated()
+            ->assertJsonPath('status', 'pending_payment');
         $this->assertDatabaseCount('orders', 0);
         Mail::assertNothingSent();
     }

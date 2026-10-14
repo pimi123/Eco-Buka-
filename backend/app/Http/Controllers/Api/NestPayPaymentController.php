@@ -24,10 +24,15 @@ class NestPayPaymentController extends Controller
 
     public function store(
         InitiateNestPayPaymentRequest $request,
-        Order $order,
+        string $order,
         InitiateNestPayPaymentService $payments,
+        InitiateNestPayCheckoutSessionService $checkout,
     ): JsonResponse {
-        $payload = $payments->initiate($order, $request->validated());
+        if (str_starts_with($order, 'checkout-')) {
+            return response()->json($checkout->resume(substr($order, strlen('checkout-')), $request->validated()));
+        }
+
+        $payload = $payments->initiate(Order::query()->findOrFail($order), $request->validated());
 
         return response()->json($payload);
     }

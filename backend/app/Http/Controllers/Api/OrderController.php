@@ -8,12 +8,18 @@ use App\Services\Orders\CreateOrderService;
 
 class OrderController extends Controller
 {
-    public function store(StoreOrderRequest $request, CreateOrderService $orders)
+    public function store(StoreOrderRequest $request, CreateOrderService $orders, \App\Services\Payments\NestPay\InitiateNestPayCheckoutSessionService $checkout)
     {
         if ($request->input('payment_method') !== 'cash') {
-            throw \Illuminate\Validation\ValidationException::withMessages([
-                'payment_method' => 'Për pagesë me kartelë, ju lutemi vazhdoni përmes checkout-it të sigurt.',
-            ]);
+            // Older storefront builds use two requests. Return a session reference,
+            // never an unpaid card order, for their subsequent payment request.
+            $payment = $checkout->initiate($request->validated());
+
+            return response()->json([
+                'id' => 'checkout-'.$payment['parameters']['oid'],
+                'payment_method' => 'card',
+                'status' => 'pending_payment',
+            ], 201);
         }
         $order = $orders->create($request->validated());
 

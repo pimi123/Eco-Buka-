@@ -62,6 +62,39 @@ class NestPayCheckoutSessionTest extends TestCase
         $this->initiate();
     }
 
+    public function test_old_two_request_checkout_continues_to_bank_without_creating_an_order(): void
+    {
+        $this->initiate();
+        $payload = NestPayCheckoutSession::sole()->order_payload;
+        $response = $this->postJson('/api/orders', $payload)->assertCreated();
+        $reference = $response->json('id');
+        $this->assertStringStartsWith('checkout-', $reference);
+        $this->assertDatabaseCount('orders', 0);
+
+        $payment = $this->postJson("/api/orders/{$reference}/payments/nestpay", [
+            'shopurl' => 'https://shop.example.test/checkout',
+        ])->assertOk()->assertJsonPath('gateway_url', 'https://bank.example.test/pay')
+            ->assertJsonPath('parameters.amount', '200.00')
+            ->assertJsonPath('parameters.shopurl', 'https://shop.example.test/checkout');
+        $this->assertSame(substr($reference, strlen('checkout-')), $payment->json('parameters.oid'));
+        $this->assertNotEmpty($payment->json('parameters.hash'));
+        $this->assertDatabaseCount('orders', 0);
+        $this->assertDatabaseCount('payments', 0);
+        $this->assertDatabaseCount('nestpay_checkout_sessions', 2);
+
+        $bankPayload = [
+            'ReturnOid' => $payment->json('parameters.oid'),
+            'Response' => 'Approved', 'ProcReturnCode' => '00',
+            'amount' => '200.00', 'currency' => '978',
+        ];
+        $bankPayload['HASH'] = app(NestPayHashService::class)->generateRequestHash($bankPayload, 'test-key');
+        $this->post('/api/payments/nestpay/success', $bankPayload)->assertRedirect();
+        $this->assertDatabaseCount('orders', 1);
+        $this->postJson("/api/orders/{$reference}/payments/nestpay", [])
+            ->assertUnprocessable()->assertJsonValidationErrors('payment');
+        $this->assertDatabaseCount('orders', 1);
+    }
+
     private function signedResult(array $overrides = []): array
     {
         $payload = array_merge([
