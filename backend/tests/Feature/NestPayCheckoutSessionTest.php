@@ -24,6 +24,8 @@ class NestPayCheckoutSessionTest extends TestCase
             'nestpay.store_key' => 'test-key',
             'nestpay.frontend_url' => 'https://shop.example.test',
             'nestpay.installments_enabled' => false,
+            'nestpay.ok_url' => null,
+            'nestpay.fail_url' => null,
         ]);
     }
 
@@ -42,12 +44,22 @@ class NestPayCheckoutSessionTest extends TestCase
             'items' => [['product_id' => $product->id, 'quantity' => 2,
                 'selected_options' => ['color' => 'black']]],
         ])->assertOk()->assertJsonPath('parameters.amount', '200.00')
-            ->assertJsonPath('parameters.okUrl', url('/api/payments/nestpay/success'));
+            ->assertJsonPath('parameters.okUrl', config('nestpay.ok_url') ?: url('/api/payments/nestpay/success'))
+            ->assertJsonPath('parameters.failUrl', config('nestpay.fail_url') ?: url('/api/payments/nestpay/failure'));
         $this->assertDatabaseCount('orders', 0);
         $this->assertDatabaseCount('payments', 0);
         $this->assertDatabaseCount('nestpay_checkout_sessions', 1);
         Mail::assertNothingSent();
         return $product;
+    }
+
+    public function test_configured_public_callback_urls_are_preserved(): void
+    {
+        config([
+            'nestpay.ok_url' => 'https://dev.example.test/api/payments/nestpay/success',
+            'nestpay.fail_url' => 'https://dev.example.test/api/payments/nestpay/failure',
+        ]);
+        $this->initiate();
     }
 
     private function signedResult(array $overrides = []): array
