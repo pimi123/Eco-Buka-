@@ -19,10 +19,6 @@ class OrderApiTest extends TestCase
         $response = $this->postJson('/api/orders', [
             'customer_name' => 'Eco Customer',
             'customer_phone' => '+38344111222',
-            'payment_method' => 'cash',
-            'customer_email' => 'customer@example.com',
-            'municipality' => 'Prishtina',
-            'policy_accepted' => true,
             'customer_email' => 'customer@example.com',
             'delivery_address' => 'Main Street 12',
             'city' => 'Prishtina',
@@ -57,10 +53,6 @@ class OrderApiTest extends TestCase
         $response = $this->postJson('/api/orders', [
             'customer_name' => 'Price Test',
             'customer_phone' => '+38344111222',
-            'payment_method' => 'cash',
-            'customer_email' => 'customer@example.com',
-            'municipality' => 'Prishtina',
-            'policy_accepted' => true,
             'delivery_address' => 'Main Street 12',
             'city' => 'Prishtina',
             'items' => [
@@ -78,10 +70,6 @@ class OrderApiTest extends TestCase
 
         $this->postJson('/api/orders', [
             'customer_phone' => '+38344111222',
-            'payment_method' => 'cash',
-            'customer_email' => 'customer@example.com',
-            'municipality' => 'Prishtina',
-            'policy_accepted' => true,
             'delivery_address' => 'Main Street 12',
             'city' => 'Prishtina',
             'items' => [
@@ -98,10 +86,6 @@ class OrderApiTest extends TestCase
         $this->postJson('/api/orders', [
             'customer_name' => 'Inactive Test',
             'customer_phone' => '+38344111222',
-            'payment_method' => 'cash',
-            'customer_email' => 'customer@example.com',
-            'municipality' => 'Prishtina',
-            'policy_accepted' => true,
             'delivery_address' => 'Main Street 12',
             'city' => 'Prishtina',
             'items' => [

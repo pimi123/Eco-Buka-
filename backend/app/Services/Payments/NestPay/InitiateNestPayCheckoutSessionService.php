@@ -33,7 +33,7 @@ class InitiateNestPayCheckoutSessionService
                 'currency' => 'EUR',
                 'currency_code' => $this->config('currency'),
                 'status' => NestPayCheckoutSession::STATUS_PENDING,
-                'order_payload' => array_merge($checkoutData, ['payment_method' => 'card']),
+                'order_payload' => $checkoutData,
                 'items_snapshot' => $itemsSnapshot,
                 'installment_count' => $installmentCount,
                 'request_metadata' => [
@@ -51,32 +51,6 @@ class InitiateNestPayCheckoutSessionService
                 'gateway_url' => $this->config('gateway_url'),
                 'parameters' => $parameters,
             ];
-        });
-    }
-
-    public function resume(string $oid, array $options): array
-    {
-        return DB::transaction(function () use ($oid, $options): array {
-            $session = NestPayCheckoutSession::query()
-                ->where('provider', Payment::PROVIDER_NESTPAY)
-                ->where('provider_order_id', $oid)
-                ->lockForUpdate()->firstOrFail();
-
-            if ($session->processed_at || $session->status !== NestPayCheckoutSession::STATUS_PENDING) {
-                throw ValidationException::withMessages([
-                    'payment' => 'Kjo pagesë është përpunuar. Ju lutemi kontrolloni rezultatin ose kontaktoni mbështetjen.',
-                ]);
-            }
-
-            $session->installment_count = $this->validatedInstallmentCount((float) $session->amount, $options);
-            $session->request_metadata = array_merge($session->request_metadata, [
-                'installment_count' => $session->installment_count,
-            ]);
-            $session->save();
-            $parameters = $this->parameters($session, $session->request_metadata['rnd'], $options);
-            $parameters['hash'] = $this->hashes->generateRequestHash($parameters);
-
-            return ['gateway_url' => $this->config('gateway_url'), 'parameters' => $parameters];
         });
     }
 
@@ -115,7 +89,6 @@ class InitiateNestPayCheckoutSessionService
                 'unit_price' => $unitCents / 100,
                 'line_total' => $lineCents / 100,
                 'category' => $product->category?->name,
-                'selected_options' => $item['selected_options'] ?? null,
             ];
         }
 
@@ -138,8 +111,8 @@ class InitiateNestPayCheckoutSessionService
             'amount' => $this->formatAmount($session->amount),
             'currency' => $this->config('currency'),
             'oid' => $session->provider_order_id,
-            'okUrl' => config('nestpay.ok_url') ?: url('/api/payments/nestpay/success'),
-            'failUrl' => config('nestpay.fail_url') ?: url('/api/payments/nestpay/failure'),
+            'okUrl' => $this->url('ok_url', '/order-success?payment=approved'),
+            'failUrl' => $this->url('fail_url', '/payment-failed?payment=failed'),
             'lang' => $this->config('language'),
             'rnd' => $rnd,
             'hashAlgorithm' => $this->config('hash_algorithm'),
