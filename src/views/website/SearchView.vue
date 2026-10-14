@@ -15,7 +15,7 @@ const results = computed(() => {
 
 useSeo({
   title: 'Kërko produkte',
-  description: 'Kërko stacione portative energjie, panele solare, bateri, pajisje inteligjente dhe aksesorë të energjisë së pastër nga Eco Buka.',
+  description: 'Kërko stacione portative energjie, panele solare, bateri, pajisje inteligjente dhe aksesorë të energjisë së pastër nga EcoBuka.',
   canonicalPath: '/search',
 });
 

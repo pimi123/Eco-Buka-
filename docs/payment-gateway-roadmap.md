@@ -1,6 +1,6 @@
-# Eco Buka Payment Gateway Roadmap
+# EcoBuka Payment Gateway Roadmap
 
-This document keeps the requirements and implementation plan for adding online Visa/Mastercard payments to Eco Buka later.
+This document keeps the requirements and implementation plan for adding online Visa/Mastercard payments to EcoBuka later.
 
 ## Current Status
 
@@ -113,7 +113,7 @@ Ask the provider for:
 - EUR support
 - Settlement bank account requirements
 
-Important: Eco Buka should not process or store card numbers directly. Use hosted payment page or tokenized payment flow from the bank/PSP.
+Important: EcoBuka should not process or store card numbers directly. Use hosted payment page or tokenized payment flow from the bank/PSP.
 
 ## Required Database Tables
 

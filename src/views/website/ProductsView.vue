@@ -9,7 +9,7 @@ const productStore = useProductStore();
 
 useSeo({
   title: 'Produktet',
-  description: 'Shfletoni stacione portative energjie, panele solare, gjeneratorë solarë, bateri për shtëpi, power bank dhe aksesorë Eco Buka.',
+  description: 'Shfletoni stacione portative energjie, panele solare, gjeneratorë solarë, bateri për shtëpi, power bank dhe aksesorë EcoBuka.',
   canonicalPath: '/products',
 });
 
@@ -22,7 +22,7 @@ onMounted(() => productStore.fetchProducts());
       <div class="container-shell">
         <p class="label">Katalogu</p>
         <h1 class="mt-2 text-3xl font-black sm:text-4xl">Produktet</h1>
-        <p class="mt-4 max-w-2xl text-sm leading-6 text-slate-600 sm:text-base">Shfletoni stacione portative, sete solare, sisteme rezervë dhe aksesorë të përgatitur për zgjidhje energjie Eco Buka.</p>
+        <p class="mt-4 max-w-2xl text-sm leading-6 text-slate-600 sm:text-base">Shfletoni stacione portative, sete solare, sisteme rezervë dhe aksesorë të përgatitur për zgjidhje energjie EcoBuka.</p>
       </div>
     </section>
     <section class="container-shell py-10 sm:py-12">

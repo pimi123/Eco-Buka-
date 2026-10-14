@@ -41,6 +41,7 @@
             <div class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
                 <h2 class="text-lg font-black">Customer and delivery</h2>
                 <dl class="mt-4 grid gap-3 text-sm sm:grid-cols-2">
+                    <div><dt class="font-bold text-slate-500">Mënyra e pagesës</dt><dd>{{ match ($order->payment_method) { 'cash' => 'Cash', 'card' => 'Card', default => '—' } }}</dd></div>
                     <div><dt class="font-bold text-slate-500">Name</dt><dd>{{ $order->customer_name }}</dd></div>
                     <div><dt class="font-bold text-slate-500">Phone</dt><dd>{{ $order->customer_phone }}</dd></div>
                     <div><dt class="font-bold text-slate-500">Email</dt><dd>{{ $order->customer_email ?: '-' }}</dd></div>

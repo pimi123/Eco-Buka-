@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref, watch } from 'vue';
+import { useRouter } from 'vue-router';
 import WebsiteLayout from '../../components/layout/WebsiteLayout.vue';
 import { apiGet, apiPost } from '../../lib/api';
 import { deliveryCountries, municipalitiesForCountry } from '../../lib/locations';
@@ -8,6 +9,8 @@ import { useCartStore } from '../../stores/cartStore';
 import type { CheckoutPayload, NestPayInitiationResponse, NestPayPaymentOptions, OrderResponse } from '../../types/order';
 
 const cartStore = useCartStore();
+const router = useRouter();
+const paymentMethod = ref<'card' | 'cash'>('card');
 const loading = ref(false);
 const paymentSubmitting = ref(false);
 const paymentOptionsLoading = ref(false);
@@ -45,7 +48,7 @@ const installmentsAvailable = computed(() => (
 
 useSeo({
   title: 'Përfundimi i porosisë',
-  description: "Dërgo porosinë Eco Buka dhe ekipi ynë do t'ju kontaktojë për konfirmim, disponueshmëri dhe dërgesë.",
+  description: "Dërgo porosinë EcoBuka dhe ekipi ynë do t'ju kontaktojë për konfirmim, disponueshmëri dhe dërgesë.",
   canonicalPath: '/checkout',
 });
 
@@ -121,6 +124,7 @@ async function submitOrder() {
 
   const payload: CheckoutPayload = {
     ...form,
+    payment_method: paymentMethod.value,
     city: form.municipality,
     items: cartStore.items.map((item) => ({
       product_id: Number(item.product.id),
@@ -131,6 +135,11 @@ async function submitOrder() {
 
   try {
     const response = await apiPost<OrderResponse>('/orders', payload);
+    if (paymentMethod.value === 'cash') {
+      cartStore.clear();
+      await router.push({ path: '/order-success', query: { order: response.order_number, method: 'cash' } });
+      return;
+    }
     const payment = await apiPost<NestPayInitiationResponse>(`/orders/${response.id}/payments/nestpay`, {
       shopurl: window.location.origin + '/checkout',
       installment_count: selectedInstallmentCount.value,
@@ -152,7 +161,7 @@ async function submitOrder() {
   <WebsiteLayout>
     <section class="container-shell py-8 sm:py-12">
       <div>
-        <p class="label">Pa pagesë online</p>
+        <p class="label">Pagesë me kartelë ose në dorëzim</p>
         <h1 class="mt-2 text-3xl font-black sm:text-4xl">Përfundimi i porosisë</h1>
         <p class="mt-3 max-w-2xl text-sm leading-6 text-slate-600 sm:text-base">
           Dërgo kërkesën për porosi dhe ekipi ynë do t'ju kontaktojë për të konfirmuar disponueshmërinë, dërgesën dhe detajet finale.
@@ -174,7 +183,7 @@ async function submitOrder() {
           <section class="grid gap-4">
             <div>
               <h2 class="text-lg font-black">Të dhënat e klientit</h2>
-              <p class="mt-1 text-sm leading-6 text-slate-600">Këto të dhëna përdoren vetëm për konfirmimin e porosisë dhe kontaktin nga ekipi Eco Buka.</p>
+              <p class="mt-1 text-sm leading-6 text-slate-600">Këto të dhëna përdoren vetëm për konfirmimin e porosisë dhe kontaktin nga ekipi EcoBuka.</p>
             </div>
             <div class="grid gap-4 sm:grid-cols-2">
               <label class="grid gap-2">
@@ -237,6 +246,19 @@ async function submitOrder() {
             </label>
           </section>
 
+          <fieldset class="grid gap-3 border-t border-line pt-5" :disabled="loading || paymentSubmitting">
+            <legend class="text-lg font-black">Mënyra e pagesës</legend>
+            <label class="flex items-start gap-3 rounded-lg border border-line p-4">
+              <input v-model="paymentMethod" type="radio" value="card" name="payment_method" class="mt-1">
+              <span><strong class="block">Pagesë me kartelë</strong></span>
+            </label>
+            <label class="flex items-start gap-3 rounded-lg border border-line p-4">
+              <input v-model="paymentMethod" type="radio" value="cash" name="payment_method" class="mt-1">
+              <span><strong class="block">Para në dorë në dorëzim</strong><span class="text-sm text-slate-600">Paguaj kur ta pranosh porosinë.</span></span>
+            </label>
+            <p v-if="fieldError('payment_method')" class="text-sm text-red-600">{{ fieldError('payment_method') }}</p>
+          </fieldset>
+
           <!-- <section class="grid gap-4 border-t border-line pt-5">
             <div>
               <h2 class="text-lg font-black">Mënyra e pagesës</h2>
@@ -294,12 +316,12 @@ async function submitOrder() {
                 <RouterLink class="font-bold text-ink underline underline-offset-4" to="/termat-dhe-kushtet" target="_blank">Termat dhe Kushtet</RouterLink>
                 dhe
                 <RouterLink class="font-bold text-ink underline underline-offset-4" to="/politika-e-kthimit" target="_blank">Politikën e Kthimit</RouterLink>.
-                Pranoj që Eco Buka të më dërgojë email konfirmimi me produktet e porositura, totalin, adresën dhe detajet e dërgesës.
+                Pranoj që EcoBuka të më dërgojë email konfirmimi me produktet e porositura, totalin, adresën dhe detajet e dërgesës.
               </span>
             </label>
             <span v-if="fieldError('policy_accepted')" class="text-xs font-semibold text-red-600">{{ fieldError('policy_accepted') }}</span>
             <button class="btn-primary min-h-12 w-full disabled:cursor-not-allowed disabled:opacity-50 sm:w-fit" :disabled="loading || paymentSubmitting || hasUnavailableItems">
-              {{ loading ? 'Duke hapur faqen e pagesës...' : 'Vazhdo te pagesa' }}
+              {{ loading ? 'Duke përpunuar...' : paymentMethod === 'cash' ? 'Konfirmo porosinë' : 'Vazhdo te pagesa' }}
             </button>
           </section>
         </form>

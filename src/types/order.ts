@@ -8,6 +8,7 @@ export interface CartItem {
 }
 
 export interface CheckoutPayload {
+  payment_method?: 'card' | 'cash';
   customer_name: string;
   customer_phone: string;
   customer_email: string;
@@ -27,6 +28,7 @@ export interface CheckoutPayload {
 }
 
 export interface OrderResponse {
+  payment_method?: 'card' | 'cash';
   message: string;
   id: number;
   order_number: string;

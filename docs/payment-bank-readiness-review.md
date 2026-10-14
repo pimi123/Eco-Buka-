@@ -1,10 +1,10 @@
-# Eco Buka Payment And Bank Readiness Review
+# EcoBuka Payment And Bank Readiness Review
 
 Date: 2026-08-12
 
 ## Review Summary
 
-The roadmap is good and realistic, but it is much bigger than simply adding a payment method. The core message is correct: Eco Buka should first become a secure, reliable, production-ready ecommerce website before adding online card payments.
+The roadmap is good and realistic, but it is much bigger than simply adding a payment method. The core message is correct: EcoBuka should first become a secure, reliable, production-ready ecommerce website before adding online card payments.
 
 The project does not need to be locked to Raiffeisen right now. The same roadmap can support Raiffeisen or another proper bank/payment provider later if the architecture is clean.
 
@@ -122,6 +122,6 @@ Recommended order:
 
 ## Conclusion
 
-The roadmap is useful, but it should be treated as a long-term checklist. The immediate goal is not to add card payments. The immediate goal is to make Eco Buka secure, reliable, professional, and production-ready.
+The roadmap is useful, but it should be treated as a long-term checklist. The immediate goal is not to add card payments. The immediate goal is to make EcoBuka secure, reliable, professional, and production-ready.
 
 Payments should be implemented only after the order system, legal content, server configuration, admin security, backup strategy, monitoring, and operational workflows are ready.

@@ -2,9 +2,12 @@
 
 namespace App\Services\Orders;
 
+use App\Mail\OrderConfirmationMail;
 use App\Models\Order;
 use App\Models\Product;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
@@ -14,6 +17,7 @@ class CreateOrderService
     {
         return DB::transaction(function () use ($data): Order {
             $order = Order::create([
+                'payment_method' => $data['payment_method'] ?? Order::PAYMENT_CARD,
                 'order_number' => $this->nextOrderNumber(),
                 'tracking_token' => $this->trackingToken(),
                 'customer_name' => $data['customer_name'],
@@ -79,6 +83,19 @@ class CreateOrderService
             $order->subtotal = $subtotalCents / 100;
             $order->total = ($subtotalCents / 100) + (float) $order->delivery_fee;
             $order->save();
+
+            if ($order->payment_method === Order::PAYMENT_CASH) {
+                DB::afterCommit(function () use ($order): void {
+                    try {
+                        Mail::to($order->customer_email)->send(new OrderConfirmationMail($order));
+                    } catch (\Throwable $exception) {
+                        Log::warning('Cash order confirmation email could not be sent.', [
+                            'order_id' => $order->id,
+                            'error' => $exception->getMessage(),
+                        ]);
+                    }
+                });
+            }
 
             return $order->load('items');
         });

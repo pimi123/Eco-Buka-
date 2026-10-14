@@ -35,7 +35,7 @@ const fallbackSections: HomepageSection[] = [
     id: 'fallback-new-products',
     section_key: 'new_products',
     title: 'Produktet e reja',
-    subtitle: 'Produkte të reja energjie, oferta sezonale dhe zgjidhje inteligjente për klientët Eco Buka.',
+    subtitle: 'Produkte të reja energjie, oferta sezonale dhe zgjidhje inteligjente për klientët EcoBuka.',
     section_type: 'promo_cards',
     active: true,
     sort_order: 2,
@@ -54,7 +54,7 @@ const fallbackSections: HomepageSection[] = [
   {
     id: 'fallback-popular',
     section_key: 'popular_eco_buka',
-    title: 'Zgjidhjet më të kërkuara Eco Buka',
+    title: 'Zgjidhjet më të kërkuara EcoBuka',
     section_type: 'product_grid',
     active: true,
     sort_order: 6,
@@ -85,7 +85,7 @@ const orderedSections = computed(() =>
 
 useSeo({
   title: 'Zgjidhje portative energjie dhe energji solare',
-  description: 'Shfletoni stacione portative energjie, panele solare, sete gjeneratorësh solarë, bateri për shtëpi dhe zgjidhje rezervë energjie nga Eco Buka.',
+  description: 'Shfletoni stacione portative energjie, panele solare, sete gjeneratorësh solarë, bateri për shtëpi dhe zgjidhje rezervë energjie nga EcoBuka.',
   canonicalPath: '/',
 });
 

@@ -25,7 +25,7 @@ const statusMessage = computed(() => {
 
 useSeo({
   title: 'Pagesa nuk u përfundua',
-  description: 'Pagesa për porosinë Eco Buka nuk u përfundua. Provo përsëri ose kontakto ekipin tonë.',
+  description: 'Pagesa për porosinë EcoBuka nuk u përfundua. Provo përsëri ose kontakto ekipin tonë.',
   canonicalPath: '/payment-failed',
 });
 </script>
@@ -55,13 +55,13 @@ useSeo({
         </div>
 
         <p class="mt-4 rounded-lg border border-line bg-white p-4 text-sm leading-6 text-slate-600">
-          Nëse shuma është rezervuar në kartelë, ju lutemi kontaktoni bankën ose ekipin Eco Buka para se të provoni përsëri.
+          Nëse shuma është rezervuar në kartelë, ju lutemi kontaktoni bankën ose ekipin EcoBuka para se të provoni përsëri.
         </p>
 
         <div class="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
           <RouterLink to="/checkout" class="btn-primary">Provo përsëri</RouterLink>
           <RouterLink to="/cart" class="btn-secondary">Kthehu te shporta</RouterLink>
-          <RouterLink to="/contact" class="btn-secondary">Kontakto Eco Buka</RouterLink>
+          <RouterLink to="/contact" class="btn-secondary">Kontakto EcoBuka</RouterLink>
         </div>
       </div>
     </section>

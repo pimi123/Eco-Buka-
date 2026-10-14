@@ -16,7 +16,7 @@ const purposeOptions: Array<{ value: ContactPurpose; label: string; title: strin
     value: 'offer',
     label: 'Kërkesë për ofertë',
     title: 'Kërko ofertë',
-    description: 'Na tregoni çfarë zgjidhjeje energjie ju nevojitet dhe ekipi Eco Buka do tju kontaktojë me propozim.',
+    description: 'Na tregoni çfarë zgjidhjeje energjie ju nevojitet dhe ekipi EcoBuka do tju kontaktojë me propozim.',
     placeholder: 'P.sh. Kam nevojë për zgjidhje backup për shtëpi, biznes ose sistem solar.',
   },
   {
@@ -37,7 +37,7 @@ const purposeOptions: Array<{ value: ContactPurpose; label: string; title: strin
     value: 'general',
     label: 'Pyetje e përgjithshme',
     title: 'Na kontaktoni',
-    description: 'Përdoreni këtë opsion për pyetje të përgjithshme rreth Eco Buka, produkteve ose shërbimit.',
+    description: 'Përdoreni këtë opsion për pyetje të përgjithshme rreth EcoBuka, produkteve ose shërbimit.',
     placeholder: 'Shkruani mesazhin tuaj.',
   },
 ];
@@ -60,7 +60,7 @@ const selectedPurpose = computed(() => purposeOptions.find((option) => option.va
 
 useSeo({
   title: 'Kontakt',
-  description: 'Kontaktoni Eco Buka për ofertë, kthim produkti, garancion ose mbështetje teknike.',
+  description: 'Kontaktoni EcoBuka për ofertë, kthim produkti, garancion ose mbështetje teknike.',
   canonicalPath: '/contact',
 });
 

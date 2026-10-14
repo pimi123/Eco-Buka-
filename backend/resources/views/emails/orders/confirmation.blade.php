@@ -11,7 +11,7 @@
                 <table role="presentation" width="640" cellpadding="0" cellspacing="0" style="width:640px;max-width:94%;background:#ffffff;border:1px solid #d8e1e7;border-radius:12px;overflow:hidden;">
                     <tr>
                         <td style="background:#090f1d;color:#ffffff;padding:24px 28px;">
-                            <p style="margin:0 0 8px;font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#cbd5e1;">Eco Buka</p>
+                            <p style="margin:0 0 8px;font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#cbd5e1;">EcoBuka</p>
                             <h1 style="margin:0;font-size:26px;line-height:1.2;">Porosia juaj u pranua</h1>
                             <p style="margin:10px 0 0;font-size:15px;line-height:1.6;color:#e2e8f0;">Faleminderit për porosinë. Më poshtë janë detajet që kemi regjistruar.</p>
                         </td>
@@ -28,6 +28,14 @@
                                     </td>
                                 </tr>
                             </table>
+
+                            @if ($order->payment_method === \App\Models\Order::PAYMENT_CASH)
+                                <p style="font-size:14px;line-height:1.7;">
+                                    <strong>Mënyra e pagesës:</strong> Para në dorë në dorëzim<br>
+                                    <strong>Statusi i pagesës:</strong> E papaguar<br>
+                                    <strong>Për t'u paguar në dorëzim:</strong> {{ number_format((float) $order->total, 2) }} {{ $order->currency }}
+                                </p>
+                            @endif
 
                             <h2 style="margin:0 0 12px;font-size:18px;">Produktet e porositura</h2>
                             <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;margin-bottom:24px;">
@@ -72,7 +80,7 @@
                             <div style="background:#f8fafc;border:1px solid #d8e1e7;border-radius:10px;padding:16px;margin:0 0 18px;">
                                 <strong style="display:block;margin-bottom:6px;">Koha e arritjes dhe konfirmimi final</strong>
                                 <p style="margin:0;font-size:14px;line-height:1.7;color:#475569;">
-                                    Ekipi Eco Buka do t'ju kontaktojë për të konfirmuar disponueshmërinë, mënyrën e dërgesës dhe afatin final të arritjes. Produktet me para-porosi ose konfigurim të veçantë konfirmohen veçmas para dorëzimit.
+                                    Ekipi EcoBuka do t'ju kontaktojë për të konfirmuar disponueshmërinë, mënyrën e dërgesës dhe afatin final të arritjes. Produktet me para-porosi ose konfigurim të veçantë konfirmohen veçmas para dorëzimit.
                                 </p>
                             </div>
 

@@ -25,7 +25,7 @@ const heroUrl = '/promo/optimized/summer-sale-1280.jpg';
       <div class="relative overflow-hidden rounded-lg bg-white shadow-panel">
         <img
           :src="heroUrl"
-          alt="Set portativ energjie dhe panel solar Eco Buka"
+          alt="Set portativ energjie dhe panel solar EcoBuka"
           class="aspect-[4/3] w-full object-cover sm:aspect-[16/10] lg:min-h-[360px]"
           loading="eager"
           fetchpriority="high"

@@ -24,7 +24,7 @@ const category = computed(() => categoryStore.categories.find((item) => item.slu
 
 useSeo({
   title: computed(() => category.value?.name || 'Kategori produktesh'),
-  description: computed(() => category.value?.description || `Shfletoni produktet Eco Buka në kategorinë ${currentSlug.value.replace(/-/g, ' ')}.`),
+  description: computed(() => category.value?.description || `Shfletoni produktet EcoBuka në kategorinë ${currentSlug.value.replace(/-/g, ' ')}.`),
   canonicalPath: computed(() => `/category/${currentSlug.value}`),
 });
 

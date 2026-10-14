@@ -77,7 +77,7 @@ const specs = [
 useSeo({
   title: 'EcoFlow PowerOcean për Shtëpi dhe Backup Solar',
   description:
-    'Faqe informative për EcoFlow PowerOcean nga Eco Buka: ruajtje solare, energji rezervë, bateri LFP, monitorim inteligjent dhe kërkesë për ofertë në Kosovë dhe Shqipëri.',
+    'Faqe informative për EcoFlow PowerOcean nga EcoBuka: ruajtje solare, energji rezervë, bateri LFP, monitorim inteligjent dhe kërkesë për ofertë në Kosovë dhe Shqipëri.',
   canonicalPath: '/solutions/powerocean',
 });
 </script>
@@ -121,7 +121,7 @@ useSeo({
               Merr Ofertë
             </a>
             <a class="inline-flex min-h-12 items-center justify-center rounded-full border border-white/45 bg-white/10 px-7 text-sm font-black text-white backdrop-blur transition hover:bg-white/20" :href="whatsappHref" target="_blank" rel="noreferrer">
-              WhatsApp Eco Buka
+              WhatsApp EcoBuka
             </a>
           </div>
         </div>
@@ -198,7 +198,7 @@ useSeo({
             Mbani pajisjet kryesore në punë kur rrjeti elektrik ndërpritet.
           </h2>
           <p class="mt-4 text-base leading-7 text-slate-600">
-            Për planifikimin e energjisë rezervë, Eco Buka mund ta ndihmojë klientin të përcaktojë cilat pajisje duhet të mbulohen dhe ta dimensionojë sistemin sipas përdorimit real.
+            Për planifikimin e energjisë rezervë, EcoBuka mund ta ndihmojë klientin të përcaktojë cilat pajisje duhet të mbulohen dhe ta dimensionojë sistemin sipas përdorimit real.
           </p>
           <div class="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
             <div v-for="item in appliances" :key="item" class="flex min-h-12 items-center gap-2 rounded-lg border border-line bg-white px-3 text-sm font-bold text-ink">
@@ -250,7 +250,7 @@ useSeo({
           <p class="label">Përmbledhje e sistemit</p>
           <h2 class="mt-2 text-3xl font-black leading-tight text-ink sm:text-4xl">Çfarë përfshin zgjidhja</h2>
           <p class="mt-4 text-base leading-7 text-slate-600">
-            Instalimi i saktë varet nga objekti, konsumi, sistemi solar dhe prioritetet për energji rezervë. Eco Buka duhet ta konfirmojë konfigurimin final para blerjes.
+            Instalimi i saktë varet nga objekti, konsumi, sistemi solar dhe prioritetet për energji rezervë. EcoBuka duhet ta konfirmojë konfigurimin final para blerjes.
           </p>
         </div>
         <div class="grid gap-3">
@@ -267,10 +267,10 @@ useSeo({
           <div class="p-6 text-white sm:p-8 lg:p-10">
             <p class="text-xs font-black uppercase tracking-[0.24em] text-orange-400">Kërko ofertë për projekt</p>
             <h2 class="mt-3 text-3xl font-black leading-tight sm:text-4xl">
-              Tregoni Eco Buka çfarë dëshironi të furnizoni me energji.
+              Tregoni EcoBuka çfarë dëshironi të furnizoni me energji.
             </h2>
             <p class="mt-4 max-w-2xl text-base leading-7 text-slate-300">
-              Për PowerOcean, konfigurimi i duhur varet nga shtëpia, biznesi, panelet solare, pajisjet për energji rezervë dhe buxheti. Kontakto Eco Buka për dimensionim dhe detaje të ofertës.
+              Për PowerOcean, konfigurimi i duhur varet nga shtëpia, biznesi, panelet solare, pajisjet për energji rezervë dhe buxheti. Kontakto EcoBuka për dimensionim dhe detaje të ofertës.
             </p>
             <div class="mt-6 flex flex-col gap-3 sm:flex-row">
               <a class="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-white px-7 text-sm font-black text-ink transition hover:bg-slate-100" :href="phoneHref">

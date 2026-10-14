@@ -1,10 +1,10 @@
-# Eco Buka - Prioritetet Para Launch Dhe Bank Review
+# EcoBuka - Prioritetet Para Launch Dhe Bank Review
 
 Date: 2026-08-13
 
 ## Qellimi
 
-Ky dokument permbledh prioritetet kryesore qe duhet te trajtohen perpara se Eco Buka te konsiderohet website i sigurt, i besueshem dhe i pergatitur per rishikim nga banka ose payment provider.
+Ky dokument permbledh prioritetet kryesore qe duhet te trajtohen perpara se EcoBuka te konsiderohet website i sigurt, i besueshem dhe i pergatitur per rishikim nga banka ose payment provider.
 
 Fokusi nuk eshte ende implementimi i pagesave online. Fokusi eshte qe website te kete baze te mire sigurie, besueshmerie, dokumentimi dhe operimi.
 
@@ -248,4 +248,4 @@ Keto vijne me vone, pasi website te jete i sigurt dhe i pergatitur mire per prod
 
 ## Konkluzion
 
-Prioriteti kryesor per Eco Buka tani eshte te behet website i besueshem, i sigurt, i dokumentuar dhe i gatshem per launch. Vetem pas kesaj faze ka kuptim te fillohet me pagesa online dhe integrim me banke/payment provider.
+Prioriteti kryesor per EcoBuka tani eshte te behet website i besueshem, i sigurt, i dokumentuar dhe i gatshem per launch. Vetem pas kesaj faze ka kuptim te fillohet me pagesa online dhe integrim me banke/payment provider.

@@ -27,6 +27,7 @@
                         <th class="px-4 py-3">Location</th>
                         <th class="px-4 py-3">Items</th>
                         <th class="px-4 py-3">Total</th>
+                        <th class="px-4 py-3">Mënyra e pagesës</th>
                         <th class="px-4 py-3">Status</th>
                         <th class="px-4 py-3">Date</th>
                         <th class="px-4 py-3">Action</th>
@@ -44,12 +45,13 @@
                             </td>
                             <td class="px-4 py-3">{{ $order->items_count }}</td>
                             <td class="px-4 py-3 font-semibold">€{{ number_format((float) $order->total, 2) }}</td>
+                            <td class="px-4 py-3 whitespace-nowrap font-semibold">{{ match ($order->payment_method) { 'cash' => 'Cash', 'card' => 'Card', default => '—' } }}</td>
                             <td class="px-4 py-3"><span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold">{{ str($order->status)->headline() }}</span></td>
                             <td class="px-4 py-3">{{ $order->created_at?->format('d M Y H:i') }}</td>
                             <td class="px-4 py-3"><a class="rounded-md border border-slate-300 px-3 py-2 font-semibold" href="{{ route('admin.orders.show', $order) }}">Open</a></td>
                         </tr>
                     @empty
-                        <tr><td class="px-4 py-8 text-center text-slate-500" colspan="9">No orders found.</td></tr>
+                        <tr><td class="px-4 py-8 text-center text-slate-500" colspan="10">No orders found.</td></tr>
                     @endforelse
                 </tbody>
             </table>

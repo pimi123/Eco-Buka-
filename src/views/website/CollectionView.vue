@@ -23,8 +23,8 @@ const currentSlug = computed(() => String(route.params.slug || ''));
 const collection = computed(() => collectionStore.collections.find((item) => item.slug === currentSlug.value));
 
 useSeo({
-  title: computed(() => collection.value?.name || 'Eco Buka Collection'),
-  description: computed(() => collection.value?.description || `Shfletoni produktet Eco Buka të zgjedhura për ${currentSlug.value.replace(/-/g, ' ')}.`),
+  title: computed(() => collection.value?.name || 'EcoBuka Collection'),
+  description: computed(() => collection.value?.description || `Shfletoni produktet EcoBuka të zgjedhura për ${currentSlug.value.replace(/-/g, ' ')}.`),
   canonicalPath: computed(() => `/collections/${currentSlug.value}`),
 });
 

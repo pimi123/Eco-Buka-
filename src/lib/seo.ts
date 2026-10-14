@@ -6,9 +6,9 @@ interface SeoConfig {
   canonicalPath?: MaybeRefOrGetter<string | null | undefined>;
 }
 
-const siteName = 'Eco Buka';
+const siteName = 'EcoBuka';
 const defaultDescription =
-  'Eco Buka provides portable power stations, solar panels, solar generator kits, and home backup energy solutions.';
+  'EcoBuka provides portable power stations, solar panels, solar generator kits, and home backup energy solutions.';
 
 function readValue<T>(value: MaybeRefOrGetter<T>): T {
   return typeof value === 'function' ? (value as () => T)() : unref(value);
