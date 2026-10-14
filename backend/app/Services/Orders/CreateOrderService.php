@@ -13,9 +13,9 @@ use Illuminate\Validation\ValidationException;
 
 class CreateOrderService
 {
-    public function create(array $data): Order
+    public function create(array $data, ?array $paidItems = null): Order
     {
-        return DB::transaction(function () use ($data): Order {
+        return DB::transaction(function () use ($data, $paidItems): Order {
             $order = Order::create([
                 'payment_method' => $data['payment_method'] ?? Order::PAYMENT_CARD,
                 'order_number' => $this->nextOrderNumber(),
@@ -47,27 +47,27 @@ class CreateOrderService
                 ->get()
                 ->keyBy('id');
 
-            foreach ($data['items'] as $index => $item) {
+            foreach ($paidItems ?? $data['items'] as $index => $item) {
                 $product = $products->get((int) $item['product_id']);
-                if (! $product) {
+                if ($paidItems === null && ! $product) {
                     throw ValidationException::withMessages([
                         "items.{$index}.product_id" => 'This product is currently out of stock.',
                     ]);
                 }
 
                 $quantity = (int) $item['quantity'];
-                $unitCents = (int) round(((float) ($product->price ?? 0)) * 100);
+                $unitCents = (int) round(((float) ($paidItems !== null ? $item['unit_price'] : ($product->price ?? 0))) * 100);
                 $lineCents = $unitCents * $quantity;
                 $subtotalCents += $lineCents;
 
                 $order->items()->create([
-                    'product_id' => $product->id,
-                    'product_name' => $product->name,
+                    'product_id' => $product?->id,
+                    'product_name' => $paidItems !== null ? $item['name'] : $product->name,
                     'quantity' => $quantity,
                     'unit_price' => $unitCents / 100,
                     'line_total' => $lineCents / 100,
                     'selected_options' => $item['selected_options'] ?? null,
-                    'product_snapshot' => [
+                    'product_snapshot' => $paidItems !== null ? $item : [
                         'id' => $product->id,
                         'name' => $product->name,
                         'slug' => $product->slug,

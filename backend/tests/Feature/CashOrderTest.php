@@ -55,7 +55,9 @@ class CashOrderTest extends TestCase
         Mail::fake();
         $payload = $this->payload();
         $payload['payment_method'] = 'card';
-        $this->postJson('/api/orders', $payload)->assertCreated();
+        $this->postJson('/api/orders', $payload)->assertUnprocessable()
+            ->assertJsonValidationErrors('payment_method');
+        $this->assertDatabaseCount('orders', 0);
         Mail::assertNothingSent();
     }
 

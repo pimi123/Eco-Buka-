@@ -190,7 +190,7 @@ class ProcessNestPayResultService
             return new PaymentResult(false, 'declined', null, 'Payment declined.');
         }
 
-        $order = $this->orders->create($session->order_payload);
+        $order = $this->orders->create($session->order_payload, $session->items_snapshot);
         $order->setStatus(Order::STATUS_CONFIRMED);
         $order->save();
 

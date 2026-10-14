@@ -134,18 +134,18 @@ async function submitOrder() {
   };
 
   try {
-    const response = await apiPost<OrderResponse>('/orders', payload);
     if (paymentMethod.value === 'cash') {
+      const response = await apiPost<OrderResponse>('/orders', payload);
       cartStore.clear();
       await router.push({ path: '/order-success', query: { order: response.order_number, method: 'cash' } });
       return;
     }
-    const payment = await apiPost<NestPayInitiationResponse>(`/orders/${response.id}/payments/nestpay`, {
+    const payment = await apiPost<NestPayInitiationResponse>('/checkout/nestpay', {
+      ...payload,
       shopurl: window.location.origin + '/checkout',
       installment_count: selectedInstallmentCount.value,
     });
 
-    cartStore.clear();
     submitHostedPayment(payment);
   } catch (error) {
     const response = (error as Error & { response?: { errors?: Record<string, string[]>; message?: string } }).response;

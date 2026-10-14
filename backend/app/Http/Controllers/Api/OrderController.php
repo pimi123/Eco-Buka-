@@ -10,6 +10,11 @@ class OrderController extends Controller
 {
     public function store(StoreOrderRequest $request, CreateOrderService $orders)
     {
+        if ($request->input('payment_method') !== 'cash') {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'payment_method' => 'Për pagesë me kartelë, ju lutemi vazhdoni përmes checkout-it të sigurt.',
+            ]);
+        }
         $order = $orders->create($request->validated());
 
         return response()->json([

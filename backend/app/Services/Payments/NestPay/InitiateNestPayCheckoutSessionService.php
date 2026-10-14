@@ -33,7 +33,7 @@ class InitiateNestPayCheckoutSessionService
                 'currency' => 'EUR',
                 'currency_code' => $this->config('currency'),
                 'status' => NestPayCheckoutSession::STATUS_PENDING,
-                'order_payload' => $checkoutData,
+                'order_payload' => array_merge($checkoutData, ['payment_method' => 'card']),
                 'items_snapshot' => $itemsSnapshot,
                 'installment_count' => $installmentCount,
                 'request_metadata' => [
@@ -89,6 +89,7 @@ class InitiateNestPayCheckoutSessionService
                 'unit_price' => $unitCents / 100,
                 'line_total' => $lineCents / 100,
                 'category' => $product->category?->name,
+                'selected_options' => $item['selected_options'] ?? null,
             ];
         }
 
@@ -111,8 +112,8 @@ class InitiateNestPayCheckoutSessionService
             'amount' => $this->formatAmount($session->amount),
             'currency' => $this->config('currency'),
             'oid' => $session->provider_order_id,
-            'okUrl' => $this->url('ok_url', '/order-success?payment=approved'),
-            'failUrl' => $this->url('fail_url', '/payment-failed?payment=failed'),
+            'okUrl' => url('/api/payments/nestpay/success'),
+            'failUrl' => url('/api/payments/nestpay/failure'),
             'lang' => $this->config('language'),
             'rnd' => $rnd,
             'hashAlgorithm' => $this->config('hash_algorithm'),
