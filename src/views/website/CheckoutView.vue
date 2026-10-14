@@ -250,7 +250,7 @@ async function submitOrder() {
             <legend class="text-lg font-black">Mënyra e pagesës</legend>
             <label class="flex items-start gap-3 rounded-lg border border-line p-4">
               <input v-model="paymentMethod" type="radio" value="card" name="payment_method" class="mt-1">
-              <!-- <span><strong class="block">Pagesë me kartelë</strong><span class="text-sm text-slate-600">Paguaj në faqen e sigurt të bankës TEB.</span></span> -->
+              <span><strong class="block">Pagesë me kartelë</strong></span>
             </label>
             <label class="flex items-start gap-3 rounded-lg border border-line p-4">
               <input v-model="paymentMethod" type="radio" value="cash" name="payment_method" class="mt-1">
