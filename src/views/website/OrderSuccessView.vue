@@ -6,10 +6,11 @@ import { useSeo } from '../../lib/seo';
 const route = useRoute();
 const orderNumber = String(route.query.order || '');
 const paymentStatus = String(route.query.payment || '');
+const isCash = route.query.method === 'cash';
 
 useSeo({
-  title: 'Pagesa u aprovua',
-  description: 'Pagesa juaj në EcoBuka u aprovua dhe porosia u pranua me sukses.',
+  title: isCash ? 'Porosia u pranua' : 'Pagesa u aprovua',
+  description: isCash ? 'Porosia u pranua. Pagesa bëhet në dorëzim.' : 'Pagesa juaj në EcoBuka u aprovua dhe porosia u pranua me sukses.',
   canonicalPath: '/order-success',
 });
 </script>
@@ -21,10 +22,10 @@ useSeo({
         <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-emerald-50 text-2xl font-black text-emerald-700">
           ✓
         </div>
-        <p class="label mt-5">Pagesa u aprovua</p>
+        <p class="label mt-5">{{ isCash ? 'Pagesë në dorëzim' : 'Pagesa u aprovua' }}</p>
         <h1 class="mt-2 text-3xl font-black sm:text-4xl">Porosia juaj u pranua me sukses.</h1>
         <p class="mt-4 text-sm leading-6 text-slate-600 sm:text-base">
-          Pagesa u verifikua nga banka dhe porosia është regjistruar në sistemin EcoBuka. Ekipi ynë do t'ju kontaktojë për dërgesën dhe detajet finale.
+          {{ isCash ? 'Porosia është regjistruar. Pagesa bëhet me para në dorë kur ta pranoni porosinë.' : 'Pagesa u verifikua nga banka dhe porosia është regjistruar në sistemin EcoBuka.' }} Ekipi ynë do t'ju kontaktojë për dërgesën dhe detajet finale.
         </p>
         <div v-if="orderNumber || paymentStatus" class="mt-6 grid gap-3 rounded-lg bg-mist p-4 text-left">
           <p v-if="orderNumber" class="text-sm font-bold text-slate-600">

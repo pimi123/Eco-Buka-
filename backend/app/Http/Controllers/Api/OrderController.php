@@ -13,7 +13,10 @@ class OrderController extends Controller
         $order = $orders->create($request->validated());
 
         return response()->json([
-            'message' => 'Porosia u regjistrua me sukses. Ju lutemi vazhdoni te pagesa.',
+            'message' => $order->payment_method === 'cash'
+                ? 'Porosia u regjistrua me sukses. Pagesa bëhet në dorëzim.'
+                : 'Porosia u regjistrua me sukses. Ju lutemi vazhdoni te pagesa.',
+            'payment_method' => $order->payment_method,
             'id' => $order->id,
             'order_number' => $order->order_number,
             'status' => $order->status,

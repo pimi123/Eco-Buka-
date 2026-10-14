@@ -74,6 +74,11 @@ class InitiateNestPayPaymentService
 
     private function assertOrderCanBePaid(Order $order): void
     {
+        if ($order->payment_method === Order::PAYMENT_CASH) {
+            throw ValidationException::withMessages([
+                'order' => 'Cash on delivery orders cannot be paid through NestPay.',
+            ]);
+        }
         if (in_array($order->status, [Order::STATUS_COMPLETED, Order::STATUS_CANCELLED], true)) {
             throw ValidationException::withMessages([
                 'order' => 'This order cannot be paid.',

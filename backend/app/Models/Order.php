@@ -9,6 +9,8 @@ use Illuminate\Support\Carbon;
 
 class Order extends Model
 {
+    public const PAYMENT_CARD = 'card';
+    public const PAYMENT_CASH = 'cash';
     public const STATUS_PENDING = 'pending';
     public const STATUS_CONFIRMED = 'confirmed';
     public const STATUS_PROCESSING = 'processing';
@@ -26,6 +28,7 @@ class Order extends Model
     ];
 
     protected $fillable = [
+        'payment_method',
         'order_number',
         'tracking_token',
         'customer_name',

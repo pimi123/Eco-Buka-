@@ -29,6 +29,14 @@
                                 </tr>
                             </table>
 
+                            @if ($order->payment_method === \App\Models\Order::PAYMENT_CASH)
+                                <p style="font-size:14px;line-height:1.7;">
+                                    <strong>Mënyra e pagesës:</strong> Para në dorë në dorëzim<br>
+                                    <strong>Statusi i pagesës:</strong> E papaguar<br>
+                                    <strong>Për t'u paguar në dorëzim:</strong> {{ number_format((float) $order->total, 2) }} {{ $order->currency }}
+                                </p>
+                            @endif
+
                             <h2 style="margin:0 0 12px;font-size:18px;">Produktet e porositura</h2>
                             <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;margin-bottom:24px;">
                                 <thead>
