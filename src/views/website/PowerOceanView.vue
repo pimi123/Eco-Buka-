@@ -13,9 +13,9 @@ import { ref } from 'vue';
 import WebsiteLayout from '../../components/layout/WebsiteLayout.vue';
 import { useSeo } from '../../lib/seo';
 
-const heroImage = new URL('../../assets/heroes/hero-solar-home.png', import.meta.url).href;
-const systemImage = new URL('../../assets/heroes/hero-delta-max.png', import.meta.url).href;
-const backupImage = new URL('../../assets/heroes/hero-portable-energy.png', import.meta.url).href;
+const heroImage = '/images/powerocean/solar-home.jpg';
+const systemImage = '/images/powerocean/system.jpg';
+const backupImage = '/images/powerocean/family.jpg';
 const heroVideoUrl = '/videos/powerocean-hero.mp4';
 const heroVideoFailed = ref(false);
 
@@ -25,8 +25,8 @@ const whatsappHref =
   'https://wa.me/38345977007?text=P%C3%ABrsh%C3%ABndetje%20Eco%20Buka%2C%20dua%20nj%C3%AB%20ofert%C3%AB%20p%C3%ABr%20EcoFlow%20PowerOcean.';
 
 const highlights = [
-  { label: 'Kapacitet i zgjerueshëm', value: '5-45 kWh' },
-  { label: 'Fuqi rezervë', value: 'Deri 12 kW' },
+  { label: 'Kapacitet i zgjerueshëm', value: 'Deri 180 kWh' },
+  { label: 'Fuqia e sistemit', value: 'Deri 90 kW' },
   { label: 'Teknologjia e baterisë', value: 'LFP' },
   { label: 'Garancion', value: '15 vjet' },
 ];
@@ -66,10 +66,10 @@ const appliances = [
 ];
 
 const specs = [
-  'EcoFlow PowerOcean Three-phase për ruajtje solare dhe energji rezervë në shtëpi',
+  'EcoFlow PowerOcean / PowerOcean Plus trifazor për shtëpi dhe biznese',
   'Inverter hibrid, module baterie LFP dhe ekosistem EcoFlow App',
-  'Kapacitet baterie i zgjerueshëm nga 5 kWh deri në 45 kWh',
-  'Fuqi rezervë deri në 10 kW, me kulm deri në 12 kW për periudha të shkurtra',
+  'Module baterie 5 kWh; deri në 180 kWh me tre inverterë PowerOcean Plus në kaskadë',
+  'Fuqi totale deri në 90 kW me konfigurim të tre inverterëve PowerOcean Plus',
   'Qeliza baterie LFP me referencë deri në 6000 cikle sipas kushteve të testimit të prodhuesit',
   'Opsione instalimi në mur ose në dysheme, varësisht nga projekti',
 ];
@@ -85,10 +85,10 @@ useSeo({
 <template>
   <WebsiteLayout>
     <section class="relative isolate overflow-hidden bg-ink text-white">
-      <img :src="heroImage" alt="Zgjidhje solare me bateri për shtëpi" class="absolute inset-0 h-full w-full object-cover" fetchpriority="high" />
+      <img :src="heroImage" alt="Zgjidhje solare me bateri për shtëpi" class="absolute inset-0 h-full w-full object-cover object-[57%_center] sm:object-center" fetchpriority="high" />
       <video
         v-if="!heroVideoFailed"
-        class="absolute inset-0 hidden h-full w-full object-cover md:block"
+        class="absolute inset-0 h-full w-full object-cover"
         :poster="heroImage"
         autoplay
         muted
@@ -102,7 +102,7 @@ useSeo({
       </video>
       <div class="absolute inset-0 bg-gradient-to-r from-black/80 via-black/45 to-black/20"></div>
 
-      <div class="container-shell relative z-10 grid min-h-[640px] items-center py-16 sm:min-h-[700px] lg:min-h-[760px]">
+      <div class="container-shell relative z-10 grid min-h-[560px] items-center py-16 sm:min-h-[700px] lg:min-h-[760px]">
         <div class="max-w-3xl">
           <p class="text-xs font-black uppercase tracking-[0.26em] text-orange-400 sm:text-sm">
             EcoFlow PowerOcean
@@ -110,12 +110,9 @@ useSeo({
           <h1 class="mt-4 text-4xl font-black leading-[0.95] sm:text-6xl lg:text-7xl">
             Zgjidhje solare me bateri për shtëpi
           </h1>
-          <p class="mt-5 max-w-2xl text-base font-semibold leading-7 text-white/90 sm:text-xl sm:leading-8">
-            Sistem i zgjerueshëm për ruajtje solare dhe energji rezervë për shtëpi, zyra dhe biznese që kërkojnë më shumë pavarësi energjetike.
+          <p class="mt-5 max-w-2xl text-base font-medium leading-6 text-white/90 sm:text-xl sm:leading-8">
+            Ruajtje solare dhe energji rezervë për shtëpi e biznese.
           </p>
-          <div class="mt-5 inline-flex max-w-xl items-center rounded-full border border-orange-300/40 bg-orange-500/90 px-5 py-3 text-sm font-black text-white shadow-lg backdrop-blur">
-            Produktet PowerOcean janë të disponueshme vetëm me pre-order dhe ofertë të personalizuar.
-          </div>
           <div class="mt-8 flex flex-col gap-3 sm:flex-row">
             <a class="inline-flex min-h-12 items-center justify-center rounded-full bg-white px-7 text-sm font-black text-ink transition hover:scale-[1.02] hover:bg-slate-100" :href="phoneHref">
               Merr Ofertë
@@ -129,9 +126,9 @@ useSeo({
     </section>
 
     <section class="border-b border-line bg-white">
-      <div class="container-shell grid gap-3 py-5 sm:grid-cols-2 lg:grid-cols-4">
+      <div class="container-shell grid grid-cols-2 gap-3 py-5 lg:grid-cols-4">
         <article v-for="item in highlights" :key="item.label" class="rounded-lg border border-line bg-mist px-4 py-5">
-          <p class="text-2xl font-black text-ink">{{ item.value }}</p>
+          <p class="text-xl font-black text-ink sm:text-2xl">{{ item.value }}</p>
           <p class="mt-1 text-xs font-bold uppercase tracking-wide text-slate-500">{{ item.label }}</p>
         </article>
       </div>
@@ -162,7 +159,7 @@ useSeo({
     <section class="bg-mist py-12 sm:py-16 lg:py-20">
       <div class="container-shell grid gap-8 lg:grid-cols-2 lg:items-center">
         <div class="overflow-hidden rounded-lg">
-          <img :src="systemImage" alt="Sistem modular PowerOcean me bateri për shtëpi" class="h-full min-h-[320px] w-full object-cover" loading="lazy" />
+          <img :src="systemImage" alt="Sistem modular PowerOcean me bateri për shtëpi" class="h-[420px] w-full object-cover object-[51%_center] sm:h-[520px]" loading="lazy" />
         </div>
         <div>
           <p class="label">Investim fleksibil</p>
@@ -170,7 +167,7 @@ useSeo({
             Filloni me kapacitet më të vogël dhe zgjerojeni kur projekti ka nevojë për më shumë energji.
           </h2>
           <p class="mt-4 text-base leading-7 text-slate-600">
-            Sistemi mund të fillojë me një modul baterie 5 kWh dhe të zgjerohet deri në 45 kWh. Kjo e bën të përshtatshëm për instalime me faza, ku klienti mund të fillojë tani dhe të shtojë kapacitet më vonë.
+            Filloni me një modul baterie 5 kWh. Konfigurimi PowerOcean Plus me tre inverterë në kaskadë mund të arrijë deri në 180 kWh kapacitet dhe 90 kW fuqi totale. Kjo e bën të përshtatshëm për instalime me faza, ku klienti mund të fillojë tani dhe të shtojë kapacitet më vonë.
           </p>
           <div class="mt-6 grid gap-3 sm:grid-cols-3">
             <div class="rounded-lg bg-white p-4">
@@ -178,7 +175,7 @@ useSeo({
               <p class="mt-1 text-xs font-semibold text-slate-500">Moduli fillestar</p>
             </div>
             <div class="rounded-lg bg-white p-4">
-              <p class="text-xl font-black">45 kWh</p>
+              <p class="text-xl font-black">180 kWh</p>
               <p class="mt-1 text-xs font-semibold text-slate-500">Kapacitet i zgjerueshëm</p>
             </div>
             <div class="rounded-lg bg-white p-4">
@@ -208,7 +205,7 @@ useSeo({
           </div>
         </div>
         <div class="overflow-hidden rounded-lg">
-          <img :src="backupImage" alt="Energji rezervë për shtëpi dhe punë" class="h-full min-h-[320px] w-full object-cover" loading="lazy" />
+          <img :src="backupImage" alt="EcoFlow PowerOcean me inverter dhe bateri pranë shtëpisë" class="aspect-[2/1] h-auto w-full object-cover object-center lg:aspect-auto lg:h-[520px] lg:object-right" loading="lazy" />
         </div>
       </div>
     </section>
@@ -283,10 +280,13 @@ useSeo({
             </div>
           </div>
           <div class="relative min-h-[280px]">
-            <img :src="heroImage" alt="Konsultim për energji solare në shtëpi" class="absolute inset-0 h-full w-full object-cover opacity-80" loading="lazy" />
+            <img src="/images/powerocean/house1_pc.jpg" alt="Sistem EcoFlow PowerOcean i instaluar pranë garazhit" class="absolute inset-0 h-full w-full object-cover object-[45%_center] opacity-80" loading="lazy" />
           </div>
         </div>
       </div>
     </section>
   </WebsiteLayout>
 </template>
+
+
+
