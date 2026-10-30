@@ -2,8 +2,8 @@
 import { computed } from 'vue';
 import { discountPercent } from '../../lib/discount';
 
-const props = defineProps<{ price?: number | null; oldPrice?: number | null }>();
-const discounted = computed(() => Number(props.price) > 0 && Number(props.oldPrice) > Number(props.price));
+const props = withDefaults(defineProps<{ price?: number | null; oldPrice?: number | null; inStock?: boolean }>(), { inStock: true });
+const discounted = computed(() => props.inStock && Number(props.price) > 0 && Number(props.oldPrice) > Number(props.price));
 const percent = computed(() => discountPercent(props.price, props.oldPrice));
 const money = (value: number) => new Intl.NumberFormat('sq-XK', { style: 'currency', currency: 'EUR' }).format(value);
 </script>

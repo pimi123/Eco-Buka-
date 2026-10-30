@@ -9,3 +9,7 @@ export function discountsFirst<T extends { price?: number | null; old_price?: nu
   return [...products].sort((a, b) => Number(discounted(b)) - Number(discounted(a)));
 }
 
+export function isProductInStock(product: { in_stock?: unknown }): boolean {
+  return product.in_stock !== false && product.in_stock !== 0 && product.in_stock !== '0';
+}
+
