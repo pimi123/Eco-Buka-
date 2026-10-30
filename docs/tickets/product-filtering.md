@@ -1,6 +1,6 @@
 # Filtrimi i produkteve
 
-Statusi: Backlog — zhvillimi i ardhshëm
+Statusi: Implementuar lokalisht — 2026-10-30
 Data: 2026-10-30
 
 ## Kërkesa
@@ -26,4 +26,4 @@ Detajet e filtrave të konfirmohen kur të nisë implementimi.
 
 ## Jashtë kësaj tikete
 
-Implementimi nuk ka nisur; kjo tiketë dokumenton punën e ardhshme.
+Implementuar në /search, /products, /category/:slug dhe /collections/:slug përmes CatalogBrowser dhe GET /api/catalog. Seritë identifikohen nga emri i produktit (DELTA, RIVER, STREAM, RAPID, PowerOcean). Numrat e filtrave janë për grupimin bazë dhe ruhen 60 sekonda në cache; nuk rillogariten për çdo ndryshim filtri. Pagination: 24 produkte. Kërkimi: debounce 400 ms, anulim i kërkesave të vjetra, timeout 15 sekonda. Nuk është publikuar live.
