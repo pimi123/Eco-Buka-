@@ -201,14 +201,14 @@ onMounted(async () => {
               decoding="async"
               sizes="(max-width: 340px) 100vw, (max-width: 767px) 50vw, (max-width: 1023px) 33vw, 25vw"
             />
-            <span v-if="discountPercent(product.price, product.old_price)" class="absolute right-2 top-2 rounded-full bg-red-600 px-2.5 py-1.5 text-xs font-black leading-none text-white shadow-sm sm:right-3 sm:top-3">−{{ discountPercent(product.price, product.old_price) }}%</span>
+            <span v-if="discountPercent(product.price, product.old_price)" class="absolute right-2 top-2 rounded-full bg-red-700 px-2.5 py-1.5 text-xs font-black leading-none text-white shadow-sm sm:right-3 sm:top-3">−{{ discountPercent(product.price, product.old_price) }}%</span>
             <span v-if="product.badge" class="absolute left-2 top-2 rounded-full bg-energy px-2.5 py-1 text-[11px] font-bold leading-none text-white sm:left-3 sm:top-3 sm:text-xs">
               {{ product.badge }}
             </span>
           </div>
 
           <div class="flex min-w-0 flex-1 flex-col p-3 min-[390px]:p-3.5 sm:p-5">
-            <p v-if="product.badge" class="mb-2 text-xs font-medium leading-none text-red-600 sm:hidden">{{ product.badge }}</p>
+            <p v-if="product.badge" class="mb-2 text-xs font-medium leading-none text-red-700 sm:hidden">{{ product.badge }}</p>
             <p class="text-[11px] font-bold uppercase tracking-wide text-slate-500 sm:text-xs">{{ product.category || sectionTitle }}</p>
             <h3 class="mt-1.5 line-clamp-2 text-sm font-black leading-5 text-ink min-[390px]:text-[15px] sm:mt-2 sm:text-lg sm:leading-6">{{ product.name }}</h3>
             <p class="mt-1.5 line-clamp-2 text-xs leading-5 text-slate-600 min-[390px]:text-[13px] sm:mt-2 sm:text-sm sm:leading-6">{{ product.short_description || product.description }}</p>

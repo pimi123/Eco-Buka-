@@ -10,7 +10,7 @@ const money = (value: number) => new Intl.NumberFormat('sq-XK', { style: 'curren
 
 <template>
   <div class="min-w-0">
-    <p class="text-base font-black leading-tight min-[390px]:text-lg sm:text-2xl" :class="discounted ? 'text-red-600' : 'text-ink'">
+    <p class="text-base font-black leading-tight min-[390px]:text-lg sm:text-2xl" :class="discounted ? 'text-red-700' : 'text-ink'">
       {{ price ? money(Number(price)) : 'Çmimi sipas kërkesës' }}
     </p>
     <div v-if="discounted" class="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1">
