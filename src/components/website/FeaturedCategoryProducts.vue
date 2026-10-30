@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import ProductPrice from './ProductPrice.vue';
+import { discountPercent, discountsFirst } from '../../lib/discount';
 import { ArrowRight } from 'lucide-vue-next';
 import { computed, onMounted, ref } from 'vue';
 import { apiGet, hasLaravelApiConfig } from '../../lib/api';
@@ -49,7 +51,7 @@ const eyebrow = computed(() => apiSection.value?.eyebrow || 'Seri e veçuar');
 const sectionLimit = computed(() => apiSection.value?.display_limit || props.limit);
 
 const products = computed(() => {
-  if (apiProducts.value.length) return apiProducts.value.slice(0, sectionLimit.value);
+  if (apiProducts.value.length) return discountsFirst(apiProducts.value).slice(0, sectionLimit.value);
 
   const category = selectedCategory.value;
   if (!category) return [];
@@ -199,6 +201,7 @@ onMounted(async () => {
               decoding="async"
               sizes="(max-width: 340px) 100vw, (max-width: 767px) 50vw, (max-width: 1023px) 33vw, 25vw"
             />
+            <span v-if="discountPercent(product.price, product.old_price)" class="absolute right-2 top-2 rounded-full bg-red-600 px-2.5 py-1.5 text-xs font-black leading-none text-white shadow-sm sm:right-3 sm:top-3">−{{ discountPercent(product.price, product.old_price) }}%</span>
             <span v-if="product.badge" class="absolute left-2 top-2 rounded-full bg-energy px-2.5 py-1 text-[11px] font-bold leading-none text-white sm:left-3 sm:top-3 sm:text-xs">
               {{ product.badge }}
             </span>
@@ -212,8 +215,7 @@ onMounted(async () => {
 
             <div class="mt-auto flex items-end justify-between gap-2 pt-4 sm:gap-3 sm:pt-5">
               <div class="min-w-0">
-                <p class="text-sm font-black text-ink min-[390px]:text-[15px] sm:text-xl">{{ money(product.price) }}</p>
-                <p v-if="product.old_price" class="text-xs text-slate-400 line-through sm:text-sm">{{ money(product.old_price) }}</p>
+                <ProductPrice :price="product.price" :old-price="product.old_price" />
               </div>
               <span
                 class="grid h-9 w-9 shrink-0 place-items-center rounded-md border border-line text-ink transition group-hover:border-ink sm:h-10 sm:w-10"

@@ -142,7 +142,7 @@ class HomeController extends Controller
             }
 
             if ($category) {
-                return \App\Models\Product::query()
+                return \App\Models\Product::query()->discountFirst()
                     ->where('active', true)
                     ->where(function ($query) use ($category): void {
                         $query->where('category_id', $category->id)
@@ -170,7 +170,7 @@ class HomeController extends Controller
             }
 
             if ($collection) {
-                return $collection->products()
+                return $collection->products()->discountFirst()
                     ->where('products.active', true)
                     ->wherePivot('active', true)
                     ->with(['category:id,name,slug', 'categories:id,name,slug', 'collections:id,name,slug,type'])
@@ -179,7 +179,7 @@ class HomeController extends Controller
             }
         }
 
-        return $section->products()
+        return $section->products()->discountFirst()
             ->where('products.active', true)
             ->wherePivot('active', true)
             ->with(['category:id,name,slug', 'categories:id,name,slug', 'collections:id,name,slug,type'])

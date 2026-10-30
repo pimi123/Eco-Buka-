@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { discountsFirst } from '../../lib/discount';
 import { computed, onMounted } from 'vue';
 import CategoryNavigationCard from './CategoryNavigationCard.vue';
 import FeatureBanner from './FeatureBanner.vue';
@@ -23,7 +24,7 @@ const displayLimit = computed(() => Number(homepageStore.section?.display_limit 
 const displayProducts = computed(() => {
   const selected = homepageStore.showcaseProducts.filter((product) => product.active);
   const fallback = productStore.featuredProducts.length ? productStore.featuredProducts : productStore.activeProducts;
-  return (selected.length ? selected : fallback).slice(0, displayLimit.value);
+  return discountsFirst(selected.length ? selected : fallback).slice(0, displayLimit.value);
 });
 const displayCards = computed(() => homepageStore.activeNavigationCards.slice(0, 2));
 const banner = computed(() => homepageStore.primaryBanner);

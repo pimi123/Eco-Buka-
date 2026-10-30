@@ -22,7 +22,7 @@ class CollectionController extends Controller
         return Collection::query()
             ->where('active', true)
             ->where('slug', $slug)
-            ->with(['products' => fn ($query) => $query->where('products.active', true)->wherePivot('active', true)])
+            ->with(['products' => fn ($query) => $query->discountFirst()->where('products.active', true)->wherePivot('active', true)])
             ->firstOrFail();
     }
 
@@ -30,7 +30,7 @@ class CollectionController extends Controller
     {
         $collection = Collection::query()->where('active', true)->where('slug', $slug)->firstOrFail();
 
-        $query = $collection->products()
+        $query = $collection->products()->discountFirst()
             ->where('products.active', true)
             ->wherePivot('active', true)
             ->with(['category:id,name,slug', 'categories:id,name,slug', 'collections:id,name,slug,type']);

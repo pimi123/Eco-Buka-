@@ -20,6 +20,7 @@
 
         <div class="grid gap-4 md:grid-cols-2">
             @foreach ($config['fields'] as $field => $type)
+                @continue($resource === 'products' && $field === 'sort_order' && ! $item->exists)
                 @php
                     $rawValue = $item->{$field};
                     if ($type === 'json' && is_array($rawValue)) {

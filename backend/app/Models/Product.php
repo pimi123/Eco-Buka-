@@ -13,6 +13,25 @@ class Product extends Model
     use HasPublicImageUrls;
     use HasUniqueSlug;
 
+    protected static function booted(): void
+    {
+        static::creating(function (Product $product): void {
+            if (! $product->sort_order) {
+                $product->sort_order = ((int) static::max('sort_order')) + 1;
+            }
+        });
+    }
+
+    public function scopeDiscountFirst($query)
+    {
+        // Prepend priority without replacing a collection's pivot ordering.
+        $orders = $query->getQuery()->orders ?? [];
+        $query->reorder()->orderByRaw('CASE WHEN products.price > 0 AND products.old_price > products.price THEN 0 ELSE 1 END');
+        $query->getQuery()->orders = array_merge($query->getQuery()->orders, $orders);
+
+        return $query;
+    }
+
     protected $fillable = [
         'category_id',
         'name',
