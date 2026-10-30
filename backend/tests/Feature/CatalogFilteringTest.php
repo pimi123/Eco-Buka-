@@ -13,6 +13,21 @@ class CatalogFilteringTest extends TestCase
 {
     use RefreshDatabase;
 
+    public function test_out_of_stock_products_are_last_in_every_sort_and_group(): void
+    {
+        $available = $this->product('Available', ['price' => 100, 'created_at' => now()->subDay()]);
+        $cheap = $this->product('Unavailable cheap sale', ['price' => 1, 'old_price' => 200, 'in_stock' => false]);
+        $expensive = $this->product('Unavailable expensive', ['price' => 1000, 'in_stock' => false]);
+        $group = Collection::create(['name' => 'Stock group', 'type' => 'featured', 'active' => true]);
+        foreach ([$cheap, $expensive, $available] as $i => $product) $group->products()->attach($product, ['sort_order' => $i + 1, 'active' => true]);
+        foreach (['recommended', 'price_asc', 'price_desc', 'newest'] as $sort) {
+            $this->getJson('/api/catalog?sort='.$sort)->assertOk()->assertJsonPath('data.0.id', $available->id);
+            $this->getJson('/api/catalog?collection='.$group->slug.'&sort='.$sort)->assertOk()->assertJsonPath('data.0.id', $available->id);
+        }
+        $this->getJson('/api/products')->assertOk()->assertJsonPath('0.id', $available->id);
+        $this->getJson('/api/collections/'.$group->slug.'/products')->assertOk()->assertJsonPath('0.id', $available->id);
+    }
+
     private function product(string $name, array $extra = []): Product
     {
         return Product::create(['name' => $name, 'price' => 100, 'active' => true, 'in_stock' => true, ...$extra]);

@@ -4,7 +4,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { SlidersHorizontal, X } from 'lucide-vue-next';
 import { apiGet, hasLaravelApiConfig } from '../../lib/api';
 import { demoProducts } from '../../lib/demoData';
-import { discountsFirst, isProductInStock } from '../../lib/discount';
+import { discountsFirst, inStockFirst, isProductInStock } from '../../lib/discount';
 import type { Product } from '../../types/product';
 import ProductGrid from './ProductGrid.vue';
 
@@ -21,9 +21,17 @@ const facets = ref<Facets>({ categories: [], series: [], min: 0, max: 0 });
 const context = ref<{ name: string; description?: string }>(); const open = ref(false);
 const filterPanel = ref<HTMLElement>();
 let previousFocus: HTMLElement | null = null;
+let bodyOverflow: string | null = null;
+function unlockScroll() {
+  if (bodyOverflow !== null) { document.body.style.overflow = bodyOverflow; bodyOverflow = null; }
+}
 watch(open, async value => {
-  if (value) { previousFocus = document.activeElement as HTMLElement; await nextTick(); filterPanel.value?.querySelector<HTMLButtonElement>('button')?.focus(); }
-  else previousFocus?.focus();
+  if (value) {
+    previousFocus = document.activeElement as HTMLElement;
+    bodyOverflow = document.body.style.overflow; document.body.style.overflow = 'hidden';
+    await nextTick(); filterPanel.value?.querySelector<HTMLButtonElement>('button')?.focus();
+  }
+  else { unlockScroll(); previousFocus?.focus(); }
 });
 function panelKeys(event: KeyboardEvent) {
   if (!open.value) return;
@@ -89,13 +97,14 @@ async function load() {
       if (sort.value.startsWith('price')) filtered.sort((a,b) => a.price == null ? 1 : b.price == null ? -1 : (Number(a.price)-Number(b.price))*(sort.value === 'price_desc' ? -1 : 1));
       else if (sort.value === 'newest') filtered.sort((a,b) => String(b.created_at || '').localeCompare(String(a.created_at || '')));
       else filtered = discountsFirst(filtered);
+      filtered = inStockFirst(filtered);
       total.value = filtered.length; lastPage.value = Math.max(1,Math.ceil(filtered.length/24)); products.value = filtered.slice((page.value-1)*24,page.value*24);
     }
   } catch { if (id === requestId) { error.value = 'Produktet nuk mund të ngarkohen. Provo përsëri.'; products.value = []; } }
   finally { clearTimeout(timeout); if (id === requestId) loading.value = false; }
 }
 watch(() => [route.fullPath, props.category, props.collection], load, { immediate: true });
-onBeforeUnmount(() => { clearTimeout(timer); controller?.abort(); });
+onBeforeUnmount(() => { clearTimeout(timer); controller?.abort(); unlockScroll(); });
 </script>
 
 <template>
@@ -111,9 +120,9 @@ onBeforeUnmount(() => { clearTimeout(timer); controller?.abort(); });
     </div>
     <div class="mt-6 grid items-start gap-6 lg:grid-cols-[230px_minmax(0,1fr)]">
       <div v-if="open" class="fixed inset-0 z-40 bg-black/40 lg:hidden" @click="open = false"></div>
-      <aside ref="filterPanel" :role="open ? 'dialog' : undefined" :aria-modal="open ? true : undefined" aria-label="Filtrimi i produkteve" @keydown="panelKeys" :class="open ? 'fixed inset-y-0 left-0 z-50 flex w-[min(90vw,360px)] flex-col bg-white shadow-xl' : 'hidden lg:block'" class="lg:sticky lg:top-24 lg:w-auto lg:rounded-xl lg:border lg:border-line lg:bg-white">
-        <div class="flex items-center justify-between border-b border-line p-4"><h2 class="font-bold">Filtro produktet</h2><button v-if="open" type="button" aria-label="Mbyll filtrat" @click="open = false"><X class="h-5 w-5" /></button></div>
-        <div class="flex-1 space-y-5 overflow-y-auto p-4">
+      <aside ref="filterPanel" :role="open ? 'dialog' : undefined" :aria-modal="open ? true : undefined" aria-label="Filtrimi i produkteve" @keydown="panelKeys" :class="open ? 'fixed inset-y-0 left-0 z-50 flex w-[min(90vw,360px)] flex-col bg-white shadow-xl' : 'hidden lg:flex'" class="catalog-filter-panel overflow-hidden lg:sticky lg:top-24 lg:w-auto lg:flex-col lg:rounded-xl lg:border lg:border-line lg:bg-white">
+        <div class="flex shrink-0 items-center justify-between border-b border-line p-4"><h2 class="font-bold">Filtro produktet</h2><button v-if="open" type="button" aria-label="Mbyll filtrat" @click="open = false"><X class="h-5 w-5" /></button></div>
+        <div class="catalog-filter-scroll min-h-0 flex-1 space-y-5 overflow-y-auto overscroll-contain p-4">
           <p class="text-xs leading-5 text-slate-500">Numrat tregojnë produktet në këtë katalog, përpara filtrave.</p>
           <details open><summary class="cursor-pointer text-sm font-bold">Kategoria</summary><div class="mt-3 space-y-3"><label v-for="c in facets.categories" :key="c.slug" class="flex items-start gap-2 text-sm"><input v-model="categories" type="checkbox" :value="c.slug" class="mt-1 accent-emerald-600" @change="apply()" /><span class="flex-1">{{ c.name }}</span><span class="text-xs text-slate-500">{{ c.count }}</span></label></div></details>
           <details v-if="facets.series.length" open><summary class="cursor-pointer text-sm font-bold">Seria</summary><div class="mt-3 space-y-3"><label v-for="s in facets.series" :key="s.name" class="flex items-center gap-2 text-sm"><input v-model="series" type="checkbox" :value="s.name" class="accent-emerald-600" @change="apply()" /><span class="flex-1">{{ s.name }}</span><span class="text-xs text-slate-500">{{ s.count }}</span></label></div></details>
@@ -121,7 +130,7 @@ onBeforeUnmount(() => { clearTimeout(timer); controller?.abort(); });
           <div class="space-y-3 border-t border-line pt-4"><label class="flex gap-2 text-sm font-semibold"><input v-model="sale" type="checkbox" class="accent-red-700" @change="apply()" /> Vetëm me zbritje</label><label class="flex gap-2 text-sm font-semibold"><input v-model="stock" type="checkbox" class="accent-emerald-600" @change="apply()" /> Vetëm në stok</label></div>
           <button v-if="activeCount" type="button" class="text-sm font-bold underline underline-offset-4" @click="clear">Pastro filtrat</button>
         </div>
-        <div v-if="open" class="border-t border-line bg-white p-4"><button type="button" class="w-full rounded-full bg-ink py-3 text-sm font-bold text-white" @click="open = false">{{ loading ? 'Duke kërkuar…' : `Shfaq ${total} produkte` }}</button></div>
+        <div v-if="open" class="shrink-0 border-t border-line bg-white p-4 pb-[max(1rem,env(safe-area-inset-bottom))]"><button type="button" class="w-full rounded-full bg-ink py-3 text-sm font-bold text-white" @click="open = false">{{ loading ? 'Duke kërkuar…' : `Shfaq ${total} produkte` }}</button></div>
       </aside>
       <div class="min-w-0" :aria-busy="loading">
         <div v-if="chips.length" class="mb-5 flex flex-wrap gap-2"><button v-for="chip in chips" :key="chip.label" type="button" class="inline-flex items-center gap-2 rounded-full border border-line bg-mist px-3 py-2 text-xs font-semibold" @click="chip.remove">{{ chip.label }} <X class="h-3 w-3" /></button></div>
@@ -134,3 +143,12 @@ onBeforeUnmount(() => { clearTimeout(timer); controller?.abort(); });
     </div>
   </section>
 </template>
+
+<style scoped>
+.catalog-filter-scroll { scrollbar-width: none; -ms-overflow-style: none; }
+.catalog-filter-scroll::-webkit-scrollbar { display: none; }
+.catalog-filter-panel { height: 100vh; height: 100dvh; }
+@media (min-width: 1024px) {
+  .catalog-filter-panel { height: auto; max-height: calc(100vh - 7rem); max-height: calc(100dvh - 7rem); }
+}
+</style>

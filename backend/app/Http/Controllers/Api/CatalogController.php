@@ -77,6 +77,7 @@ class CatalogController extends Controller
         if (isset($data['max'])) $query->where('products.price', '<=', $data['max']);
         if ($request->boolean('sale')) $query->where('products.in_stock', true)->where('products.price', '>', 0)->whereColumn('products.old_price', '>', 'products.price');
         if ($request->boolean('stock')) $query->where('products.in_stock', true);
+        if (($data['sort'] ?? 'recommended') !== 'recommended') $query->inStockFirst();
         switch ($data['sort'] ?? 'recommended') {
             case 'price_asc': $query->orderByRaw('CASE WHEN price IS NULL THEN 1 ELSE 0 END')->orderBy('price'); break;
             case 'price_desc': $query->orderByRaw('CASE WHEN price IS NULL THEN 1 ELSE 0 END')->orderByDesc('price'); break;
