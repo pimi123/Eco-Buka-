@@ -105,13 +105,13 @@ watch(images, () => {
         <div
           v-for="(image, index) in images.length ? images : [fallbackUrl]"
           :key="`${image}-${index}`"
-          class="grid h-full w-full shrink-0 snap-center place-items-center bg-mist"
+          class="relative aspect-[4/3] w-full shrink-0 snap-center bg-mist"
           :aria-hidden="index !== activeIndex"
         >
           <img
             :src="image"
             :alt="`${title} imazhi ${index + 1}`"
-            class="h-full w-full select-none object-contain p-3"
+            class="absolute inset-0 h-full w-full select-none object-contain p-3"
             draggable="false"
             :loading="index === 0 ? 'eager' : 'lazy'"
             :fetchpriority="index === 0 ? 'high' : 'auto'"

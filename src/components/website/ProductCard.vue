@@ -19,6 +19,7 @@ const {
   variant?: 'default' | 'showcase';
 }>();
 
+const specEntries = computed(() => Object.entries(product.specs || {}));
 const discount = computed(() => discountPercent(product.price, product.old_price));
 const imageUrl = computed(() => product.image_url || product.main_image_url || fallbackUrl);
 const isInStock = computed(() => {
@@ -63,7 +64,8 @@ const isInStock = computed(() => {
       <h3 class="mt-1.5 line-clamp-2 font-bold text-ink" :class="variant === 'showcase' ? 'text-base leading-6 sm:min-h-12 sm:text-lg' : 'text-sm leading-5 min-[390px]:text-[15px] sm:mt-2 sm:text-lg sm:leading-6'">{{ product.name }}</h3>
       <p class="mt-1.5 line-clamp-2 text-xs leading-5 text-slate-600 min-[390px]:text-[13px] sm:mt-2 sm:text-sm sm:leading-6">{{ product.short_description }}</p>
       <div v-if="showSpecs" class="mt-3 hidden flex-wrap gap-2 sm:flex">
-        <span v-for="(value, key) in product.specs" :key="key" class="rounded-md bg-mist px-2 py-1 text-xs font-semibold text-slate-600">{{ key }}: {{ value }}</span>
+        <span v-for="[key, value] in specEntries.slice(0, 4)" :key="key" class="line-clamp-2 max-w-full rounded-md bg-mist px-2 py-1 text-xs font-semibold text-slate-600">{{ key }}: {{ value }}</span>
+        <span v-if="specEntries.length > 4" class="w-full text-xs font-semibold text-ink underline underline-offset-2">Më shumë…</span>
       </div>
       <div class="mt-auto flex items-end justify-between gap-2 pt-4 sm:gap-3 sm:pt-5">
         <div class="min-w-0">
