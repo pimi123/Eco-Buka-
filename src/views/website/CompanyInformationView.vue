@@ -64,7 +64,7 @@
             </div>
             <div>
               <dt class="font-bold text-ink">Email</dt>
-              <dd><a class="hover:text-ink hover:underline" href="mailto:info@ecoflowks.com">info@ecoflowks.com</a></dd>
+              <dd><a class="hover:text-ink hover:underline" href="mailto:ecobuka.ks@gmail.com">ecobuka.ks@gmail.com</a></dd>
             </div>
             <div>
               <dt class="font-bold text-ink">Kanalet e mbështetjes</dt>

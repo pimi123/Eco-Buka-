@@ -228,7 +228,9 @@ class ContentController extends Controller
             }
 
             if ($type === 'number') {
-                if ($field === 'source_id' && (($data[$field] ?? null) === null || ($data[$field] ?? null) === '')) {
+                if ($resource === 'products' && $field === 'sort_order' && ! $request->filled($field)) {
+                    $data[$field] = $item?->sort_order ?? 0;
+                } elseif ($field === 'source_id' && (($data[$field] ?? null) === null || ($data[$field] ?? null) === '')) {
                     $data[$field] = null;
                 } else {
                     $data[$field] = (int) ($data[$field] ?? 0);
@@ -504,18 +506,31 @@ class ContentController extends Controller
             ->unique()
             ->values();
 
-        $categorySync = [];
-        foreach ($categoryIds as $index => $categoryId) {
-            $categorySync[$categoryId] = ['sort_order' => $index + 1, 'active' => true];
-        }
+        $this->syncProductGroups($item, 'categories', $categoryIds);
+        $this->syncProductGroups($item, 'collections', collect($request->input('collection_ids', []))->filter()->unique()->values());
+    }
 
-        $collectionSync = [];
-        foreach (collect($request->input('collection_ids', []))->filter()->unique()->values() as $index => $collectionId) {
-            $collectionSync[$collectionId] = ['sort_order' => $index + 1, 'active' => true];
+    private function syncProductGroups(Model $item, string $relation, $groupIds): void
+    {
+        $existing = $item->{$relation}()->get()->keyBy('id');
+        $sync = [];
+        foreach ($groupIds as $groupId) {
+            if ($group = $existing->get($groupId)) {
+                $sync[$groupId] = [
+                    'sort_order' => $group->pivot->sort_order,
+                    'active' => $group->pivot->active,
+                ];
+            } else {
+                $groupClass = $relation === 'categories' ? Category::class : Collection::class;
+                $group = $groupClass::findOrFail($groupId);
+                $products = $relation === 'categories' ? $group->assignedProducts() : $group->products();
+                $sync[$groupId] = [
+                    'sort_order' => ((int) $products->max($products->qualifyPivotColumn('sort_order'))) + 1,
+                    'active' => true,
+                ];
+            }
         }
-
-        $item->categories()->sync($categorySync);
-        $item->collections()->sync($collectionSync);
+        $item->{$relation}()->sync($sync);
     }
 
     private function syncCollectionProducts(Request $request, string $resource, Model $item): void

@@ -52,7 +52,7 @@ class ProductController extends Controller
 
     private function activeProducts()
     {
-        return Product::query()
+        return Product::query()->discountFirst()
             ->where('active', true)
             ->with(['category:id,name,slug', 'categories:id,name,slug', 'collections:id,name,slug,type'])
             ->orderBy('sort_order')

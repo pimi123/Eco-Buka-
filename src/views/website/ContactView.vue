@@ -109,7 +109,7 @@ async function submitContactMessage() {
           <p class="font-black text-ink">Kontakt i shpejtë</p>
           <a class="font-semibold hover:text-ink hover:underline" href="tel:+38345977007">Kosovë: +383 45 977 007</a>
           <a class="font-semibold hover:text-ink hover:underline" href="tel:+355688049525">Shqipëri: +355 68 804 9525</a>
-          <a class="font-semibold hover:text-ink hover:underline" href="mailto:info@ecoflowks.com">info@ecoflowks.com</a>
+          <a class="font-semibold hover:text-ink hover:underline" href="mailto:ecobuka.ks@gmail.com">ecobuka.ks@gmail.com</a>
         </div>
       </div>
 

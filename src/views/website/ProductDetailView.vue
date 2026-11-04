@@ -74,7 +74,7 @@ onMounted(() => productStore.fetchProducts());
         <p class="mt-4 text-base leading-7 text-slate-600 sm:text-lg sm:leading-8">{{ product.short_description }}</p>
         <div class="mt-6 flex flex-wrap items-end gap-3">
           <p class="text-2xl font-black sm:text-3xl">{{ money(product.price) }}</p>
-          <p v-if="product.old_price" class="text-slate-400 line-through">{{ money(product.old_price) }}</p>
+          <p v-if="isInStock && product.old_price && Number(product.old_price) > Number(product.price)" class="text-slate-400 line-through">{{ money(product.old_price) }}</p>
         </div>
         <div class="mt-7 flex flex-col gap-3 min-[420px]:flex-row min-[420px]:flex-wrap sm:mt-8">
           <label class="grid gap-1">

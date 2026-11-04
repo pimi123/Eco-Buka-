@@ -52,7 +52,7 @@
           <div class="mt-5 grid gap-3 text-sm font-semibold text-white/85">
             <a class="hover:text-white hover:underline" href="tel:+38345977007">Kosovë: +383 45 977 007</a>
             <a class="hover:text-white hover:underline" href="tel:+355688049525">Shqipëri: +355 68 804 9525</a>
-            <a class="hover:text-white hover:underline" href="mailto:info@ecoflowks.com">info@ecoflowks.com</a>
+            <a class="hover:text-white hover:underline" href="mailto:ecobuka.ks@gmail.com">ecobuka.ks@gmail.com</a>
           </div>
           <RouterLink class="mt-6 inline-flex min-h-11 items-center justify-center rounded-full bg-white px-6 py-3 text-sm font-black text-ink transition hover:bg-mist" to="/contact?purpose=return">
             Kontakto EcoBuka

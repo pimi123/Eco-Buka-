@@ -19,6 +19,7 @@ Route::get('/collections/{slug}', [CollectionController::class, 'show']);
 Route::get('/collections/{slug}/products', [CollectionController::class, 'products']);
 
 Route::get('/products', [ProductController::class, 'index']);
+Route::get('/catalog', [\App\Http\Controllers\Api\CatalogController::class, 'index']);
 Route::get('/products/featured', [ProductController::class, 'featured']);
 Route::get('/products/search', [ProductController::class, 'search']);
 Route::get('/products/category/{slug}', [ProductController::class, 'byCategory']);

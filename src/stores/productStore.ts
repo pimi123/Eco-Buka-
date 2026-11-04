@@ -1,3 +1,4 @@
+import { discountsFirst } from '../lib/discount';
 import { defineStore } from 'pinia';
 import { computed, ref } from 'vue';
 import { apiGet, hasLaravelApiConfig } from '../lib/api';
@@ -83,7 +84,7 @@ export const useProductStore = defineStore('products', () => {
   const products = ref<Product[]>([]);
   const loading = ref(false);
 
-  const activeProducts = computed(() => products.value.filter((product) => product.active));
+  const activeProducts = computed(() => discountsFirst(products.value.filter((product) => product.active)));
   const featuredProducts = computed(() => activeProducts.value.filter((product) => product.featured));
 
   async function fetchProducts(includeInactive = false) {
@@ -179,10 +180,12 @@ export const useProductStore = defineStore('products', () => {
   async function saveProduct(product: Partial<Product>) {
     const payload = cleanProductPayload(product);
     const id = payload.id || crypto.randomUUID();
-  const next = { active: true, featured: false, in_stock: true, specs: {}, ...payload, id } as Product;
+  const existing = products.value.find((item) => item.id === id);
+  const sortOrder = payload.sort_order ?? existing?.sort_order ?? Math.max(0, ...products.value.map((item) => Number(item.sort_order || 0))) + 1;
+  const next = { active: true, featured: false, in_stock: true, specs: {}, ...payload, sort_order: sortOrder, id } as Product;
     products.value = products.value.some((item) => item.id === id)
       ? products.value.map((item) => (item.id === id ? next : item))
-      : [next, ...products.value.filter((item) => item.id !== id)];
+      : [...products.value, next];
     return next;
   }
 

@@ -13,10 +13,11 @@ if (hasLaravelApiConfig && typeof document !== 'undefined') {
   }
 }
 
-export async function apiGet<T>(path: string): Promise<T> {
+export async function apiGet<T>(path: string, signal?: AbortSignal): Promise<T> {
   const base = String(apiBaseUrl).replace(/\/$/, '');
   const cleanPath = path.startsWith('/') ? path : `/${path}`;
   const response = await fetch(`${base}${cleanPath}`, {
+    signal,
     headers: { Accept: 'application/json' },
   });
 
