@@ -70,8 +70,8 @@ onBeforeUnmount(() => {
         <img :src="logoUrl" alt="EcoBuka" class="h-8 w-auto max-w-[100px] object-contain sm:h-9 sm:max-w-[150px] mr-32" />
       </RouterLink>
       <nav class="hidden items-center gap-5 text-sm font-semibold xl:flex 2xl:gap-6">
-        <RouterLink v-for="[label, to] in nav" :key="label" :to="to" class="hover:text-energy" active-class="text-energy underline decoration-2 underline-offset-8">{{ label }}</RouterLink>
-        <RouterLink to="/solutions/powerocean" class="hover:text-energy" active-class="text-energy underline decoration-2 underline-offset-8">PowerOcean</RouterLink>
+        <RouterLink v-for="[label, to] in nav" :key="label" :to="to" class="hover:text-energy" active-class="text-energy">{{ label }}</RouterLink>
+        <RouterLink to="/solutions/powerocean" class="hover:text-energy" active-class="text-energy">PowerOcean</RouterLink>
       </nav>
       <div class="hidden min-w-0 flex-1 justify-end lg:flex">
         <RouterLink to="/search">
@@ -93,10 +93,10 @@ onBeforeUnmount(() => {
         <RouterLink to="/search" class="mb-2 px-3 flex min-h-11 items-center gap-2 rounded-md text-slate-500" @click="open = false">
           <Search class="h-4 w-4" />
         </RouterLink>
-        <RouterLink v-for="[label, to] in nav" :key="label" :to="to" class="rounded-md px-3 py-3 text-base font-semibold hover:bg-mist sm:text-sm" active-class="bg-mist text-energy" @click="open = false">{{ label }}</RouterLink>
+        <RouterLink v-for="[label, to] in nav" :key="label" :to="to" class="rounded-md px-3 py-3 text-base font-semibold hover:bg-mist sm:text-sm" active-class="text-energy" @click="open = false">{{ label }}</RouterLink>
         <RouterLink
           to="/solutions/powerocean"
-          class="rounded-md px-3 py-3 text-base font-semibold hover:bg-mist sm:text-sm" active-class="bg-mist text-energy"
+          class="rounded-md px-3 py-3 text-base font-semibold hover:bg-mist sm:text-sm" active-class="text-energy"
           @click="open = false"
         >
           PowerOcean
