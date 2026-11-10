@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import { onMounted } from 'vue';
+import { apiPost } from '../../lib/api';
+import { trackPurchase } from '../../lib/metaPixel';
 import { useRoute } from 'vue-router';
 import WebsiteLayout from '../../components/layout/WebsiteLayout.vue';
 import { useSeo } from '../../lib/seo';
@@ -7,6 +10,18 @@ const route = useRoute();
 const orderNumber = String(route.query.order || '');
 const paymentStatus = String(route.query.payment || '');
 const isCash = route.query.method === 'cash';
+
+onMounted(async () => {
+  const token = typeof route.query.token === 'string' ? route.query.token : '';
+  if (isCash || !orderNumber || !token) return;
+  try {
+    // URL parameters alone are never proof of payment.
+    const purchase = await apiPost<{ id: number; total: string | number; currency: string }>(
+      '/orders/purchase-confirmation', { order_number: orderNumber, token },
+    );
+    trackPurchase(purchase);
+  } catch { /* Unverified payments must not generate a Purchase. */ }
+});
 
 useSeo({
   title: isCash ? 'Porosia u pranua' : 'Pagesa u aprovua',

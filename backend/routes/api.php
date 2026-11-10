@@ -25,6 +25,7 @@ Route::get('/products/search', [ProductController::class, 'search']);
 Route::get('/products/category/{slug}', [ProductController::class, 'byCategory']);
 Route::get('/products/{slug}', [ProductController::class, 'show']);
 Route::post('/orders', [OrderController::class, 'store'])->middleware('throttle:orders');
+Route::post('/orders/purchase-confirmation', [OrderController::class, 'purchaseConfirmation'])->middleware('throttle:orders');
 Route::get('/payments/nestpay/options', [NestPayPaymentController::class, 'options'])->middleware('throttle:orders');
 Route::post('/checkout/nestpay', [NestPayPaymentController::class, 'checkout'])->middleware('throttle:orders');
 Route::post('/orders/{order}/payments/nestpay', [NestPayPaymentController::class, 'store'])->middleware('throttle:orders');

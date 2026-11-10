@@ -3,6 +3,7 @@ import { computed, onMounted, reactive, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import WebsiteLayout from '../../components/layout/WebsiteLayout.vue';
 import { apiGet, apiPost } from '../../lib/api';
+import { trackPurchase } from '../../lib/metaPixel';
 import { deliveryCountries, municipalitiesForCountry } from '../../lib/locations';
 import { useSeo } from '../../lib/seo';
 import { useCartStore } from '../../stores/cartStore';
@@ -136,6 +137,7 @@ async function submitOrder() {
   try {
     const response = await apiPost<OrderResponse>('/orders', payload);
     if (paymentMethod.value === 'cash') {
+      trackPurchase(response);
       cartStore.clear();
       await router.push({ path: '/order-success', query: { order: response.order_number, method: 'cash' } });
       return;
