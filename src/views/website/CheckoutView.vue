@@ -250,21 +250,21 @@ async function submitOrder() {
 
           <fieldset class="grid gap-3 border-t border-line pt-5" :disabled="loading || paymentSubmitting">
             <legend class="text-lg font-black">Mënyra e pagesës</legend>
-            <label class="flex cursor-pointer items-start gap-3 rounded-lg border p-4 transition-colors has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-blue-600" :class="paymentMethod === 'card' ? 'border-blue-600 bg-blue-50 ring-1 ring-blue-600' : 'border-line'">
+            <label class="flex cursor-pointer items-center gap-3 rounded-lg border p-3 transition-colors sm:p-4 has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-blue-600" :class="paymentMethod === 'card' ? 'border-blue-600 bg-blue-50 ring-1 ring-blue-600' : 'border-line'">
               <input v-model="paymentMethod" type="radio" value="card" name="payment_method" class="sr-only">
-              <span class="flex min-w-0 flex-1 flex-wrap items-center justify-between gap-3">
+              <span class="grid min-w-0 flex-1 grid-cols-[minmax(0,1fr)_48px] items-center gap-3 sm:grid-cols-[minmax(0,1fr)_80px]">
                 <span>
-                  <strong class="block">Pagesë me kartelë</strong>
-                  <span class="mt-1 block text-sm text-slate-600">Me mundësi pagese me këste.</span>
+                  <strong class="block text-sm leading-5 sm:text-base">Pagesë me kartelë</strong>
+                  <span class="mt-1 block text-xs leading-5 text-slate-600 sm:text-sm">Me mundësi pagese me këste.</span>
                 </span>
-                <img src="/images/payments/star-card.png" alt="TEB Starcard për pagesë me këste" class="h-auto w-20 shrink-0 rounded-sm" />
+                <img src="/images/payments/star-card.png" alt="TEB Starcard për pagesë me këste" class="h-auto w-12 justify-self-end rounded-sm object-contain sm:w-20" />
               </span>
             </label>
-            <label class="flex cursor-pointer items-start gap-3 rounded-lg border p-4 transition-colors has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-blue-600" :class="paymentMethod === 'cash' ? 'border-blue-600 bg-blue-50 ring-1 ring-blue-600' : 'border-line'">
+            <label class="flex cursor-pointer items-center gap-3 rounded-lg border p-3 transition-colors sm:p-4 has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-blue-600" :class="paymentMethod === 'cash' ? 'border-blue-600 bg-blue-50 ring-1 ring-blue-600' : 'border-line'">
               <input v-model="paymentMethod" type="radio" value="cash" name="payment_method" class="sr-only">
-              <span class="flex min-w-0 flex-1 flex-wrap items-center justify-between gap-3">
-                <span><strong class="block">Para në dorë në dorëzim</strong><span class="text-sm text-slate-600">Paguaj kur ta pranosh porosinë.</span></span>
-                <img src="/images/payments/money.png" alt="Pagesë me para në dorë" class="h-10 w-15 shrink-0 object-contain" />
+              <span class="grid min-w-0 flex-1 grid-cols-[minmax(0,1fr)_48px] items-center gap-3 sm:grid-cols-[minmax(0,1fr)_80px]">
+                <span class="min-w-0"><strong class="block text-sm leading-5 sm:text-base">Para në dorë në dorëzim</strong><span class="mt-1 block text-xs leading-5 text-slate-600 sm:text-sm">Paguaj kur ta pranosh porosinë.</span></span>
+                <img src="/images/payments/money.png" alt="Pagesë me para në dorë" class="h-8 w-8 justify-self-center object-contain sm:h-10 sm:w-10" />
               </span>
             </label>
             <p v-if="fieldError('payment_method')" class="text-sm text-red-600">{{ fieldError('payment_method') }}</p>
