@@ -56,7 +56,6 @@ class ProcessNestPayResultService
             $payment->load('order');
 
             if ($payment->processed_at) {
-                \App\Models\MetaConversionEvent::where('order_id', $payment->order_id)->where('event_name', 'Purchase')->increment('duplicate_attempts');
                 return new PaymentResult(
                     $payment->status === Payment::STATUS_APPROVED,
                     'duplicate',
@@ -79,9 +78,6 @@ class ProcessNestPayResultService
             $response = $this->value($payload, 'Response');
             $procReturnCode = $this->value($payload, 'ProcReturnCode');
             $approved = $response === 'Approved' && $procReturnCode === '00';
-            if ($approved && ($amount === null || $currency === null)) {
-                return $this->markError($payment, $payload, 'missing_payment_fields', 'Signed amount and currency are required for payment confirmation.');
-            }
 
             $payment->fill([
                 'status' => $approved ? Payment::STATUS_APPROVED : $this->failureStatus($response, $procReturnCode),
@@ -102,7 +98,6 @@ class ProcessNestPayResultService
                     ]
                 ),
                 'paid_at' => $approved ? now() : null,
-                'action_source' => 'website',
                 'processed_at' => now(),
             ]);
             $payment->save();
@@ -115,7 +110,6 @@ class ProcessNestPayResultService
                     }
 
                     $this->sendOrderConfirmationAfterCommit($payment->order);
-                    app(\App\Services\Tracking\MetaConversions::class)->purchased($payment);
                 } else {
                     $this->markOrderPaymentFailed($payment);
                 }
@@ -145,7 +139,6 @@ class ProcessNestPayResultService
         $session->load('order');
 
         if ($session->processed_at) {
-            if ($session->order_id) \App\Models\MetaConversionEvent::where('order_id', $session->order_id)->where('event_name', 'Purchase')->increment('duplicate_attempts');
             $payment = $session->order?->latestPayment()->first();
 
             return new PaymentResult(
@@ -174,14 +167,6 @@ class ProcessNestPayResultService
         $response = $this->value($payload, 'Response');
         $procReturnCode = $this->value($payload, 'ProcReturnCode');
         $approved = $response === 'Approved' && $procReturnCode === '00';
-        if ($approved && ($amount === null || $currency === null || empty($session->items_snapshot))) {
-            $this->markCheckoutSessionError($session, $payload, $endpoint, 'Missing payment amount, currency or immutable item snapshot.');
-            return new PaymentResult(false, 'missing_payment_fields', null, 'Payment requires reconciliation.');
-        }
-        if ($approved && (int) round(collect($session->items_snapshot)->sum(fn ($item) => (float) $item['unit_price'] * (int) $item['quantity']) * 100) !== (int) round((float) $session->amount * 100)) {
-            $this->markCheckoutSessionError($session, $payload, $endpoint, 'Snapshot amount does not match the payment amount.');
-            return new PaymentResult(false, 'amount_mismatch', null, 'Payment requires reconciliation.');
-        }
 
         $session->fill([
             'status' => $approved ? NestPayCheckoutSession::STATUS_APPROVED : $this->checkoutFailureStatus($response, $procReturnCode),
@@ -205,7 +190,7 @@ class ProcessNestPayResultService
             return new PaymentResult(false, 'declined', null, 'Payment declined.');
         }
 
-        $order = $this->orders->create($session->order_payload, $session->items_snapshot);
+        $order = $this->orders->create($session->order_payload);
         $order->setStatus(Order::STATUS_CONFIRMED);
         $order->save();
 
@@ -217,7 +202,6 @@ class ProcessNestPayResultService
             'currency' => $session->currency,
             'currency_code' => $session->currency_code,
             'status' => Payment::STATUS_APPROVED,
-            'action_source' => 'website',
             'response' => $session->response,
             'proc_return_code' => $session->proc_return_code,
             'auth_code' => $session->auth_code,
@@ -238,7 +222,6 @@ class ProcessNestPayResultService
         $session->save();
 
         $this->sendOrderConfirmationAfterCommit($order);
-        app(\App\Services\Tracking\MetaConversions::class)->purchased($payment);
 
         return new PaymentResult(true, 'approved', $payment, 'Payment approved.');
     }
@@ -330,7 +313,7 @@ class ProcessNestPayResultService
 
     private function safeMetadata(array $payload): array
     {
-        return Arr::only($payload, ['ReturnOid', 'oid', 'Response', 'ProcReturnCode', 'AuthCode', 'HostRefNum', 'TransId', 'mdStatus', 'amount', 'currency', 'Instalment']);
+        return Arr::except($payload, ['HASH', 'hash', 'storekey', 'StoreKey', 'password', 'Password', 'cvv', 'CVV']);
     }
 
     private function sendOrderConfirmationAfterCommit(Order $order): void
@@ -347,7 +330,7 @@ class ProcessNestPayResultService
                 Log::warning('Order confirmation email could not be sent after NestPay approval.', [
                     'order_id' => $order->id,
                     'order_number' => $order->order_number,
-                    'error' => 'mail_delivery_failed',
+                    'error' => $exception->getMessage(),
                 ]);
             }
         });

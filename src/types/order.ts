@@ -8,8 +8,6 @@ export interface CartItem {
 }
 
 export interface CheckoutPayload {
-  checkout_key?: string;
-  tracking?: { marketing: boolean; consent_version: string; fbp?: string; fbc?: string };
   payment_method?: 'card' | 'cash';
   customer_name: string;
   customer_phone: string;
@@ -30,8 +28,6 @@ export interface CheckoutPayload {
 }
 
 export interface OrderResponse {
-  tracking_token: string;
-  submission_event_id: string;
   payment_method?: 'card' | 'cash';
   message: string;
   id: number;

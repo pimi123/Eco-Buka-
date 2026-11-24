@@ -47,8 +47,7 @@ const router = createRouter({
     { path: '/cookie-policy', redirect: '/politika-e-cookies' },
     { path: '/solutions/powerocean', name: 'powerocean', component: PowerOceanView },
     { path: '/contact', name: 'contact', component: ContactView },
-    { path: '/guides/zgjedhja-e-stacionit-te-energjise', name: 'energy-guide', component: () => import('../views/website/EnergyGuideView.vue') },
-    { path: '/:pathMatch(.*)*', name: 'not-found', component: () => import('../views/website/NotFoundView.vue') },
+    { path: '/:pathMatch(.*)*', redirect: '/' },
   ],
 });
 

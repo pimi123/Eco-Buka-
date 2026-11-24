@@ -27,7 +27,6 @@ class NestPayPaymentController extends Controller
         Order $order,
         InitiateNestPayPaymentService $payments,
     ): JsonResponse {
-        abort_unless(! empty($order->tracking_token) && is_string($request->input('token')) && hash_equals((string) $order->tracking_token, $request->input('token')), 403);
         $payload = $payments->initiate($order, $request->validated());
 
         return response()->json($payload);
@@ -37,9 +36,7 @@ class NestPayPaymentController extends Controller
         InitiateNestPayCheckoutRequest $request,
         InitiateNestPayCheckoutSessionService $payments,
     ): JsonResponse {
-        $data = $request->validated();
-        $data['tracking_context'] = app(\App\Services\Tracking\MetaConversions::class)->context($request);
-        $payload = $payments->initiate($data);
+        $payload = $payments->initiate($request->validated());
 
         return response()->json($payload);
     }

@@ -4,7 +4,6 @@ import { apiGet, hasLaravelApiConfig } from '../../lib/api';
 import { demoFeaturedVideoPromoBanners } from '../../lib/demoData';
 import { optimizedImageUrl } from '../../lib/responsiveImages';
 import type { HomepageBanner } from '../../types/homepage';
-import { useBackgroundVideo } from '../../lib/backgroundVideo';
 
 const fallbackUrl = '/promo/optimized/summer-sale-1280.jpg';
 
@@ -38,8 +37,6 @@ const props = withDefaults(
 const banner = ref<HomepageBanner | null>(null);
 const loading = ref(false);
 const videoFailed = ref(false);
-const videoSection = ref<HTMLElement>();
-const videoAllowed = useBackgroundVideo(videoSection);
 
 const fallbackBanner = computed(() => demoFeaturedVideoPromoBanners[0] || null);
 const activeBanner = computed(() => banner.value || fallbackBanner.value);
@@ -57,7 +54,7 @@ const content = computed(() => ({
 }));
 
 const sectionVisible = computed(() => loading.value || Boolean(content.value.heading));
-const shouldShowVideo = computed(() => Boolean(videoAllowed.value && content.value.backgroundVideoUrl && !videoFailed.value));
+const shouldShowVideo = computed(() => Boolean(content.value.backgroundVideoUrl && !videoFailed.value));
 const isExternalButton = computed(() => /^https?:\/\//i.test(content.value.buttonUrl));
 
 onMounted(async () => {
@@ -74,7 +71,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <section v-if="sectionVisible" ref="videoSection" class="bg-white py-8 sm:py-12 lg:py-14" aria-label="Promovim me video të veçuar">
+  <section v-if="sectionVisible" class="bg-white py-8 sm:py-12 lg:py-14" aria-label="Promovim me video të veçuar">
     <div class="container-shell">
       <h2 v-if="content.title" class="mb-5 text-2xl font-black leading-tight text-ink sm:text-3xl">
         {{ content.title }}

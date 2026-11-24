@@ -12,15 +12,12 @@ import {
 import { ref } from 'vue';
 import WebsiteLayout from '../../components/layout/WebsiteLayout.vue';
 import { useSeo } from '../../lib/seo';
-import { useBackgroundVideo } from '../../lib/backgroundVideo';
 
-const heroImage = '/images/powerocean/solar-home.webp';
-const systemImage = '/images/powerocean/system.webp';
-const backupImage = '/images/powerocean/family.webp';
+const heroImage = '/images/powerocean/solar-home.jpg';
+const systemImage = '/images/powerocean/system.jpg';
+const backupImage = '/images/powerocean/family.jpg';
 const heroVideoUrl = '/videos/powerocean-hero.mp4';
 const heroVideoFailed = ref(false);
-const videoSection = ref<HTMLElement>();
-const videoAllowed = useBackgroundVideo(videoSection);
 
 const phoneNumber = '+383 45 977 007';
 const phoneHref = 'tel:+38345977007';
@@ -87,10 +84,10 @@ useSeo({
 
 <template>
   <WebsiteLayout>
-    <section ref="videoSection" class="relative isolate overflow-hidden bg-ink text-white">
+    <section class="relative isolate overflow-hidden bg-ink text-white">
       <img :src="heroImage" alt="Zgjidhje solare me bateri për shtëpi" class="absolute inset-0 h-full w-full object-cover object-[57%_center] sm:object-center" fetchpriority="high" />
       <video
-        v-if="videoAllowed && !heroVideoFailed"
+        v-if="!heroVideoFailed"
         class="absolute inset-0 h-full w-full object-cover"
         :poster="heroImage"
         autoplay
@@ -283,7 +280,7 @@ useSeo({
             </div>
           </div>
           <div class="relative min-h-[280px]">
-            <img src="/images/powerocean/house1_pc.webp" alt="Sistem EcoFlow PowerOcean i instaluar pranë garazhit" class="absolute inset-0 h-full w-full object-cover object-[45%_center] opacity-80" loading="lazy" />
+            <img src="/images/powerocean/house1_pc.jpg" alt="Sistem EcoFlow PowerOcean i instaluar pranë garazhit" class="absolute inset-0 h-full w-full object-cover object-[45%_center] opacity-80" loading="lazy" />
           </div>
         </div>
       </div>

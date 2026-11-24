@@ -25,13 +25,6 @@ class InitiateNestPayPaymentService
                 ->firstOrFail();
 
             $this->assertOrderCanBePaid($order);
-            $existing = $order->payments()->where('status', Payment::STATUS_PENDING)->latest('id')->first();
-            if ($existing && ! empty($existing->request_metadata['rnd'])) {
-                if ($existing->installment_count !== $this->validatedInstallmentCount($order, $options)) throw \Illuminate\Validation\ValidationException::withMessages(['installment_count' => 'A payment is already in progress with different installments.']);
-                $parameters = $this->parameters($order, $this->formatAmount($existing->amount), $existing->provider_order_id, $existing->request_metadata['rnd'], $options);
-                $parameters['hash'] = $this->hashes->generateRequestHash($parameters);
-                return ['gateway_url' => $this->config('gateway_url'), 'parameters' => $parameters];
-            }
 
             $amount = $this->formatAmount($order->total);
             $installmentCount = $this->validatedInstallmentCount($order, $options);

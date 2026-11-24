@@ -3,8 +3,7 @@ import { computed, onMounted, reactive, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import WebsiteLayout from '../../components/layout/WebsiteLayout.vue';
 import { apiGet, apiPost } from '../../lib/api';
-import { preferences, rememberTrackingReceipt, trackingContext, trackMetaEvent } from '../../lib/metaPixel';
-import { checkoutAttempt, finishCheckoutAttempt } from '../../lib/checkoutAttempt';
+import { trackPurchase } from '../../lib/metaPixel';
 import { deliveryCountries, municipalitiesForCountry } from '../../lib/locations';
 import { useSeo } from '../../lib/seo';
 import { useCartStore } from '../../stores/cartStore';
@@ -38,14 +37,6 @@ const form = reactive({
 
 const money = (value: number) => new Intl.NumberFormat('sq-XK', { style: 'currency', currency: 'EUR' }).format(value);
 const hasItems = computed(() => cartStore.items.length > 0);
-const checkoutViewId = `checkout_${crypto.randomUUID()}`;
-watch([hasItems, () => preferences.value.marketing], () => {
-  if (hasItems.value) void trackMetaEvent('InitiateCheckout', {
-    currency: 'EUR', value: cartStore.subtotal, num_items: cartStore.count,
-    contents: cartStore.items.map(item => ({ id: String(item.product.id), quantity: item.quantity, item_price: Number(item.product.price || 0) })),
-    content_ids: cartStore.items.map(item => String(item.product.id)), content_type: 'product',
-  }, checkoutViewId);
-}, { immediate: true });
 const hasUnavailableItems = computed(() => cartStore.items.some((item) => !cartStore.isProductInStock(item.product)));
 const municipalityOptions = computed(() => municipalitiesForCountry(form.country));
 const installmentOptions = computed(() => nestPayOptions.value.allowed_installments.filter((count) => count >= 2));
@@ -144,24 +135,19 @@ async function submitOrder() {
   };
 
   try {
-    payload.checkout_key = await checkoutAttempt(payload);
-    payload.tracking = trackingContext();
     const response = await apiPost<OrderResponse>('/orders', payload);
-    rememberTrackingReceipt(response);
     if (paymentMethod.value === 'cash') {
-      finishCheckoutAttempt();
+      trackPurchase(response);
       cartStore.clear();
       await router.push({ path: '/order-success', query: { order: response.order_number, method: 'cash' } });
       return;
     }
     const payment = await apiPost<NestPayInitiationResponse>(`/orders/${response.id}/payments/nestpay`, {
-      token: response.tracking_token,
       shopurl: window.location.origin + '/checkout',
       installment_count: selectedInstallmentCount.value,
     });
 
     cartStore.clear();
-    finishCheckoutAttempt();
     submitHostedPayment(payment);
   } catch (error) {
     const response = (error as Error & { response?: { errors?: Record<string, string[]>; message?: string } }).response;
@@ -271,7 +257,7 @@ async function submitOrder() {
                   <strong class="block text-sm leading-5 sm:text-base">Pagesë me kartelë</strong>
                   <span class="mt-1 block text-xs leading-5 text-slate-600 sm:text-sm">Me mundësi pagese me këste.</span>
                 </span>
-                <img src="/images/payments/star-card.webp" alt="TEB Starcard për pagesë me këste" class="h-auto w-12 justify-self-end rounded-sm object-contain sm:w-20" />
+                <img src="/images/payments/star-card.png" alt="TEB Starcard për pagesë me këste" class="h-auto w-12 justify-self-end rounded-sm object-contain sm:w-20" />
               </span>
             </label>
             <label class="flex cursor-pointer items-center gap-3 rounded-lg border p-3 transition-colors sm:p-4 has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-blue-600" :class="paymentMethod === 'cash' ? 'border-blue-600 bg-blue-50 ring-1 ring-blue-600' : 'border-line'">

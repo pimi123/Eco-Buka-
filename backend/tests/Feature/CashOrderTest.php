@@ -21,7 +21,6 @@ class CashOrderTest extends TestCase
         ]);
 
         return [
-            'checkout_key' => (string) \Illuminate\Support\Str::uuid(),
             'customer_name' => 'Test Customer',
             'customer_phone' => '+38344111222',
             'customer_email' => 'customer@example.test',
@@ -47,7 +46,7 @@ class CashOrderTest extends TestCase
         });
         Mail::assertSentCount(1);
         $this->assertStringContainsString('E papaguar', (new OrderConfirmationMail($order))->render());
-        $this->postJson("/api/orders/{$order->id}/payments/nestpay", ['token' => $order->tracking_token])
+        $this->postJson("/api/orders/{$order->id}/payments/nestpay")
             ->assertUnprocessable()->assertJsonValidationErrors('order');
     }
 

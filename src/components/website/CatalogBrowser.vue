@@ -7,7 +7,6 @@ import { demoProducts } from '../../lib/demoData';
 import { discountsFirst, inStockFirst, isProductInStock } from '../../lib/discount';
 import type { Product } from '../../types/product';
 import ProductGrid from './ProductGrid.vue';
-import { useSeo } from '../../lib/seo';
 
 const props = defineProps<{ category?: string; collection?: string; title?: string }>();
 type Facets = { categories: { slug: string; name: string; count: number }[]; series: { name: string; count: number }[]; min: number; max: number };
@@ -20,20 +19,6 @@ const page = computed(() => Math.max(1, Number(route.query.page) || 1));
 const products = ref<Product[]>([]); const total = ref(0); const lastPage = ref(1); const loading = ref(false); const error = ref('');
 const facets = ref<Facets>({ categories: [], series: [], min: 0, max: 0 });
 const context = ref<{ name: string; description?: string }>(); const open = ref(false);
-const catalogPath = computed(() => props.category ? `/category/${props.category}` : props.collection ? `/collections/${props.collection}` : route.path);
-const catalogTitle = computed(() => context.value?.name || props.title || 'Produktet');
-useSeo({
-  title: computed(() => `${catalogTitle.value}${page.value > 1 ? ` – Faqja ${page.value}` : ''}`),
-  description: computed(() => context.value?.description || `Shfletoni ${catalogTitle.value.toLowerCase()} në EcoBuka. Krahasoni specifikimet, çmimet dhe disponueshmërinë për Kosovë dhe Shqipëri.`),
-  canonicalPath: catalogPath,
-  noindex: computed(() => Boolean(error.value)),
-});
-function pageLink(target: number) {
-  const query = { ...route.query };
-  delete query.page;
-  if (target > 1) query.page = String(target);
-  return { path: catalogPath.value, query };
-}
 const filterPanel = ref<HTMLElement>();
 let previousFocus: HTMLElement | null = null;
 let bodyOverflow: string | null = null;
@@ -86,7 +71,7 @@ async function load() {
   controller?.abort(); controller = new AbortController(); const id = ++requestId;
   const activeController = controller;
   const timeout = setTimeout(() => activeController.abort(), 15000);
-  loading.value = true; error.value = ''; context.value = undefined;
+  loading.value = true; error.value = '';
   if (min.value && max.value && Number(min.value) > Number(max.value)) { clearTimeout(timeout); error.value = 'Çmimi minimal duhet të jetë më i vogël se çmimi maksimal.'; loading.value = false; products.value = []; return; }
   try {
     const key = `${props.category || ''}|${props.collection || ''}`;
@@ -153,7 +138,7 @@ onBeforeUnmount(() => { clearTimeout(timer); controller?.abort(); unlockScroll()
         <div v-else-if="loading" class="grid grid-cols-2 gap-4 md:grid-cols-3"><div v-for="i in 6" :key="i" class="h-80 animate-pulse rounded-xl bg-mist"></div></div>
         <div v-else-if="!products.length" class="rounded-xl border border-line bg-mist px-6 py-12 text-center"><h2 class="text-xl font-bold">Nuk u gjet asnjë produkt</h2><p class="mt-2 text-sm text-slate-600">Provo një kërkim tjetër ose hiq disa filtra.</p><button type="button" class="mt-5 rounded-full bg-ink px-6 py-3 text-sm font-bold text-white" @click="clear">Pastro filtrat</button></div>
         <ProductGrid v-else :products="products" preserve-order />
-        <nav v-if="lastPage > 1 && !loading" class="mt-8 flex items-center justify-center gap-4" aria-label="Faqet e produkteve"><RouterLink v-if="page > 1" :to="pageLink(page - 1)" rel="prev" class="rounded-lg border border-line px-4 py-2 text-sm">Mbrapa</RouterLink><span v-else class="px-4 py-2 text-sm opacity-40" aria-disabled="true">Mbrapa</span><span class="text-sm">{{ page }} / {{ lastPage }}</span><RouterLink v-if="page < lastPage" :to="pageLink(page + 1)" rel="next" class="rounded-lg border border-line px-4 py-2 text-sm">Para</RouterLink><span v-else class="px-4 py-2 text-sm opacity-40" aria-disabled="true">Para</span></nav>
+        <nav v-if="lastPage > 1 && !loading" class="mt-8 flex items-center justify-center gap-4" aria-label="Faqet e produkteve"><button type="button" :disabled="page <= 1" class="rounded-lg border border-line px-4 py-2 text-sm disabled:opacity-40" @click="apply(page-1)">Mbrapa</button><span class="text-sm">{{ page }} / {{ lastPage }}</span><button type="button" :disabled="page >= lastPage" class="rounded-lg border border-line px-4 py-2 text-sm disabled:opacity-40" @click="apply(page+1)">Para</button></nav>
       </div>
     </div>
   </section>

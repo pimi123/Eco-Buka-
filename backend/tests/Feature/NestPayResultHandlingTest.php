@@ -42,7 +42,7 @@ class NestPayResultHandlingTest extends TestCase
             'currency' => '978',
         ]));
 
-        $response->assertRedirect('https://shop.example.test/order-success?payment=approved&order='.$payment->order->order_number);
+        $response->assertRedirect('https://shop.example.test/order-success?payment=approved');
 
         $payment->refresh();
         $this->assertSame(Payment::STATUS_APPROVED, $payment->status);
@@ -67,7 +67,7 @@ class NestPayResultHandlingTest extends TestCase
             'HASH' => 'invalid-hash',
         ]);
 
-        $response->assertRedirect('https://shop.example.test/payment-failed?payment=invalid_hash');
+        $response->assertRedirect('https://shop.example.test/checkout?payment=invalid_hash');
 
         $payment->refresh();
         $this->assertSame(Payment::STATUS_PENDING, $payment->status);
@@ -76,7 +76,7 @@ class NestPayResultHandlingTest extends TestCase
 
     public function test_it_processes_declined_response(): void
     {
-        [$order, $payment] = $this->pendingPayment();
+        [, $payment] = $this->pendingPayment();
 
         $this->post('/api/payments/nestpay/failure', $this->signedPayload([
             'ReturnOid' => $payment->provider_order_id,
@@ -85,7 +85,7 @@ class NestPayResultHandlingTest extends TestCase
             'ErrMsg' => 'Declined by issuer',
             'amount' => '549.90',
             'currency' => '978',
-        ]))->assertRedirect('https://shop.example.test/payment-failed?payment=declined&order='.$payment->order->order_number);
+        ]))->assertRedirect('https://shop.example.test/checkout?payment=declined');
 
         $payment->refresh();
         $this->assertSame(Payment::STATUS_DECLINED, $payment->status);
@@ -107,7 +107,7 @@ class NestPayResultHandlingTest extends TestCase
             'ErrMsg' => 'Gateway error',
             'amount' => '549.90',
             'currency' => '978',
-        ]))->assertRedirect('https://shop.example.test/payment-failed?payment=declined&order='.$payment->order->order_number);
+        ]))->assertRedirect('https://shop.example.test/checkout?payment=declined');
 
         $payment->refresh();
         $this->assertSame(Payment::STATUS_ERROR, $payment->status);
@@ -126,7 +126,7 @@ class NestPayResultHandlingTest extends TestCase
             'ProcReturnCode' => '00',
             'amount' => '549.90',
             'currency' => '978',
-        ]))->assertRedirect('https://shop.example.test/payment-failed?payment=incorrect_return_oid');
+        ]))->assertRedirect('https://shop.example.test/checkout?payment=incorrect_return_oid');
 
         $this->assertSame(Payment::STATUS_PENDING, $payment->fresh()->status);
     }
@@ -144,11 +144,11 @@ class NestPayResultHandlingTest extends TestCase
         ]);
 
         $this->post('/api/payments/nestpay/success', $payload)
-            ->assertRedirect('https://shop.example.test/order-success?payment=approved&order='.$payment->order->order_number);
+            ->assertRedirect('https://shop.example.test/order-success?payment=approved');
         $firstProcessedAt = $payment->fresh()->processed_at;
 
         $this->post('/api/payments/nestpay/success', $payload)
-            ->assertRedirect('https://shop.example.test/order-success?payment=duplicate&order='.$payment->order->order_number);
+            ->assertRedirect('https://shop.example.test/order-success?payment=duplicate');
 
         $this->assertEquals($firstProcessedAt, $payment->fresh()->processed_at);
         $this->assertSame(1, Payment::query()->count());

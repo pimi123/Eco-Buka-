@@ -12,20 +12,6 @@ use Illuminate\Validation\Rule;
 
 class OrderController extends Controller
 {
-    public function confirmPayment(Request $request, Order $order, \App\Services\Payments\ConfirmCashPayment $payments)
-    {
-        $data = $request->validate([
-            'amount' => ['required', 'numeric', 'decimal:0,2', 'min:0.01'],
-            'currency' => ['required', 'in:EUR'],
-            'received_at' => ['required', 'date', 'before_or_equal:now'],
-            'reference' => ['required', 'string', 'max:100'],
-            'action_source' => ['required', 'in:other,physical_store'],
-            'funds_received' => ['accepted'],
-        ]);
-        $payments->confirm($order, $data, $request->user()->id);
-        return back()->with('status', 'Payment receipt recorded. Saving fulfillment status never records payment.');
-    }
-
     public function index(Request $request)
     {
         $query = Order::query()
@@ -79,7 +65,8 @@ public function update(Request $request, Order $order)
                 'order_id' => $order->id,
                 'order_number' => $order->order_number,
                 'status' => $order->status,
-                'error' => 'mail_delivery_failed',
+                'customer_email' => $order->customer_email,
+                'error' => $e->getMessage(),
             ]);
         }
     }

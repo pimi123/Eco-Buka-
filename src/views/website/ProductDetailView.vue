@@ -1,50 +1,16 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, ref, watch } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
 import WebsiteLayout from '../../components/layout/WebsiteLayout.vue';
 import ProductGallerySlider from '../../components/website/ProductGallerySlider.vue';
 import { useSeo } from '../../lib/seo';
 import { useCartStore } from '../../stores/cartStore';
 import { useProductStore } from '../../stores/productStore';
-import type { Product } from '../../types/product';
-import { productStructuredData } from '../../lib/productSeo';
-import { preferences, productEventData, trackMetaEvent } from '../../lib/metaPixel';
 
 const route = useRoute();
 const productStore = useProductStore();
 const cartStore = useCartStore();
-const product = ref<Product | null>(null);
-const productViewId = `view_${crypto.randomUUID()}`;
-watch([product, () => preferences.value.marketing], () => {
-  if (product.value) void trackMetaEvent('ViewContent', productEventData(product.value), `${productViewId}_${product.value.id}`);
-});
-const loading = ref(true);
-const loadError = ref(false);
-const notFound = ref(false);
-let controller: AbortController | undefined;
-async function loadProduct() {
-  controller?.abort();
-  const request = new AbortController();
-  controller = request;
-  product.value = null;
-  loading.value = true;
-  loadError.value = false;
-  notFound.value = false;
-  quantity.value = 1;
-  addedMessage.value = '';
-  try {
-    const result = await productStore.fetchProduct(String(route.params.slug), request.signal);
-    if (request.signal.aborted) return;
-    product.value = result;
-    notFound.value = !result;
-  } catch (error) {
-    if (request.signal.aborted) return;
-    notFound.value = (error as { status?: number }).status === 404;
-    loadError.value = !notFound.value;
-  } finally {
-    if (!request.signal.aborted) loading.value = false;
-  }
-}
+const product = computed(() => productStore.activeProducts.find((item) => item.slug === route.params.slug));
 const money = (value?: number | null) => (value ? new Intl.NumberFormat('sq-XK', { style: 'currency', currency: 'EUR' }).format(value) : 'Çmimi sipas kërkesës');
 const quantity = ref(1);
 const addedMessage = ref('');
@@ -84,24 +50,16 @@ const includedEntries = computed(() => detailEntries(product.value?.included_ite
 const downloadEntries = computed(() => detailEntries(product.value?.downloads));
 
 useSeo({
-  type: 'product',
-  image: computed(() => product.value?.image_url),
-  noindex: computed(() => notFound.value || loadError.value),
-  structuredData: computed(() => product.value ? productStructuredData(product.value, import.meta.env.VITE_SITE_URL || window.location.origin) : null),
   title: computed(() => product.value?.name || 'Produkt'),
   description: computed(() => product.value?.short_description || product.value?.description || 'Shiko detajet, specifikat, çmimin dhe opsionet për ofertë të produktit EcoBuka.'),
   canonicalPath: computed(() => `/products/${String(route.params.slug || '')}`),
 });
 
-watch(() => route.params.slug, loadProduct, { immediate: true });
-onBeforeUnmount(() => controller?.abort());
+onMounted(() => productStore.fetchProducts());
 </script>
 
 <template>
   <WebsiteLayout>
-    <section v-if="loading" class="container-shell py-12" aria-live="polite" aria-busy="true"><p>Duke ngarkuar produktin…</p></section>
-    <section v-else-if="notFound" class="container-shell py-12"><h1 class="text-3xl font-black">Produkti nuk u gjet</h1><RouterLink class="btn-primary mt-6" to="/products">Shiko produktet</RouterLink></section>
-    <section v-else-if="loadError" class="container-shell py-12" role="alert"><p>Produkti nuk mund të ngarkohet. Ju lutemi provoni përsëri.</p><button type="button" class="btn-primary mt-6" @click="loadProduct">Provo përsëri</button></section>
     <section v-if="product" class="container-shell grid gap-7 py-8 sm:gap-8 sm:py-12 lg:grid-cols-[1.05fr_0.95fr] lg:gap-10">
       <ProductGallerySlider :title="product.name" :main-image="product.image_url" :gallery="product.gallery" />
       <div class="min-w-0">

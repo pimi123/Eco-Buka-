@@ -126,7 +126,7 @@ const privacyItems = [
   {
     label: 'Cookies',
     title: 'Cookies dhe localStorage',
-    description: 'Ruajtja e domosdoshme mbështet shportën dhe checkout-in. Me pëlqim për marketing, identifikuesit Meta, IP-ja dhe agjenti i shfletuesit mund të lidhen me porosinë për matjen e saj dhe të pagesës së konfirmuar. Email-i dhe telefoni i vlefshëm normalizohen dhe hash-ohen para dërgimit te Meta. Konteksti dhe payload-et ruhen të enkriptuara deri në 30 ditë; përmbledhjet financiare nuk përmbajnë këtë payload. Preferencat mund t’i ndryshoni te paneli i cookies; për kërkesa nga pajisje të tjera ose të dhëna të dërguara më parë na kontaktoni.',
+    description: 'Faqja përdor cookies të domosdoshme dhe localStorage për funksione si shporta, sesioni dhe siguria. Cookies analitike ose marketingu përdoren vetëm nëse aktivizohen dhe merret pëlqimi i nevojshëm.',
   },
   {
     label: 'Palët e treta',

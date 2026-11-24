@@ -17,8 +17,6 @@ class OrderApiTest extends TestCase
         $product = $this->product(['price' => 249.99]);
 
         $response = $this->postJson('/api/orders', [
-            'checkout_key' => (string) \Illuminate\Support\Str::uuid(),
-            'country' => 'Kosove', 'municipality' => 'Prishtina', 'policy_accepted' => true,
             'customer_name' => 'Eco Customer',
             'customer_phone' => '+38344111222',
             'customer_email' => 'customer@example.com',
@@ -53,10 +51,7 @@ class OrderApiTest extends TestCase
         $product = $this->product(['price' => 100]);
 
         $response = $this->postJson('/api/orders', [
-            'checkout_key' => (string) \Illuminate\Support\Str::uuid(),
-            'country' => 'Kosove', 'municipality' => 'Prishtina', 'policy_accepted' => true,
             'customer_name' => 'Price Test',
-            'customer_email' => 'price@example.test',
             'customer_phone' => '+38344111222',
             'delivery_address' => 'Main Street 12',
             'city' => 'Prishtina',
@@ -74,8 +69,6 @@ class OrderApiTest extends TestCase
         $product = $this->product();
 
         $this->postJson('/api/orders', [
-            'checkout_key' => (string) \Illuminate\Support\Str::uuid(),
-            'country' => 'Kosove', 'municipality' => 'Prishtina', 'policy_accepted' => true,
             'customer_phone' => '+38344111222',
             'delivery_address' => 'Main Street 12',
             'city' => 'Prishtina',
@@ -91,10 +84,7 @@ class OrderApiTest extends TestCase
         $product = $this->product(['active' => false]);
 
         $this->postJson('/api/orders', [
-            'checkout_key' => (string) \Illuminate\Support\Str::uuid(),
-            'country' => 'Kosove', 'municipality' => 'Prishtina', 'policy_accepted' => true,
             'customer_name' => 'Inactive Test',
-            'customer_email' => 'inactive@example.test',
             'customer_phone' => '+38344111222',
             'delivery_address' => 'Main Street 12',
             'city' => 'Prishtina',
