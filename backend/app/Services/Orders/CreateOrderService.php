@@ -5,6 +5,9 @@ namespace App\Services\Orders;
 use App\Mail\OrderConfirmationMail;
 use App\Models\Order;
 use App\Models\Product;
+use App\Models\CheckoutAttempt;
+use App\Services\Tracking\MetaConversions;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -13,10 +16,24 @@ use Illuminate\Validation\ValidationException;
 
 class CreateOrderService
 {
-    public function create(array $data): Order
+    public function create(array $data, ?array $paidSnapshot = null): Order
     {
-        return DB::transaction(function () use ($data): Order {
+        return DB::transaction(function () use ($data, $paidSnapshot): Order {
+            $attempt = null;
+            if (! empty($data['checkout_key'])) {
+                $hash = hash('sha256', json_encode(Arr::sortRecursive(Arr::except($data, ['checkout_key', 'tracking', 'tracking_context'])), JSON_THROW_ON_ERROR));
+                CheckoutAttempt::firstOrCreate(['key' => $data['checkout_key']], ['payload_hash' => $hash]);
+                $attempt = CheckoutAttempt::whereKey($data['checkout_key'])->lockForUpdate()->firstOrFail();
+                if (! hash_equals($attempt->payload_hash, $hash)) throw ValidationException::withMessages(['checkout_key' => 'This checkout attempt has already been used with different data.']);
+                if ($attempt->order_id) {
+                    $existing = Order::whereKey($attempt->order_id)->lockForUpdate()->firstOrFail();
+                    // A retry must not retain old marketing permission after a refusal.
+                    if (($data['tracking_context']['marketing'] ?? false) !== true) app(MetaConversions::class)->withdraw($existing);
+                    return $existing->load('items');
+                }
+            }
             $order = Order::create([
+                'tracking_context' => $data['tracking_context'] ?? ['marketing' => false],
                 'payment_method' => $data['payment_method'] ?? Order::PAYMENT_CARD,
                 'order_number' => $this->nextOrderNumber(),
                 'tracking_token' => $this->trackingToken(),
@@ -40,8 +57,7 @@ class CreateOrderService
             $productIds = collect($data['items'])->pluck('product_id')->unique()->values();
             $products = Product::query()
                 ->whereIn('id', $productIds)
-                ->where('active', true)
-                ->where('in_stock', true)
+                ->when($paidSnapshot === null, fn ($query) => $query->where('active', true)->where('in_stock', true))
                 ->with('category:id,name,slug')
                 ->lockForUpdate()
                 ->get()
@@ -49,33 +65,34 @@ class CreateOrderService
 
             foreach ($data['items'] as $index => $item) {
                 $product = $products->get((int) $item['product_id']);
-                if (! $product) {
+                $frozen = $paidSnapshot !== null ? collect($paidSnapshot)->firstWhere('product_id', (int) $item['product_id']) : null;
+                if ((! $product && $paidSnapshot === null) || ($paidSnapshot !== null && ! $frozen)) {
                     throw ValidationException::withMessages([
                         "items.{$index}.product_id" => 'This product is currently out of stock.',
                     ]);
                 }
 
                 $quantity = (int) $item['quantity'];
-                $unitCents = (int) round(((float) ($product->price ?? 0)) * 100);
+                $unitCents = (int) round(((float) ($frozen['unit_price'] ?? $product?->price ?? 0)) * 100);
                 $lineCents = $unitCents * $quantity;
                 $subtotalCents += $lineCents;
 
                 $order->items()->create([
-                    'product_id' => $product->id,
-                    'product_name' => $product->name,
+                    'product_id' => $product?->id,
+                    'product_name' => $frozen['name'] ?? $product->name,
                     'quantity' => $quantity,
                     'unit_price' => $unitCents / 100,
                     'line_total' => $lineCents / 100,
                     'selected_options' => $item['selected_options'] ?? null,
                     'product_snapshot' => [
-                        'id' => $product->id,
-                        'name' => $product->name,
-                        'slug' => $product->slug,
-                        'price' => $product->price,
-                        'old_price' => $product->old_price,
-                        'image_url' => $product->main_image_url,
-                        'category' => $product->category?->name,
-                        'specs' => $product->specs,
+                        'id' => $item['product_id'],
+                        'name' => $frozen['name'] ?? $product?->name,
+                        'slug' => $frozen['slug'] ?? $product?->slug,
+                        'price' => $unitCents / 100,
+                        'old_price' => $paidSnapshot === null ? $product?->old_price : null,
+                        'image_url' => $product?->main_image_url,
+                        'category' => $frozen['category'] ?? $product?->category?->name,
+                        'specs' => $product?->specs,
                     ],
                 ]);
             }
@@ -83,6 +100,8 @@ class CreateOrderService
             $order->subtotal = $subtotalCents / 100;
             $order->total = ($subtotalCents / 100) + (float) $order->delivery_fee;
             $order->save();
+            $attempt?->update(['order_id' => $order->id]);
+            app(MetaConversions::class)->submitted($order);
 
             if ($order->payment_method === Order::PAYMENT_CASH) {
                 DB::afterCommit(function () use ($order): void {
@@ -91,7 +110,7 @@ class CreateOrderService
                     } catch (\Throwable $exception) {
                         Log::warning('Cash order confirmation email could not be sent.', [
                             'order_id' => $order->id,
-                            'error' => $exception->getMessage(),
+                            'error' => 'mail_delivery_failed',
                         ]);
                     }
                 });

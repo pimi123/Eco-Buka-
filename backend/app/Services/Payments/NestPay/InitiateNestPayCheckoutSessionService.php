@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use RuntimeException;
+use App\Models\CheckoutAttempt;
+use Illuminate\Support\Arr;
 
 class InitiateNestPayCheckoutSessionService
 {
@@ -20,12 +22,26 @@ class InitiateNestPayCheckoutSessionService
     public function initiate(array $checkoutData): array
     {
         return DB::transaction(function () use ($checkoutData): array {
+            if (! empty($checkoutData['checkout_key'])) {
+                $hash = hash('sha256', json_encode(Arr::sortRecursive(Arr::except($checkoutData, ['checkout_key', 'tracking', 'tracking_context'])), JSON_THROW_ON_ERROR));
+                CheckoutAttempt::firstOrCreate(['key' => $checkoutData['checkout_key']], ['payload_hash' => $hash]);
+                $attempt = CheckoutAttempt::whereKey($checkoutData['checkout_key'])->lockForUpdate()->firstOrFail();
+                if (! hash_equals($attempt->payload_hash, $hash) || $attempt->order_id) throw ValidationException::withMessages(['checkout_key' => 'This checkout attempt is already accepted or has different data.']);
+                $existing = NestPayCheckoutSession::where('checkout_key', $checkoutData['checkout_key'])->lockForUpdate()->first();
+                if ($existing) {
+                    if ($existing->processed_at) throw ValidationException::withMessages(['checkout_key' => 'This payment attempt has already been processed.']);
+                    $parameters = $this->parameters($existing, $existing->request_metadata['rnd'], $checkoutData);
+                    $parameters['hash'] = $this->hashes->generateRequestHash($parameters);
+                    return ['gateway_url' => $this->config('gateway_url'), 'parameters' => $parameters];
+                }
+            }
             [$amount, $itemsSnapshot] = $this->checkoutTotal($checkoutData);
             $installmentCount = $this->validatedInstallmentCount($amount, $checkoutData);
             $oid = $this->generateOid();
             $rnd = Str::random(20);
 
             $session = NestPayCheckoutSession::create([
+                'checkout_key' => $checkoutData['checkout_key'] ?? null,
                 'provider' => Payment::PROVIDER_NESTPAY,
                 'provider_order_id' => $oid,
                 'idempotency_key' => Payment::PROVIDER_NESTPAY.':checkout:'.$oid,

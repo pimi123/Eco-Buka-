@@ -70,7 +70,12 @@ class Product extends Model
         'sort_order' => 'integer',
     ];
 
-    protected $appends = ['main_image_url', 'image_url', 'gallery_image_urls'];
+    protected $appends = ['main_image_url', 'image_url', 'gallery_image_urls', 'image_srcset'];
+
+    public function getImageSrcsetAttribute(): ?string
+    {
+        return app(\App\Services\ProductImageVariants::class)->srcset($this->main_image);
+    }
 
     public function category(): BelongsTo
     {

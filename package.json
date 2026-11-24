@@ -6,6 +6,10 @@
   "scripts": {
     "dev": "vite --host 127.0.0.1",
     "build": "vue-tsc -b && vite build",
+    "build:seo": "npm run build && node scripts/prerender.mjs",
+    "check:seo": "node scripts/check-seo.mjs",
+    "check:meta": "node scripts/check-meta-tracking.mjs",
+    "check:hero": "node scripts/check-hero-loading.mjs",
     "preview": "vite preview --host 127.0.0.1"
   },
   "dependencies": {
@@ -17,6 +21,7 @@
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.1.4",
     "autoprefixer": "^10.4.20",
+    "playwright": "^1.65.0",
     "postcss": "^8.4.49",
     "tailwindcss": "^3.4.15",
     "typescript": "^5.6.3",

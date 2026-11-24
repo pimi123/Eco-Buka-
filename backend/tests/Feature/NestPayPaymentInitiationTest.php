@@ -41,6 +41,7 @@ class NestPayPaymentInitiationTest extends TestCase
         $order = $this->order(['total' => 549.90]);
 
         $response = $this->postJson("/api/orders/{$order->id}/payments/nestpay", [
+            'token' => $order->tracking_token,
             'amount' => '1.00',
         ]);
 
@@ -107,6 +108,7 @@ class NestPayPaymentInitiationTest extends TestCase
         $order = $this->order(['total' => 549.90]);
 
         $response = $this->postJson("/api/orders/{$order->id}/payments/nestpay", [
+            'token' => $order->tracking_token,
             'installment_count' => 6,
         ]);
 
@@ -123,6 +125,7 @@ class NestPayPaymentInitiationTest extends TestCase
         $order = $this->order(['total' => 549.90]);
 
         $this->postJson("/api/orders/{$order->id}/payments/nestpay", [
+            'token' => $order->tracking_token,
             'installment_count' => 6,
         ])
             ->assertUnprocessable()
@@ -140,6 +143,7 @@ class NestPayPaymentInitiationTest extends TestCase
         $order = $this->order(['total' => 549.90]);
 
         $this->postJson("/api/orders/{$order->id}/payments/nestpay", [
+            'token' => $order->tracking_token,
             'installment_count' => 12,
         ])
             ->assertUnprocessable()
@@ -157,6 +161,7 @@ class NestPayPaymentInitiationTest extends TestCase
         $order = $this->order(['subtotal' => 80.00, 'total' => 80.00]);
 
         $this->postJson("/api/orders/{$order->id}/payments/nestpay", [
+            'token' => $order->tracking_token,
             'installment_count' => 3,
         ])
             ->assertUnprocessable()
@@ -175,7 +180,7 @@ class NestPayPaymentInitiationTest extends TestCase
             'status' => Payment::STATUS_PENDING,
         ]);
 
-        $response = $this->postJson("/api/orders/{$order->id}/payments/nestpay");
+        $response = $this->postJson("/api/orders/{$order->id}/payments/nestpay", ['token' => $order->tracking_token]);
 
         $response->assertOk();
 
@@ -191,7 +196,7 @@ class NestPayPaymentInitiationTest extends TestCase
             'cancelled_at' => now(),
         ]);
 
-        $this->postJson("/api/orders/{$order->id}/payments/nestpay")
+        $this->postJson("/api/orders/{$order->id}/payments/nestpay", ['token' => $order->tracking_token])
             ->assertUnprocessable()
             ->assertJsonValidationErrors(['order']);
     }
@@ -208,7 +213,7 @@ class NestPayPaymentInitiationTest extends TestCase
             'status' => Payment::STATUS_APPROVED,
         ]);
 
-        $this->postJson("/api/orders/{$order->id}/payments/nestpay")
+        $this->postJson("/api/orders/{$order->id}/payments/nestpay", ['token' => $order->tracking_token])
             ->assertUnprocessable()
             ->assertJsonValidationErrors(['order']);
     }
@@ -217,6 +222,7 @@ class NestPayPaymentInitiationTest extends TestCase
     {
         return Order::create([
             'order_number' => 'ORD-20260916-'.str_pad((string) random_int(1, 9999), 4, '0', STR_PAD_LEFT),
+            'tracking_token' => 'ord_test_only',
             'customer_name' => 'Eco Buka Customer',
             'customer_phone' => '+38345977007',
             'customer_email' => 'customer@example.test',

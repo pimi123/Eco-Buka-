@@ -2,6 +2,7 @@ import { defineStore } from 'pinia';
 import { computed, ref } from 'vue';
 import type { CartItem } from '../types/order';
 import type { Product } from '../types/product';
+import { productEventData, trackMetaEvent } from '../lib/metaPixel';
 
 const STORAGE_KEY = 'eco-buka-cart';
 type SelectedOptions = Record<string, string>;
@@ -63,6 +64,7 @@ export const useCartStore = defineStore('cart', () => {
       items.value.push({ key, product, quantity: safeQuantity, selected_options: selectedOptions });
     }
     persist();
+    void trackMetaEvent('AddToCart', productEventData(product, safeQuantity));
   }
 
   function updateQuantity(key: string, quantity: number) {

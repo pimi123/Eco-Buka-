@@ -9,6 +9,7 @@ use Illuminate\Support\Carbon;
 
 class Order extends Model
 {
+    protected $hidden = ['tracking_context', 'tracking_token'];
     public const PAYMENT_CARD = 'card';
     public const PAYMENT_CASH = 'cash';
     public const STATUS_PENDING = 'pending';
@@ -29,6 +30,7 @@ class Order extends Model
 
     protected $fillable = [
         'payment_method',
+        'tracking_context',
         'order_number',
         'tracking_token',
         'customer_name',
@@ -56,6 +58,7 @@ class Order extends Model
     ];
 
     protected $casts = [
+        'tracking_context' => 'encrypted:array',
         'subtotal' => 'decimal:2',
         'delivery_fee' => 'decimal:2',
         'total' => 'decimal:2',

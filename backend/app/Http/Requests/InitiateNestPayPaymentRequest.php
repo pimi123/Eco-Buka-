@@ -14,6 +14,7 @@ class InitiateNestPayPaymentRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'token' => ['required', 'string', 'max:255'],
             'shopurl' => ['nullable', 'url', 'max:2048'],
             'installment_count' => ['nullable', 'integer', 'min:2', 'max:60'],
         ];

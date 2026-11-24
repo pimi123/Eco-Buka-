@@ -58,7 +58,7 @@ function mapLaravelProduct(product: LaravelProduct): Product {
     ...product,
     id: String(product.id),
     category_id: product.category_id ? String(product.category_id) : null,
-    category: typeof product.category === 'object' ? product.category.name : product.category,
+    category: typeof product.category === 'object' ? product.category?.name : product.category,
     categories: product.categories?.map((category) => ({ ...category, id: String(category.id) })) || [],
     collections: product.collections?.map((collection) => ({ ...collection, id: String(collection.id) })) || [],
     collection_ids: product.collections?.map((collection) => String(collection.id)) || [],
@@ -96,12 +96,21 @@ export const useProductStore = defineStore('products', () => {
         loading.value = false;
         return;
       } catch {
-        // Fall through to demo content so the storefront stays usable offline.
+        products.value = [];
+        loading.value = false;
+        return;
       }
     }
 
     products.value = includeInactive ? demoProducts : demoProducts.filter((product) => product.active);
     loading.value = false;
+  }
+
+  async function fetchProduct(slug: string, signal?: AbortSignal): Promise<Product | null> {
+    if (hasLaravelApiConfig) {
+      return mapLaravelProduct(await apiGet<LaravelProduct>(`/products/${encodeURIComponent(slug)}`, signal));
+    }
+    return demoProducts.find((item) => item.active && item.slug === slug) || null;
   }
 
   async function fetchProductsByCategory(slug: string, page = 1, perPage = 24): Promise<ProductListResult> {
@@ -197,5 +206,5 @@ export const useProductStore = defineStore('products', () => {
     return saveProduct({ ...product, active: !product.active });
   }
 
-  return { products, activeProducts, featuredProducts, loading, fetchProducts, fetchProductsByCategory, fetchProductsByCollection, saveProduct, deleteProduct, toggleActive };
+  return { products, activeProducts, featuredProducts, loading, fetchProducts, fetchProduct, fetchProductsByCategory, fetchProductsByCollection, saveProduct, deleteProduct, toggleActive };
 });

@@ -22,6 +22,12 @@ class StoreOrderRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'checkout_key' => ['required', 'uuid'],
+            'tracking' => ['sometimes', 'array:marketing,consent_version,fbp,fbc'],
+            'tracking.marketing' => ['required_with:tracking', 'boolean'],
+            'tracking.consent_version' => ['nullable', 'string', 'max:40'],
+            'tracking.fbp' => ['nullable', 'string', 'max:255'],
+            'tracking.fbc' => ['nullable', 'string', 'max:500'],
             'payment_method' => ['sometimes', 'required', 'in:card,cash'],
             'customer_name' => ['required', 'string', 'max:255'],
             'customer_phone' => ['required', 'string', 'max:50'],

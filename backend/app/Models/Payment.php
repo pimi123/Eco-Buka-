@@ -25,6 +25,8 @@ class Payment extends Model
 
     protected $fillable = [
         'order_id',
+        'action_source',
+        'confirmed_by',
         'provider',
         'provider_order_id',
         'amount',

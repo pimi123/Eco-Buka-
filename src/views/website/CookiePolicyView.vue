@@ -16,7 +16,7 @@
 
     <section class="container-shell py-10 sm:py-12 lg:py-14">
       <div class="rounded-lg border border-emerald-100 bg-emerald-50 p-4 text-sm font-semibold leading-6 text-emerald-950 sm:p-5">
-        Aktualisht EcoBuka përdor cookies dhe ruajtje lokale të domosdoshme për funksionimin e faqes, shportës, sigurinë dhe ruajtjen e zgjedhjeve bazë.
+        EcoBuka përdor ruajtje të domosdoshme për shportën, checkout-in dhe zgjedhjet e privatësisë. Google Analytics dhe Meta aktivizohen vetëm sipas zgjedhjeve tuaja në panelin e cookies. Refuzimi nuk pengon porosinë ose pagesën.
       </div>
 
       <div class="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3">

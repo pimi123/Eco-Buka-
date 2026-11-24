@@ -4,6 +4,7 @@ import { computed } from 'vue';
 import ProductPrice from './ProductPrice.vue';
 import { discountPercent } from '../../lib/discount';
 import type { Product } from '../../types/product';
+import { optimizedImageUrl, responsiveImageSet } from '../../lib/responsiveImages';
 
 const fallbackUrl = '/promo/optimized/summer-sale-1280.jpg';
 
@@ -21,7 +22,7 @@ const {
 
 const specEntries = computed(() => Object.entries(product.specs || {}));
 const discount = computed(() => discountPercent(product.price, product.old_price));
-const imageUrl = computed(() => product.image_url || product.main_image_url || fallbackUrl);
+const imageUrl = computed(() => optimizedImageUrl(product.image_url || product.main_image_url || fallbackUrl) || fallbackUrl);
 const isInStock = computed(() => {
   const stockValue = product.in_stock as unknown;
   return stockValue !== false && stockValue !== 0 && stockValue !== '0';
@@ -44,6 +45,7 @@ const isInStock = computed(() => {
     >
       <img
         :src="imageUrl"
+        :srcset="product.image_srcset || responsiveImageSet(imageUrl)"
         :alt="product.name"
         class="h-full w-full transition duration-500 group-hover:scale-105"
         :class="variant === 'showcase' ? 'object-contain p-5 sm:p-7' : 'object-contain p-3 sm:p-5'"

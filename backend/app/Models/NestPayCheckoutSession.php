@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class NestPayCheckoutSession extends Model
 {
+    protected $table = 'nestpay_checkout_sessions';
     public const STATUS_PENDING = 'pending';
     public const STATUS_APPROVED = 'approved';
     public const STATUS_DECLINED = 'declined';
@@ -15,6 +16,7 @@ class NestPayCheckoutSession extends Model
 
     protected $fillable = [
         'order_id',
+        'checkout_key',
         'provider',
         'provider_order_id',
         'idempotency_key',

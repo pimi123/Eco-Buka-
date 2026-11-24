@@ -4,27 +4,11 @@ import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import { apiGet, hasLaravelApiConfig } from '../../lib/api';
 import { optimizedImageUrl } from '../../lib/responsiveImages';
 import type { HomepageBanner } from '../../types/homepage';
+import { takeInitialHeroSlides, type HeroSlide } from '../../lib/heroBannerBootstrap';
 
 const deltaHeroUrl = '/promo/optimized/delta-max-series-1280.jpg';
 const portableHeroUrl = '/promo/optimized/delta-classic-1280.jpg';
 const solarHeroUrl = '/promo/optimized/summer-sale-1280.jpg';
-
-interface HeroSlide {
-  id: string;
-  eyebrow: string;
-  title: string;
-  subtitle: string;
-  primaryButtonText: string;
-  primaryButtonLink: string;
-  secondaryButtonText?: string;
-  secondaryButtonLink?: string;
-  image: string;
-  mobileImage?: string;
-  imageAlt: string;
-  overlayStyle: string;
-  textColor: string;
-  alignment: 'left' | 'center';
-}
 
 const fallbackSlides: HeroSlide[] = [
   {
@@ -78,10 +62,20 @@ const activeIndex = ref(0);
 const isPaused = ref(false);
 const isMobileViewport = ref(false);
 const touchStartX = ref<number | null>(null);
-const slides = ref<HeroSlide[]>(fallbackSlides);
+const initialSlides = takeInitialHeroSlides();
+const slides = ref<HeroSlide[]>(initialSlides.length ? initialSlides : hasLaravelApiConfig ? [] : fallbackSlides);
+const loading = ref(hasLaravelApiConfig && !initialSlides.length);
+const visitedSlides = ref(new Set([0]));
+const settledImages = ref(new Set<string>());
+const failedImages = new Set<string>();
+const pendingIndex = ref<number | null>(null);
+const imagePending = computed(() => Boolean(activeSlide.value && !settledImages.value.has(activeSlide.value.id)));
+const request = new AbortController();
+const requestTimeout = window.setTimeout(() => request.abort(), 10000);
+const preloadLinks: HTMLLinkElement[] = [];
 let autoplayId: number | undefined;
 
-const activeSlide = computed(() => slides.value[activeIndex.value] || fallbackSlides[0]);
+const activeSlide = computed(() => slides.value[activeIndex.value]);
 
 function bannerOverlay(banner: HomepageBanner) {
   return banner.text_color === 'dark'
@@ -103,8 +97,8 @@ function mapBannerToSlide(banner: HomepageBanner): HeroSlide {
     primaryButtonLink: banner.button_link || '/products',
     secondaryButtonText: banner.second_button_text || 'Shiko produktet',
     secondaryButtonLink: banner.second_button_link || '/products',
-    image: optimizedImageUrl(banner.background_image_url, 'desktop') || fallbackSlides[0].image,
-    mobileImage: optimizedImageUrl(banner.mobile_background_image_url || banner.background_image_url, 'mobile') || fallbackSlides[0].image,
+    image: optimizedImageUrl(banner.background_image_url || banner.mobile_background_image_url, 'desktop') || '',
+    mobileImage: optimizedImageUrl(banner.mobile_background_image_url || banner.background_image_url, 'mobile') || '',
     imageAlt: banner.title,
     overlayStyle: bannerOverlay(banner),
     textColor: bannerTextClass(banner),
@@ -115,39 +109,69 @@ function mapBannerToSlide(banner: HomepageBanner): HeroSlide {
 function preloadFirstHeroImage() {
   if (typeof document === 'undefined') return;
 
-  const firstImage = slides.value[0]?.image;
-  if (!firstImage || document.head.querySelector(`link[rel="preload"][href="${firstImage}"]`)) return;
-
-  const link = document.createElement('link');
-  link.rel = 'preload';
-  link.as = 'image';
-  link.href = firstImage;
-  link.setAttribute('fetchpriority', 'high');
-  link.setAttribute('imagesizes', '100vw');
-  document.head.appendChild(link);
+  preloadLinks.splice(0).forEach(link => link.remove());
+  document.head.querySelectorAll('link[data-hero-preload]').forEach(link => link.remove());
+  const first = slides.value[0];
+  if (!first?.image) return;
+  const sources = first.mobileImage && first.mobileImage !== first.image
+    ? [[first.mobileImage, '(max-width: 640px)'], [first.image, '(min-width: 641px)']]
+    : [[first.image, '']];
+  for (const [url, media] of sources) {
+    const link = document.createElement('link');
+    link.rel = 'preload'; link.as = 'image'; link.href = url;
+    link.setAttribute('data-hero-preload', '');
+    if (media) link.media = media;
+    link.setAttribute('fetchpriority', 'high');
+    document.head.appendChild(link);
+    preloadLinks.push(link);
+  }
 }
 
 async function fetchHeroBanners() {
   if (!hasLaravelApiConfig) return;
 
   try {
-    const data = await apiGet<HomepageBanner[]>('/home/hero-banners');
+    const data = await apiGet<HomepageBanner[]>('/home/hero-banners', request.signal);
+    if (request.signal.aborted) return;
     const activeBanners = data
-      .filter((banner) => banner.active !== false)
+      .filter((banner) => banner.active !== false && Boolean(banner.background_image_url || banner.mobile_background_image_url))
       .sort((a, b) => Number(a.sort_order || 0) - Number(b.sort_order || 0));
 
-    if (activeBanners.length) {
-      slides.value = activeBanners.map(mapBannerToSlide);
-      activeIndex.value = 0;
-      preloadFirstHeroImage();
-    }
+    slides.value = activeBanners.map(mapBannerToSlide);
+    activeIndex.value = 0;
+    pendingIndex.value = null;
+    visitedSlides.value = new Set([0]);
+    preloadFirstHeroImage();
   } catch {
-    slides.value = fallbackSlides;
+    // Keep a real prerendered banner on API failure; never replace it with demo content.
+  } finally {
+    window.clearTimeout(requestTimeout);
+    loading.value = false;
   }
 }
 
 function goToSlide(index: number) {
-  activeIndex.value = (index + slides.value.length) % slides.value.length;
+  if (!slides.value.length) return;
+  const target = (index + slides.value.length) % slides.value.length;
+  if (failedImages.has(slides.value[target].id)) return;
+  visitedSlides.value.add(target);
+  if (settledImages.value.has(slides.value[target].id)) {
+    pendingIndex.value = null;
+    activeIndex.value = target;
+  } else {
+    // Keep the current image visible until the requested slide is ready.
+    pendingIndex.value = target;
+  }
+}
+
+function imageSettled(id: string, failed = false) {
+  settledImages.value.add(id);
+  if (failed) failedImages.add(id);
+  if (pendingIndex.value !== null && slides.value[pendingIndex.value]?.id === id) {
+    if (!failed) activeIndex.value = pendingIndex.value;
+    pendingIndex.value = null;
+  }
+  if (slides.value.length > 1) startAutoplay();
 }
 
 function nextSlide() {
@@ -161,7 +185,7 @@ function previousSlide() {
 function startAutoplay() {
   stopAutoplay();
   autoplayId = window.setInterval(() => {
-    if (!isPaused.value && !isMobileViewport.value) nextSlide();
+    if (!isPaused.value && !isMobileViewport.value && !imagePending.value && pendingIndex.value === null) nextSlide();
   }, 6500);
 }
 
@@ -194,13 +218,16 @@ function updateViewportState() {
 onMounted(() => {
   updateViewportState();
   window.addEventListener('resize', updateViewportState);
-  preloadFirstHeroImage();
-  fetchHeroBanners();
-  startAutoplay();
+  if (slides.value.length) preloadFirstHeroImage();
+  if (hasLaravelApiConfig) void fetchHeroBanners();
+  else window.clearTimeout(requestTimeout);
 });
 
 onBeforeUnmount(() => {
   stopAutoplay();
+  request.abort();
+  window.clearTimeout(requestTimeout);
+  preloadLinks.forEach(link => link.remove());
   window.removeEventListener('resize', updateViewportState);
 });
 </script>
@@ -209,6 +236,8 @@ onBeforeUnmount(() => {
   <section
     class="relative isolate w-full overflow-hidden bg-ink"
     aria-label="Promovimet kryesore EcoBuka"
+    :aria-busy="loading || imagePending || pendingIndex !== null"
+    :data-hero-slides="JSON.stringify(slides)"
     @mouseenter="isPaused = true"
     @mouseleave="isPaused = false"
     @touchstart.passive="handleTouchStart"
@@ -216,16 +245,18 @@ onBeforeUnmount(() => {
   >
     <div class="relative h-[480px] min-h-[480px] sm:h-[600px] md:h-[68vh] md:min-h-[600px] lg:h-[78vh] lg:min-h-[660px] xl:h-[84vh] xl:min-h-[720px]">
       <div v-for="(slide, index) in slides" :key="slide.id" class="absolute inset-0 transition-opacity duration-700 ease-out" :class="index === activeIndex ? 'opacity-100' : 'pointer-events-none opacity-0'">
-        <picture>
+        <picture v-if="visitedSlides.has(index)">
           <source v-if="slide.mobileImage" media="(max-width: 640px)" :srcset="slide.mobileImage" />
           <img
             :src="slide.image"
             :alt="slide.imageAlt"
             class="absolute inset-0 h-full w-full object-cover object-center"
-            :loading="index === 0 ? 'eager' : 'lazy'"
+            :loading="index === 0 || index === pendingIndex ? 'eager' : 'lazy'"
             :fetchpriority="index === 0 ? 'high' : 'low'"
             decoding="async"
             sizes="100vw"
+            @load="imageSettled(slide.id)"
+            @error="imageSettled(slide.id, true)"
           />
         </picture>
         <div class="absolute inset-0" :class="slide.overlayStyle" />
@@ -234,7 +265,7 @@ onBeforeUnmount(() => {
       </div>
 
       <div class="container-shell relative z-10 flex h-full items-end pb-14 pt-10 sm:items-center sm:pb-20 lg:pb-24">
-        <div :key="activeSlide.id" class="max-w-[680px] animate-[fadeIn_700ms_ease-out] pb-9 sm:pb-0 sm:pt-8 lg:pt-0" :class="activeSlide.textColor">
+        <div v-if="activeSlide" :key="activeSlide.id" class="max-w-[680px] animate-[fadeIn_700ms_ease-out] pb-9 sm:pb-0 sm:pt-8 lg:pt-0" :class="activeSlide.textColor">
           <p class="text-[11px] font-bold uppercase tracking-[0.18em] text-white/80 sm:text-sm">{{ activeSlide.eyebrow }}</p>
           <h1 class="mt-2 max-w-[12.5ch] text-[1.75rem] font-black leading-[1.05] tracking-normal min-[390px]:text-[2rem] min-[430px]:text-[2.15rem] sm:mt-5 sm:max-w-[14ch] sm:text-6xl lg:text-7xl xl:text-8xl">
             {{ activeSlide.title }}
@@ -255,9 +286,19 @@ onBeforeUnmount(() => {
             </RouterLink>
           </div>
         </div>
+        <div v-else-if="loading" class="w-full max-w-xl pb-9 text-white" role="status">
+          <span class="sr-only">Po ngarkohet banneri…</span>
+          <div aria-hidden="true" class="h-10 w-3/4 rounded bg-white/10 sm:h-16" />
+          <div aria-hidden="true" class="mt-4 h-5 w-1/2 rounded bg-white/10" />
+        </div>
+        <div v-else class="max-w-xl pb-9 text-white">
+          <h1 class="text-3xl font-black sm:text-5xl">Zgjidhje energjie nga EcoBuka</h1>
+          <RouterLink to="/products" class="mt-5 inline-flex rounded-md bg-white px-5 py-3 font-bold text-ink">Shiko produktet <ArrowRight class="ml-2 h-5 w-5" /></RouterLink>
+        </div>
       </div>
 
       <button
+        v-if="slides.length > 1"
         class="absolute left-3 top-1/2 z-20 hidden h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full bg-white/18 text-white backdrop-blur transition hover:bg-white/28 md:flex"
         type="button"
         aria-label="Baneri paraprak"
@@ -266,6 +307,7 @@ onBeforeUnmount(() => {
         <ChevronLeft class="h-6 w-6" />
       </button>
       <button
+        v-if="slides.length > 1"
         class="absolute right-3 top-1/2 z-20 hidden h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full bg-white/22 text-white backdrop-blur transition hover:bg-white/32 md:flex"
         type="button"
         aria-label="Baneri tjetër"

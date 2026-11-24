@@ -22,7 +22,7 @@ export async function apiGet<T>(path: string, signal?: AbortSignal): Promise<T> 
   });
 
   if (!response.ok) {
-    throw new Error(`API request failed: ${response.status}`);
+    throw Object.assign(new Error(`API request failed: ${response.status}`), { status: response.status });
   }
 
   return response.json() as Promise<T>;

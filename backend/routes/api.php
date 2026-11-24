@@ -10,6 +10,10 @@ use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\ProductController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\MetaTrackingController;
+
+Route::get('/tracking/meta/config', [MetaTrackingController::class, 'config']);
+Route::post('/tracking/meta/revoke', [MetaTrackingController::class, 'revoke'])->middleware('throttle:orders');
 
 Route::get('/categories', [CategoryController::class, 'index']);
 Route::get('/categories/{slug}', [CategoryController::class, 'show']);

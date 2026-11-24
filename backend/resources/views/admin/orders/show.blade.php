@@ -56,6 +56,20 @@
             </div>
         </section>
 
+        @if ($order->payment_method === 'cash' && $order->status !== 'cancelled')
+        <form class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm" method="post" action="{{ route('admin.orders.confirm-payment', $order) }}">
+            @csrf
+            <h2 class="text-lg font-black">Confirm cash actually received</h2>
+            <p class="mt-2 text-sm">Use only after funds are collected. Delivery or order acceptance alone is not payment. Collection time below is UTC.</p>
+            <label class="mt-3 grid gap-1">Full amount (EUR)<input name="amount" type="number" step="0.01" min="0.01" required value="{{ $order->total }}" class="rounded border p-2"></label>
+            <input name="currency" type="hidden" value="EUR">
+            <label class="mt-3 grid gap-1">Actual collection time (UTC)<input name="received_at" type="datetime-local" required class="rounded border p-2"></label>
+            <label class="mt-3 grid gap-1">Collection/receipt reference<input name="reference" maxlength="100" required class="rounded border p-2"></label>
+            <label class="mt-3 grid gap-1">Where funds were collected<select name="action_source" class="rounded border p-2"><option value="other">Cash at delivery / other in-person collection</option><option value="physical_store">In our physical store</option></select></label>
+            <label class="mt-3 flex gap-2"><input name="funds_received" value="1" type="checkbox" required>I confirm the full payment was actually received.</label>
+            <button class="mt-4 rounded bg-slate-950 px-4 py-2 text-white">Record received payment</button>
+        </form>
+        @endif
         <form class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm" method="post" action="{{ route('admin.orders.update', $order) }}">
             @csrf
             @method('patch')

@@ -22,6 +22,8 @@ class OrderController extends Controller
         abort_unless($order->payment_method === Order::PAYMENT_CARD
             && $order->status !== Order::STATUS_CANCELLED
             && $order->payments()->where('status', Payment::STATUS_APPROVED)->whereNotNull('paid_at')->exists(), 409);
+        $payment = $order->payments()->where('status', Payment::STATUS_APPROVED)->whereNotNull('paid_at')->firstOrFail();
+        abort_unless($payment->currency === $order->currency && (int) round((float) $payment->amount * 100) === (int) round((float) $order->total * 100), 409);
 
         return response()->json([
             'id' => $order->id,
@@ -32,7 +34,9 @@ class OrderController extends Controller
 
     public function store(StoreOrderRequest $request, CreateOrderService $orders)
     {
-        $order = $orders->create($request->validated());
+        $data = $request->validated();
+        $data['tracking_context'] = app(\App\Services\Tracking\MetaConversions::class)->context($request);
+        $order = $orders->create($data);
 
         return response()->json([
             'message' => $order->payment_method === 'cash'
@@ -41,6 +45,8 @@ class OrderController extends Controller
             'payment_method' => $order->payment_method,
             'id' => $order->id,
             'order_number' => $order->order_number,
+            'tracking_token' => $order->tracking_token,
+            'submission_event_id' => 'order_submitted_'.$order->id,
             'status' => $order->status,
             'total' => $order->total,
             'currency' => $order->currency,

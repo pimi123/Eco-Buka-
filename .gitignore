@@ -1,4 +1,5 @@
 node_modules/
+.seo-tools/
 dist/
 *.log
 *.tsbuildinfo
